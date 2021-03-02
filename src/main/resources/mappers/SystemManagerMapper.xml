@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper">
+    <!--根据username查找-->
+    <!--SystemManager findByUsername(String username);-->
+    <select id="findByUsername" resultType="cn.edu.hestyle.bookstadium.entity.SystemManager">
+        SELECT
+		    `id` as `id`,
+			`username` as `username`,
+			`password` as `password`,
+			`salt_value` as `saltValue`,
+			`avatar_path` as `avatarPath`,
+			`phone_number` as `phoneNumber`,
+			`is_delete` as `isDelete`
+		FROM
+			`t_system_manager`
+		WHERE
+		    `username`=#{username}
+    </select>
+</mapper>
