@@ -1,0 +1,22 @@
+# server
+server:
+  port: 9090
+  servlet:
+    context-path: /book_stadium_online
+
+# mybatis
+mybatis:
+  mapper-locations: classpath:mappers/*.xml
+
+spring:
+  #开启热部署
+  devtools:
+    restart:
+      enabled: true
+      additional-paths: src/main/java
+      exclude: WEB-INF/**
+  # 数据库配置
+  datasource:
+    url: jdbc:mysql://localhost:3306/book_stadium_online?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
