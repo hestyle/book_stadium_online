@@ -3,7 +3,10 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+
+import java.util.HashMap;
 
 /**
  * StadiumManager 业务层接口
@@ -34,4 +37,12 @@ public interface IStadiumManagerService {
      * @return                          StadiumManager
      */
     StadiumManager findByUsername(String username) throws AccountNotFoundException;
+
+    /**
+     * 更新StadiumManager账号信息
+     * @param username                  用户名
+     * @param modifyDataMap             key value
+     * @throws ModifyFailedException    更新字段数字非法
+     */
+    void modifyInfo(String username, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
 }

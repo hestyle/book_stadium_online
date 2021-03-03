@@ -3,10 +3,7 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
-import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.ServiceException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,6 +43,9 @@ public abstract class BaseController {
         } else if (e instanceof RequestParamException) {
             // 404-请求参数错误
             code = 404;
+        } else if (e instanceof ModifyFailedException) {
+            // 405-更新保存失败
+            code = 405;
         }
         return new ResponseResult<>(code, e);
     }

@@ -5,6 +5,7 @@ import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -165,6 +167,58 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             logger.info("StadiumManager username=" + username + ", 查找账号信息成功！");
             return stadiumManager;
         }
+    }
+
+    @Override
+    public void modifyInfo(String username, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager username=" + username + ",  账号查找失败，数据库发生未知异常！");
+            throw new ModifyFailedException("更新保存失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null) {
+            logger.error("StadiumManager 账号更新保存失败，username=" + username + ",  账号查找失败！data = " + modifyDataMap);
+            throw new ModifyFailedException("更新保存失败，用户名 " + username + "未注册！");
+        }
+        if (modifyDataMap.containsKey("gender")) {
+            String gender = (String)modifyDataMap.get("gender");
+            if (!"男".equals(gender) && !"女".equals(gender) && !"保密".equals(gender)) {
+                logger.error("StadiumManager 账号更新保存失败，性别非法！data = " + modifyDataMap);
+                throw new ModifyFailedException("更新保存失败，性别非法！");
+            } else {
+                stadiumManager.setGender(gender);
+            }
+        }
+        if (modifyDataMap.containsKey("address")) {
+            String address = (String)modifyDataMap.get("address");
+            if (address != null) {
+                stadiumManager.setAddress(address);
+            }
+        }
+        if (modifyDataMap.containsKey("phoneNumber")) {
+            String phoneNumber = (String)modifyDataMap.get("phoneNumber");
+            Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                logger.info("StadiumManager 账号更改保存失败，电话号码非法！data = " + modifyDataMap);
+                throw new RegisterFailedException("账号修改保存失败，输入的电话号码非法！");
+            } else {
+                stadiumManager.setPhoneNumber(phoneNumber);
+            }
+        }
+        stadiumManager.setModifiedUser(stadiumManager.getUsername());
+        stadiumManager.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager,  账号更新保存失败，数据库发生未知异常！");
+            throw new ModifyFailedException("更新保存失败，数据库发生未知异常！");
+        }
+        logger.info("StadiumManager 账号更改保存成功！data = " + modifyDataMap);
     }
 
     /**

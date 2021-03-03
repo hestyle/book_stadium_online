@@ -23,4 +23,10 @@ public interface StadiumManagerMapper {
      * @param stadiumManager    待添加的账号
      */
     void add(StadiumManager stadiumManager);
+
+    /**
+     * StadiumManager 账号更新
+     * @param stadiumManager    待更新的账号
+     */
+    void update(StadiumManager stadiumManager);
 }
