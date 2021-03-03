@@ -1,5 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
@@ -27,7 +28,20 @@ public class StadiumManagerController extends BaseController {
         // 执行业务端的业务
         StadiumManager stadiumManager = stadiumManagerService.login(username, password);
         // 将用户名发到session中，保存到服务端
-        session.setAttribute("username", stadiumManager.getUsername());
+        session.setAttribute("stadiumManagerUsername", stadiumManager.getUsername());
         return new ResponseResult<>(SUCCESS, "登录成功！", stadiumManager);
     }
+
+    @PostMapping("/getInfo.do")
+    public ResponseResult<StadiumManager> handleGetInfo(HttpSession session) {
+        // 判断是否登录
+        String username = (String) session.getAttribute("stadiumManagerUsername");
+        if (null == username) {
+            throw new NotLoginException("请求失败，请先进行登录！");
+        }
+        // 执行业务端的业务
+        StadiumManager stadiumManager = stadiumManagerService.findByUsername(username);
+        return new ResponseResult<>(SUCCESS, "获取成功！", stadiumManager);
+    }
+
 }

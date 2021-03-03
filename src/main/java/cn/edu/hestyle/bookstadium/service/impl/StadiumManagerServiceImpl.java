@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
+import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,34 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         } else {
             logger.info("StadiumManager username=" + username + ", password=" + password + " 登录失败，密码错误！");
             throw new LoginFailedException("登录失败，密码错误！");
+        }
+    }
+
+    @Override
+    public StadiumManager findByUsername(String username) throws AccountNotFoundException {
+        // 检查用户名字符串
+        if (username == null || username.length() == 0) {
+            logger.info("StadiumManager username=" + username + " 账号查找失败，未输入用户名！");
+            throw new AccountNotFoundException("账号查找失败，未输入用户名！");
+        }
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager username=" + username + ",  账号查找失败，数据库发生未知异常！");
+            throw new AccountNotFoundException("账号查找失败，数据库发生未知异常！");
+        }
+        // 判断username是否注册
+        if (stadiumManager == null) {
+            logger.info("StadiumManager username=" + username + ", 账号查找失败，用户名 " + username + " 未注册！");
+            throw new AccountNotFoundException("账号查找失败，用户名 " + username + " 未注册！");
+        } else {
+            // 将password、saltValue剔除
+            stadiumManager.setPassword(null);
+            stadiumManager.setSaltValue(null);
+            logger.info("StadiumManager username=" + username + ", 查找账号信息成功！");
+            return stadiumManager;
         }
     }
 

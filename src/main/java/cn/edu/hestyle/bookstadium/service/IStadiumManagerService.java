@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
 
 /**
@@ -18,4 +19,11 @@ public interface IStadiumManagerService {
      * @throws LoginFailedException     登录失败异常
      */
     StadiumManager login(String username, String password) throws LoginFailedException;
+
+    /**
+     * StadiumManager 通过username查找账号信息
+     * @param username                  用户名
+     * @return                          StadiumManager
+     */
+    StadiumManager findByUsername(String username) throws AccountNotFoundException;
 }

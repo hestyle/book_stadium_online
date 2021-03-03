@@ -1,6 +1,8 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
+import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ServiceException;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
@@ -30,6 +32,12 @@ public abstract class BaseController {
         if (e instanceof LoginFailedException) {
             // 400-登录失败
             code = 400;
+        } else if (e instanceof NotLoginException) {
+            // 401-未登录
+            code = 401;
+        } else if (e instanceof AccountNotFoundException) {
+            // 402-账号未查到
+            code = 402;
         }
         return new ResponseResult<>(code, e);
     }
