@@ -17,4 +17,10 @@ public interface StadiumManagerMapper {
      * @return          StadiumManager
      */
     StadiumManager findByUsername(String username);
+
+    /**
+     * StadiumManager 账号添加
+     * @param stadiumManager    待添加的账号
+     */
+    void add(StadiumManager stadiumManager);
 }

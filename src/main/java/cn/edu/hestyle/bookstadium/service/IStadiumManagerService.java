@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
 
 /**
  * StadiumManager 业务层接口
@@ -19,6 +20,13 @@ public interface IStadiumManagerService {
      * @throws LoginFailedException     登录失败异常
      */
     StadiumManager login(String username, String password) throws LoginFailedException;
+
+    /**
+     * StadiumManager账号注册
+     * @param stadiumManager            待注册的账号
+     * @throws RegisterFailedException  注册失败异常
+     */
+    void register(StadiumManager stadiumManager) throws RegisterFailedException;
 
     /**
      * StadiumManager 通过username查找账号信息

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>注册</title>
+        <script src="../js/jquery.min.js"></script>
+        <script src="../js/jquery.cookie.js"></script>
+        <script src="../layui/layui.all.js"></script>
+        <script src="../js/common.js"></script>
+        <link rel="stylesheet" href="../layui/css/layui.css">
+        <link rel="stylesheet" href="../css/style.css">
+        <style>
+            html,body{
+                height: 100%;
+            }
+            body{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-image: url("../image/stadiumManagerLogin_bg.png");
+                background-size: cover;
+            }
+            .register-div{
+                background-color: white;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 30px;
+                border-radius: 5px;
+            }
+
+            .register-div h1{
+                margin-bottom: 20px;
+            }
+
+            .register-div h2{
+                margin-bottom: 10px;
+            }
+
+            .register-div form{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .register-div .layui-form-item{
+                margin-bottom: 10px;
+            }
+
+            .register-div .layui-form-label{
+                text-align: left;
+                padding-left: 0px;
+                padding-right: 0px;
+            }
+            .my-skin .layui-layer-btn0{
+                border-color: #4898d5;
+                background-color: #2e8ded;
+                color: #fff;
+            }
+            .my-skin .layui-layer-btn1{
+                border-color: #ef460f;
+                background-color: #ef460f;
+                color: #fff;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="register-div">
+            <h1>在线预约体育场馆管理中心</h1>
+            <h2>体育场馆管理员注册</h2>
+            <form class="layui-form" action="#">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">用户名</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="text" name="username" required  placeholder="请输入用户名" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">密码</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="password" name="password" required lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">重复密码</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="password" name="rePassword" required lay-verify="required" placeholder="请再次输入密码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">性别</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="radio" name="gender" value="男" title="男" checked>
+                        <input type="radio" name="gender" value="女" title="女">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">地址</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="text" name="address" required lay-verify="required" placeholder="请输入地址" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">电话号码</label>
+                    <div class="layui-input-block" style="width: 220px;">
+                        <input type="tel" name="phoneNumber" required lay-verify="required" placeholder="请输入电话号码" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <button id="registerButton" class="layui-btn" type="button" style="width: 300px">注册</button>
+            </form>
+        </div>
+    </body>
+    <script>
+        layuiModules=['layer','form'];
+        function mounted(){
+            layui.use('form',function(){
+                const form = layui.form;
+                form.render();
+            });
+            // 监听回车键
+            document.onkeydown = function (event) {
+                var e = event || window.event;
+                if (e && e.keyCode === 13) { //回车键的键值为13
+                    $("#registerButton").click(); //调用登录按钮的登录事件
+                }
+            };
+            // 注册button添加点击事件
+            $('#registerButton').click(function () {
+                // 检测 用户名、密码是否输入
+                if ($('input[name=username]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入用户名！"
+                    });
+                    return false;
+                }
+                if ($('input[name=password]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入密码！"
+                    });
+                    return false;
+                }
+                if ($('input[name=rePassword]').val() !== $('input[name=password]').val()) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "两次密码不一致！"
+                    });
+                    return false;
+                }
+                if ($('input[name=address]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入地址！"
+                    });
+                    return false;
+                }
+                if ($('input[name=phoneNumber]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入电话号码！"
+                    });
+                    return false;
+                }
+                var url ="/book_stadium_online/stadiumManager/register.do";
+                var data =  '{"username":"' + $('input[name=username]').val() + '","password":"' + $('input[name=password]').val()
+                    + '","address":"' + $('input[name=address]').val() + '","gender":"' +  $('input[name=gender]:checked').val()
+                    + '","phoneNumber":"' + $('input[name=phoneNumber]').val() + '"}';
+                $.ajax({
+                    "url" : url,
+                    "data" : {"stadiumManagerData":data},
+                    "type" : "POST",
+                    "dataType" : "json",
+                    "success" : function (json) {
+                        if (json.code === 200) {
+                            // 弹出中间提示框
+                            layer.open({
+                                skin: "my-skin",
+                                title: "提示信息",
+                                content: json.message,
+                                btn: ["确定", "去登录"],
+                                btn1: function (index, layero) {
+                                    layer.close(index);
+                                },
+                                btn2: function (index, layero) {
+                                    location.href = "login.html";
+                                }
+                            });
+                        } else {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message
+                            });
+                        }
+                    },
+                    "error" : function () {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "服务器访问出现异常！"
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+</html>

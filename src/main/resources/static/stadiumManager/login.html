@@ -33,7 +33,10 @@
                 <div class="login-form-item">
                     <input name="password" type="password" placeholder="密码">
                 </div>
-                <button class="btn-login" type="button">登录</button>
+                <div>
+                    <button id="registerButton" class="layui-btn layui-btn-warm" type="button" style="width: 150px">去注册</button>
+                    <button id="loginButton" class="layui-btn" type="button" style="width: 150px">登录</button>
+                </div>
             </form>
         </div>
     </body>
@@ -44,11 +47,15 @@
             document.onkeydown = function (event) {
                 var e = event || window.event;
                 if (e && e.keyCode === 13) { //回车键的键值为13
-                    $(".btn-login").click(); //调用登录按钮的登录事件
+                    $("#loginButton").click(); //调用登录按钮的登录事件
                 }
             };
+            // 注册button添加点击事件
+            $('#registerButton').click(function () {
+                location.href = "register.html";
+            });
             // 登录button添加点击事件
-            $('.btn-login').click(function () {
+            $('#loginButton').click(function () {
                 // 检测 用户名、密码是否输入
                 if ($('input[name=username]').val().length === 0) {
                     // 弹出中间提示框
