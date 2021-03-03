@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper">
+    <!--根据username查找-->
+    <!--StadiumManager findByUsername(String username);-->
+    <select id="findByUsername" resultType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
+        SELECT
+		    `id` as `id`,
+			`username` as `username`,
+			`password` as `password`,
+			`salt_value` as `saltValue`,
+			`avatar_path` as `avatarPath`,
+            `gender` as `gender`,
+			`address` as `address`,
+			`phone_number` as `phoneNumber`,
+			`credit_score` as `creditScore`,
+			`is_authenticate` as `isAuthenticate`,
+			`is_delete` as `isDelete`,
+			`created_user` as `createdUser`,
+			`created_time` as `createdTime`,
+			`modified_user` as `modifiedUser`,
+			`modified_time` as `modifiedTime`
+		FROM
+			`t_stadium_manager`
+		WHERE
+		    `username`=#{username}
+    </select>
+</mapper>
