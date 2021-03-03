@@ -20,7 +20,7 @@ function initRouter() {
         if (router === '') {
             router = 'index.html';
         }
-        $('#iframeParent').attr('src', 'html/' + router);
+        $('#iframeParent').attr('src', './' + router);
     } else {
         $('#iframeParent').attr('src', 'html/index.html');
         history.replaceState(null, null, '#/');

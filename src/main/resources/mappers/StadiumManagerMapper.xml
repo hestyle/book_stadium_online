@@ -26,4 +26,19 @@
 		WHERE
 		    `username`=#{username}
     </select>
+	<!--添加账号-->
+	<!--void add(StadiumManager stadiumManager);-->
+	<insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager" useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO `t_stadium_manager`(`username`, `password`, `salt_value`, `gender`, `address`, `phone_number`, `created_time`, `created_user`)
+		VALUES (#{username}, #{password}, #{saltValue}, #{gender}, #{address}, #{phoneNumber}, #{createdTime}, #{createdUser})
+	</insert>
+	<!--更新账号-->
+	<!--void update(StadiumManager stadiumManager);-->
+	<update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
+		UPDATE `t_stadium_manager` SET
+			`password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete},
+			`is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
+		WHERE
+			`id` = #{id}
+	</update>
 </mapper>
