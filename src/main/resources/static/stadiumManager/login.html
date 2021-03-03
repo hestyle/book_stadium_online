@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>登录</title>
+        <script src="../js/jquery.min.js"></script>
+        <script src="../js/jquery.cookie.js"></script>
+        <script src="../layui/layui.all.js"></script>
+        <script src="../js/common.js"></script>
+        <link rel="stylesheet" href="../layui/css/layui.css">
+        <link rel="stylesheet" href="../css/style.css">
+        <style>
+            html,body{
+                height: 100%;
+            }
+            body{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-image: url("../image/login_bg.png");
+                background-size: cover;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="login-div">
+            <h1>在线预约体育场馆管理中心</h1>
+            <h2>体育场馆管理员登录</h2>
+            <form id="login-form" action="#">
+                <div class="login-form-item">
+                    <input name="username" placeholder="用户名">
+                </div>
+                <div class="login-form-item">
+                    <input name="password" type="password" placeholder="密码">
+                </div>
+                <button class="btn-login" type="button">登录</button>
+            </form>
+        </div>
+    </body>
+    <script>
+        layuiModules=['layer','form'];
+        function mounted(){
+            // 监听回车键
+            document.onkeydown = function (event) {
+                var e = event || window.event;
+                if (e && e.keyCode === 13) { //回车键的键值为13
+                    $(".btn-login").click(); //调用登录按钮的登录事件
+                }
+            };
+            // 登录button添加点击事件
+            $('.btn-login').click(function () {
+                // 检测 用户名、密码是否输入
+                if ($('input[name=username]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入用户名！"
+                    });
+                    return false;
+                } else if ($('input[name=password]').val().length === 0) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入密码！"
+                    });
+                    return false;
+                }
+                var url ="/book_stadium_online/stadiumManager/login.do";
+                var data = $("#login-form").serialize();
+                $.ajax({
+                    "url" : url,
+                    "data" : data,
+                    "type" : "POST",
+                    "dataType" : "json",
+                    "success" : function (json) {
+                        if (json.code === 200) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: "登录成功！",
+                                yes: function (index, layero) {
+                                    location.href = "index.html";
+                                }
+                            });
+                            // 将用户名数据保存到cookies中
+                            $.cookie("username", json.data.username, {
+                                expires : 1
+                            });
+                        } else {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message
+                            });
+                        }
+                    },
+                    "error" : function () {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "出现异常！"
+                        });
+                    }
+                });
+            });
+        }
+    </script>
+</html>
