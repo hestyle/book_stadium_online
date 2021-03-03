@@ -16,7 +16,7 @@
     <body>
         <!--上方标题栏-->
         <div class="parentTop">
-            <a href="#" class="appName">在线预约体育场馆管理中心</a>
+            <a href="/book_stadium_online/stadiumManager/index.html" class="appName">在线预约体育场馆管理中心</a>
             <div class="loginNameDiv">
                 <img class="loginIcon" src="../image/icon.png">
                 <div class="loginUserInfo">
@@ -45,6 +45,12 @@
         <!--修改密码弹框-->
         <script type="text/html" id="dialogModifySelfPassword">
             <form class="layui-form" id="dialogModifySelfPasswordForm" style="margin-top:30px;padding-right:30px;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">原密码</label>
+                    <div class="layui-input-block">
+                        <input type="password" name="beforePassword" placeholder="请输入原密码" class="layui-input">
+                    </div>
+                </div>
                 <div class="layui-form-item">
                     <label class="layui-form-label">新密码</label>
                     <div class="layui-input-block">
@@ -114,7 +120,32 @@
                         content: $('#dialogModifySelfPassword').html(),
                         btn: ['确定', '取消'],
                         yes: function (index1, layero) {
-                            var url ="./manager/modifySelfPassword.do";
+                            // 检测密码是否输入
+                            if ($('input[name=beforePassword]').val().length === 0) {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入原密码！"
+                                });
+                                return;
+                            }
+                            if ($('input[name=newPassword]').val().length === 0) {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入新密码！"
+                                });
+                                return;
+                            }
+                            if ($('input[name=newPassword]').val() !== $('input[name=reNewPassword]').val()) {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "两次输入的新密码不一致！"
+                                });
+                                return;
+                            }
+                            var url ="/book_stadium_online/stadiumManager/changePassword.do";
                             var data = $("#dialogModifySelfPasswordForm").serialize();
                             $.ajax({
                                 "url" : url,
@@ -129,9 +160,9 @@
                                         yes: function (index2, layero) {
                                             if (json.code === 200) {
                                                 layer.close(index1);
-                                            } else if (json.code === 402) {
-                                                // code==402说明未登录(BaseController.java定义)
-                                                location.href = "login.html"
+                                            } else if (json.code === 401) {
+                                                // code==401说明未登录(BaseController.java定义)
+                                                location.href = "/book_stadium_online/stadiumManager/login.html"
                                             }
                                             layer.close(index2);
                                         }

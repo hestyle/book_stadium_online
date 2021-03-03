@@ -45,4 +45,13 @@ public interface IStadiumManagerService {
      * @throws ModifyFailedException    更新字段数字非法
      */
     void modifyInfo(String username, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
+
+    /**
+     * 修改StadiumManager账号密码
+     * @param username                  用户名
+     * @param beforePassword            原密码
+     * @param newPassword               新密码
+     * @throws ModifyFailedException    更新错误
+     */
+    void changePassword(String username, String beforePassword, String newPassword) throws ModifyFailedException;
 }

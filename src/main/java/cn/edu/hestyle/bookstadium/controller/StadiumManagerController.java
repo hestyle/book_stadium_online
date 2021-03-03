@@ -92,4 +92,16 @@ public class StadiumManagerController extends BaseController {
         stadiumManagerService.modifyInfo(username, modifyDataMap);
         return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
     }
+
+    @PostMapping("/changePassword.do")
+    public ResponseResult<Void> handleChangePassword(@RequestParam(name = "beforePassword") String beforePassword, @RequestParam(name = "newPassword") String newPassword, HttpSession session) {
+        // 判断是否登录
+        String username = (String) session.getAttribute("stadiumManagerUsername");
+        if (null == username) {
+            throw new NotLoginException("请求失败，请先进行登录！");
+        }
+        // 执行业务端的业务
+        stadiumManagerService.changePassword(username, beforePassword, newPassword);
+        return new ResponseResult<>(SUCCESS, "密码修改成功！");
+    }
 }

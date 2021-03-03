@@ -221,6 +221,47 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         logger.info("StadiumManager 账号更改保存成功！data = " + modifyDataMap);
     }
 
+    @Override
+    public void changePassword(String username, String beforePassword, String newPassword) throws ModifyFailedException {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager username=" + username + ",  账号查找失败，数据库发生未知异常！");
+            throw new ModifyFailedException("密码修改失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null) {
+            logger.info("StadiumManager 账号更新保存失败，username=" + username + ",  账号查找失败！");
+            throw new ModifyFailedException("更新保存失败，用户名 " + username + "未注册！");
+        }
+        // 检查原密码是否正确
+        if (!stadiumManager.getPassword().equals(encryptPassword(beforePassword, stadiumManager.getSaltValue()))) {
+            logger.info("StadiumManager 密码更新失败，原密码错误！beforePassword = " + beforePassword);
+            throw new ModifyFailedException("密码更新失败，原密码错误！");
+        }
+        // 检查新密码是否合法
+        if (newPassword == null || newPassword.length() == 0) {
+            logger.info("StadiumManager 密码更新失败，未输入新密码！");
+            throw new ModifyFailedException("密码更新失败，请输入新密码！");
+        }
+        if (newPassword.length() > 20) {
+            logger.info("StadiumManager 密码更新失败，新密码超过20个字符！newPassword = " + newPassword);
+            throw new ModifyFailedException("密码更新失败，新密码超过了20个字符！");
+        }
+        stadiumManager.setPassword(encryptPassword(newPassword, stadiumManager.getSaltValue()));
+        stadiumManager.setModifiedUser(stadiumManager.getUsername());
+        stadiumManager.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManager);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager, 密码更新保存失败，数据库发生未知异常！");
+            throw new ModifyFailedException("密码更新保存失败，数据库发生未知异常！");
+        }
+        logger.info("StadiumManager 账号密码更改保存成功！data = " + stadiumManager);
+    }
+
     /**
      * 对原始密码和盐值执行MD5加密
      * @param srcPassword 原始密码
