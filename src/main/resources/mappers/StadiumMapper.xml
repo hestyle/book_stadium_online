@@ -18,6 +18,7 @@
             `name` as `name`,
             `address` as `address`,
             `description` as `description`,
+            `image_paths` as `imagePaths`,
             `is_authenticate` as `isAuthenticate`,
             `is_delete` as `isDelete`,
             `created_user` as `createdUser`,
