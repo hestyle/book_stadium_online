@@ -6,6 +6,7 @@ import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.service.IStadiumService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpSession;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
@@ -70,6 +72,28 @@ public class StadiumController extends BaseController {
         }
         stadiumService.add(username, stadium);
         return new ResponseResult<Void>(SUCCESS, "体育场馆添加成功！");
+    }
+
+    @PostMapping("/stadiumManagerModify.do")
+    public ResponseResult<Void> handleStadiumManagerrModify(@RequestParam(name = "modifyData") String modifyData, HttpSession session) {
+        // 判断是否登录
+        String username = (String) session.getAttribute("stadiumManagerUsername");
+        if (null == username) {
+            throw new NotLoginException("请求失败，请先进行登录！");
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        HashMap<String, Object> modifyDataMap = null;
+        // 从stadiumManagerData读取modifyDataMap对象
+        try {
+            modifyDataMap = objectMapper.readValue(modifyData, new TypeReference<HashMap<String, Object>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 修改失败，数据格式错误！data = " + modifyData);
+            throw new RequestParamException("更新保存失败，数据格式错误！");
+        }
+        // 执行业务端的业务
+        stadiumService.stadiumManagerModify(username, modifyDataMap);
+        return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
     }
 
     @PostMapping("/stadiumManagerFindByPage.do")

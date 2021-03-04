@@ -19,6 +19,19 @@ public interface StadiumMapper {
     void add(Stadium stadium);
 
     /**
+     * 更新stadium
+     * @param stadium       stadium
+     */
+    void update(Stadium stadium);
+
+    /**
+     * 通过id查找
+     * @param id    id
+     * @return      Stadium
+     */
+    Stadium findById(Integer id);
+
+    /**
      * 分页查询某stadiumManager的Stadium
      * @param stadiumManagerId  stadiumManager
      * @param beginIndex        id升序排列

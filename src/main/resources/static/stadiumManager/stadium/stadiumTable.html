@@ -35,46 +35,45 @@
     <script type="text/html" id="editDialog">
         <form class="layui-form" action="" style="padding: 20px;" lay-filter="editDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">id</label>
+                <label class="layui-form-label" style="width: 15%;">id</label>
                 <div class="layui-input-inline">
                     <input id="id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">名称</label>
+                <label class="layui-form-label" style="width: 15%;">名称</label>
                 <div class="layui-input-inline">
                     <input id="name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">分值</label>
+                <label class="layui-form-label" style="width: 15%;">地址</label>
                 <div class="layui-input-inline">
-                    <input id="score" type="text" name="score" placeholder="请输入分值" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">描述</label>
+                <label class="layui-form-label" style="width: 15%;">描述</label>
                 <div class="layui-input-inline">
                     <textarea id="description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">音频路径</label>
-                <div class="layui-input-inline">
-                    <input id="voicePath" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                <label class="layui-form-label" style="width: 15%;">图片</label>
+                <div class="layui-input-inline" id="editStadiumImages" style="width: 450px;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">操作项ID列表</label>
+                <label class="layui-form-label" style="width: 15%;">场馆分类ID列表</label>
                 <div class="layui-input-inline">
-                    <input id="operationIds" type="text" name="operationIds" placeholder="请输入操作项ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="stadiumCategoryIds" type="text" name="categoryIds" placeholder="请输入场馆分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 30%;">是否删除</label>
+                <label class="layui-form-label" style="width: 15%;">是否删除</label>
                 <div class="layui-input-inline">
-                    <input type="radio" name="isDel" value="0" title="未删除" checked>
-                    <input id="is_del_true" type="radio" name="isDel" value="1" title="已删除">
+                    <input type="radio" name="isDelete" value="0" title="未删除" checked>
+                    <input id="is_del_true" type="radio" name="isDelete" value="1" title="已删除">
                 </div>
             </div>
         </form>
@@ -483,23 +482,29 @@
                     layer.open({
                         type: 1,
                         title: '编辑',
-                        area:['50%','70%'],
+                        area:['70%','70%'],
                         content: $('#editDialog').html(),
                         btn: ['确定', '取消'],
                         success: function (index, layero) {
                             form.render();
                             // 对于radio单选框，int型数据转成string才能正确check
-                            data.isDel = data.isDel + '';
+                            data.isDelete = data.isDelete + '';
+                            if (data.imagePaths != null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#editStadiumImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-right: 10px">');
+                                }
+                            }
                             form.val("editDialogForm", data);
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
-                            var url ="../../examItem/modify.do";
-                            var postData = '{"id":'+ $('#id').val() + ',"name":"' + $('#name').val() + '","description":"' + $('#description').val() + '",' +
-                                '"isDel":' + $('input:radio[name="isDel"]:checked').val() + '}';
+                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#id').val() + ',"name":"' + $('#name').val() + '","address":"' + $('#address').val() +  '","description":"' + $('#description').val() + '",' +
+                                '"isDelete":' + $('input:radio[name="isDelete"]:checked').val() + '}';
                             $.ajax({
                                 "url" : url,
-                                "data" : {"newExamItemJsonData":postData},
+                                "data" : {"modifyData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "success" : function (json) {
@@ -510,8 +515,9 @@
                                     if (json.code === 200) {
                                         obj.update({
                                             name: $('#name').val()
+                                            ,address: $('#address').val()
                                             ,description: $('#description').val()
-                                            ,isDel: $('input:radio[name="isDel"]:checked').val()
+                                            ,isDelete: $('input:radio[name="isDelete"]:checked').val()
                                         });
                                         layer.close(index);
                                     }
@@ -526,7 +532,7 @@
                             });
                         },
                         btn2: function (index, layero) {
-                            //return false 开启该代码可禁止点击该按钮关闭
+                            layer.close(index);
                         }
                     });
                 } else if (layEvent === 'changeOperationIds') {

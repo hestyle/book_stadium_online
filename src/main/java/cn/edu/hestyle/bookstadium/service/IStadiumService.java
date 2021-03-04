@@ -3,7 +3,9 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -18,6 +20,14 @@ public interface IStadiumService {
      * @throws AddFailedException   添加失败异常
      */
     void add(String stadiumManagerUsername, Stadium stadium) throws AddFailedException;
+
+    /**
+     * 修改stadium
+     * @param stadiumManagerUsername    stadiumManager用户名
+     * @param modifyDataMap             key value
+     * @throws ModifyFailedException    修改异常
+     */
+    void stadiumManagerModify(String stadiumManagerUsername, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
 
     /**
      * Stadium分页查询

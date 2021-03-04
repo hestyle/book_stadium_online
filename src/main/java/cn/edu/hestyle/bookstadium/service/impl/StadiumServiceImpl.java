@@ -9,6 +9,7 @@ import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.util.ResourceUtils;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -77,6 +79,103 @@ public class StadiumServiceImpl implements IStadiumService {
             throw new AddFailedException("添加失败，数据库发生未知异常！");
         }
         logger.warn("Stadium 添加成功！data = " + stadium);
+    }
+
+    @Override
+    public void stadiumManagerModify(String stadiumManagerUsername, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            throw new ModifyFailedException("添加失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null) {
+            logger.warn("Stadium 修改失败，username = " + stadiumManagerUsername + "用户未注册！");
+            throw new ModifyFailedException("修改失败，username = " + stadiumManagerUsername + "用户未注册！");
+        }
+        if (!modifyDataMap.containsKey("id")) {
+            logger.warn("Stadium 修改失败，场馆id未填写！data = " + modifyDataMap);
+            throw new ModifyFailedException("修改失败，未指定需要修改的场馆id！");
+        }
+        Integer id = (Integer) modifyDataMap.get("id");
+        if (id == null) {
+            logger.warn("Stadium 修改失败，场馆id未填写！data = " + modifyDataMap);
+            throw new ModifyFailedException("修改失败，未指定需要修改的场馆id！");
+        }
+        // stadium是否存在
+        Stadium stadium = null;
+        try {
+            stadium = stadiumMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败，数据库发生未知异常！data = " + modifyDataMap);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (stadium == null) {
+            logger.warn("Stadium 修改失败，不存在 id = " + id + "的体育场馆！");
+            throw new ModifyFailedException("修改失败，不存在 id = " + id + "的体育场馆！");
+        }
+        // 检查该stadiumManager是否有权限修改stadium
+        if (!stadiumManager.getId().equals(stadium.getManagerId())) {
+            logger.warn("Stadium 修改失败，stadiumManagerId = " + stadiumManager.getId() + "没有体育场馆 data = " + stadium + " 修改权限！");
+            throw new ModifyFailedException("修改失败，" + stadiumManagerUsername + " 无权限修改 id = " + id + "的体育场馆！");
+        }
+        // name
+        if (modifyDataMap.containsKey("name")) {
+            String name = (String) modifyDataMap.get("name");
+            if (name == null || name.length() == 0) {
+                logger.warn("Stadium 修改失败，场馆name不能设置为空！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的名称不能设置为空！");
+            }
+            if (name.length() > 20) {
+                logger.warn("Stadium 修改失败，场馆name长度超过20个字符！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的名称不能超过20个字符！");
+            }
+            stadium.setName(name);
+        }
+        // address
+        if (modifyDataMap.containsKey("address")) {
+            String address = (String) modifyDataMap.get("address");
+            if (address == null || address.length() == 0) {
+                logger.warn("Stadium 修改失败，场馆address不能设置为空！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的地址不能设置为空！");
+            }
+            if (address.length() > 200) {
+                logger.warn("Stadium 修改失败，场馆address长度超过200个字符！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的地址不能超过200个字符！");
+            }
+            stadium.setAddress(address);
+        }
+        // description
+        if (modifyDataMap.containsKey("description")) {
+            String description = (String) modifyDataMap.get("description");
+            if (description != null && description.length() > 200) {
+                logger.warn("Stadium 修改失败，场馆description长度超过200个字符！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的描述不能超过200个字符！");
+            }
+            stadium.setDescription(description);
+        }
+        // isDelete
+        if (modifyDataMap.containsKey("isDelete")) {
+            Integer isDelete = (Integer) modifyDataMap.get("isDelete");
+            if (isDelete == null || (!isDelete.equals(0) && !isDelete.equals(1))) {
+                logger.warn("Stadium 修改失败，场馆删除状态异常！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，体育场馆的删除状态设置异常！");
+            }
+            stadium.setIsDelete(isDelete);
+        }
+        stadium.setModifiedUser(stadiumManagerUsername);
+        stadium.setModifiedTime(new Date());
+        try {
+            stadiumMapper.update(stadium);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 修改失败，数据库发生未知异常！data = " + stadium);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("Stadium 修改成功！data = " + stadium);
     }
 
     @Override
