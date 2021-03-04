@@ -46,6 +46,12 @@ public abstract class BaseController {
         } else if (e instanceof ModifyFailedException) {
             // 405-更新保存失败
             code = 405;
+        } else if (e instanceof AddFailedException) {
+            // 406-添加失败
+            code = 406;
+        } else if (e instanceof FindFailedException) {
+            // 407-查找失败
+            code = 407;
         }
         return new ResponseResult<>(code, e);
     }

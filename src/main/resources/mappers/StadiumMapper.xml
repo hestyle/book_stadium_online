@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumMapper">
+    <!--添加Stadium-->
+    <!--void add(Stadium stadium);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium`(`manager_id`, `category_ids`, `name`, `address`, `description`, `created_time`, `created_user`)
+        VALUES (#{managerId}, #{categoryIds}, #{name}, #{address}, #{description}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--分页查询某stadiumManager的Stadium-->
+    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
+    <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        SELECT
+            `id` as `id`,
+            `manager_id` as `managerId`,
+            `category_ids` as `categoryIds`,
+            `name` as `name`,
+            `address` as `address`,
+            `description` as `description`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium`
+        WHERE
+            `manager_id` = #{stadiumManagerId}
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取某stadiumManager的stadium个数-->
+    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId);-->
+    <select id="stadiumManagerGetCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium`
+        WHERE
+            `manager_id` = #{stadiumManagerId}
+    </select>
+
+</mapper>

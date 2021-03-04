@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>考试项列表</title>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
+</head>
+    <body>
+        <table id="stadiumTable" lay-filter="test"></table>
+    </body>
+    <!--顶部操作栏-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        </div>
+    </script>
+    <!--每条数据的操作栏-->
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeVoice">修改音频</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeOperationIds">修改操作项ID列表</a>
+    </script>
+    <!--(修改操作项id列表弹窗中的table)每条数据的操作栏-->
+    <script type="text/html" id="changeOperationIdsBar">
+        <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+    </script>
+    <!--每条数据的编辑操作-->
+    <script type="text/html" id="editDialog">
+        <form class="layui-form" action="" style="padding: 20px;" lay-filter="editDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">id</label>
+                <div class="layui-input-inline">
+                    <input id="id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">分值</label>
+                <div class="layui-input-inline">
+                    <input id="score" type="text" name="score" placeholder="请输入分值" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">描述</label>
+                <div class="layui-input-inline">
+                    <textarea id="description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">音频路径</label>
+                <div class="layui-input-inline">
+                    <input id="voicePath" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">操作项ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="operationIds" type="text" name="operationIds" placeholder="请输入操作项ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 30%;">是否删除</label>
+                <div class="layui-input-inline">
+                    <input type="radio" name="isDel" value="0" title="未删除" checked>
+                    <input id="is_del_true" type="radio" name="isDel" value="1" title="已删除">
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据的插入操作-->
+    <script type="text/html" id="addDialog">
+        <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="add_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">分值</label>
+                <div class="layui-input-inline">
+                    <input id="add_score" type="number" name="score" placeholder="请输入分值" autocomplete="off" class="layui-input" style="width: 140%;" value="0">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">描述</label>
+                <div class="layui-input-inline">
+                    <textarea id="add_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">音频路径</label>
+                <div class="layui-input-inline">
+                    <input id="add_voice_path" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button type="button" class="layui-btn" id="add_uploadVoiceButton"><i class="layui-icon">&#xe67c;</i>上传音频</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">播放</label>
+                <div class="layui-input-inline">
+                    <audio id="add_examItemVoiceAudio" src="xxxx.mp3" controls="controls"></audio>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">操作项ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="add_operationIds" type="text" name="operationIds" placeholder="请输入操作项ID列表，以英文逗号隔开！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button id="select_opeations" type="button" class="layui-btn" onclick="addOperation(1)">选择操作项</button>
+                </div>
+            </div>
+            <table id="add_operationIds_table" lay-filter="addOperationIdsTable"></table>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">是否删除</label>
+                <div class="layui-input-inline">
+                    <input type="radio" name="add_isDel" value="0" title="未删除" checked>
+                    <input type="radio" name="add_isDel" value="1" title="已删除">
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据修改音频资源-->
+    <script type="text/html" id="changeVoiceDialog">
+        <form id="change_voice_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeVoiceDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">id</label>
+                <div class="layui-input-inline">
+                    <input id="change_voice_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">名称</label>
+                <div class="layui-input-inline">
+                    <input id="change_voice_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">音频路径</label>
+                <div class="layui-input-inline">
+                    <input id="change_voice_voice_path" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button type="button" class="layui-btn" id="uploadVoiceButton"><i class="layui-icon">&#xe67c;</i>上传音频</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">播放</label>
+                <div>
+                    <audio id="examItemVoiceAudio" src="xxxx.mp3" controls="controls"></audio>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据修改操作项id列表-->
+    <script type="text/html" id="changeOperationIdsDialog">
+        <form id="change_operationIds_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeOperationIdsDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">id</label>
+                <div class="layui-input-inline">
+                    <input id="change_operationIds_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="change_operationIds_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">操作项ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="change_operationIds_operationIds" type="text" name="operationIds" placeholder="请输入操作项ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button type="button" class="layui-btn" id="change_operationId_Button" onclick="addOperation(2)">添加操作项</button>
+                </div>
+            </div>
+            <table id="change_operationIds_table" lay-filter="changeOperationIdsTable"></table>
+        </form>
+    </script>
+    <!--操作项page列表-->
+    <script type="text/html" id="operationPageDialog">
+        <table id="all_operation_table" lay-filter="allOperationTable"></table>
+    </script>
+    <script>
+        layui.config({
+            base: '../../plugins/soulTable/',
+            version: 'v1.5.20'
+        }).extend({
+            soulTable: 'soulTable/soulTable.slim'
+        });
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable'];
+        // operationIds对应的操作项
+        var operationData = [];
+        function mounted() {
+            var url ="/book_stadium_online/stadium/stadiumManagerFindByPage.do";
+            $.ajax({
+                "url" : url,
+                "data" : {"pageIndex":1, "pageSize":10},
+                "type" : "POST",
+                "dataType" : "json",
+                "success" : function (json) {
+                    if (json.code === 200) {
+                        // 往table填充服务器返回的数据
+                        table.render({
+                            elem: '#stadiumTable'
+                            , toolbar: '#toolbarDemo'
+                            , height: 550
+                            , defaultToolbar: ['print', 'exports']
+                            , method: 'POST'
+                            , cols: [[
+                                {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                            ],[ //表头
+                                {checkbox: true, LAY_CHECKED: false}
+                                , {field: 'id', title: 'id', width: 80, sort: true}
+                                , {field: 'name', title: '名称', width: 150, sort: true}
+                                , {field: 'address', title: '地址', width: 80, sort: true}
+                                , {field: 'description', title: '描述', width: 200, sort: true}
+                                , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                                , {field: 'imagePaths', title: '图片', width: 150, sort: true}
+                                , {field: 'isDelete', title: '是否删除', width: 120, sort: true}
+                                , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                            ]]
+                            , page: true
+                            , url: url
+                            , request: {
+                                pageName: 'pageIndex' //页码的参数名称，默认：page
+                                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                            }
+                            , response: {
+                                statusName: 'code' //规定数据状态的字段名称，默认：code
+                                ,statusCode: 200 //规定成功的状态码，默认：0
+                                ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                            }
+                            , parseData: function(res){ //res 即为原始返回的数据
+                                return {
+                                    "code": res.code, //解析接口状态
+                                    "message": res.message, //解析提示文本
+                                    "count": res.count, //解析数据长度
+                                    "data": res.data //解析数据列表
+                                };
+                            }
+                        });
+                    } else {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: json.message,
+                            yes: function (index2, layero) {
+                                if (json.code === 401) {
+                                    // code==401说明未登录(BaseController.java定义)
+                                    parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                                }
+                                layer.close(index2);
+                            }
+                        });
+                    }
+                },
+                "error" : function () {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "出现异常！"
+                    });
+                }
+            });
+            //监听事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id);
+                switch (obj.event) {
+                    case 'add':
+                        layer.open({
+                            type: 1,
+                            title: '添加',
+                            area:['70%','80%'],
+                            content: $('#addDialog').html(),
+                            btn: ['确定', '取消'],
+                            success: function (index, layero) {
+                                // 清空缓存
+                                operationData = [];
+                                form.render();
+                                upload.render({
+                                    elem: '#add_uploadVoiceButton'
+                                    ,url: '../../examItem/uploadVoice.do'
+                                    ,accept: 'audio'
+                                    ,acceptMime: 'audio/mpeg'
+                                    ,done: function(res){
+                                        // 文件上传成功后修改音频路径
+                                        $('#add_voice_path').val(res.data);
+                                        $('#add_examItemVoiceAudio').attr('src', res.data);
+                                    }
+                                    ,error: function(){
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: '文件上传失败！'
+                                        });
+                                    }
+                                });
+                            },
+                            yes: function (index, layero) {
+                                if (checkAddForm() === false) {
+                                    return false;
+                                }
+                                var url ="../../examItem/add.do";
+                                var postData = '{"name":"' + $('#add_name').val() + '","score":' + $('#add_score').val() + ',"description":"' +
+                                    $('#add_description').val() + '","voicePath":"' + $('#add_voice_path').val() + '","operationIds":"' + $('#add_operationIds').val()  +
+                                    '","isDel":' + $('input:radio[name="add_isDel"]:checked').val() + '}';
+                                $.ajax({
+                                    "url" : url,
+                                    "data" : {"newExamItemJsonData":postData},
+                                    "type" : "POST",
+                                    "dataType" : "json",
+                                    "success" : function (json) {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                        if (json.code === 200) {
+                                            layer.close(index);
+                                            // 成功后，表格重载
+                                            layui.table.reload('stadiumTable');
+                                        }
+                                    },
+                                    "error" : function () {
+                                        // 弹出中间提示框
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: "保存失败，出现未知异常！"
+                                        });
+                                    }
+                                });
+                            },
+                            btn2: function (index, layero) {
+                                //return false 开启该代码可禁止点击该按钮关闭
+                            }
+                        });
+                        break;
+                    case 'delete':
+                        // 拼接选中行的username
+                        var postData = '[';
+                        for (var value of checkStatus.data) {
+                            if (postData.length > 1) {
+                                postData += ',"' + value.id + '"';
+                            } else {
+                                postData += '"' + value.id + '"';
+                            }
+                        }
+                        postData += ']';
+                        // 判断是否选中待删除行
+                        if (postData.length === 2) {
+                            layer.open({
+                                title: "提示信息",
+                                content: "请选中需要删除的数据！"
+                            });
+                            return;
+                        }
+                        layer.confirm('删除选中行？', function (index) {
+                            var url ="../../examItem/deleteByIdList.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"idListJsonString":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口、刷新表格
+                                        layer.close(index);
+                                        table.reload('stadiumTable');
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+
+                            layer.close(index);
+                        });
+                        break;
+                }
+            });
+
+            //监听工具条
+            table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'changeVoice') {
+                    layer.open({
+                        type: 1,
+                        title: '修改音频',
+                        area:['50%','80%'],
+                        content: $('#changeVoiceDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("changeVoiceDialogForm", data);
+
+                            $('#examItemVoiceAudio').attr('src', data.voicePath);
+
+                            upload.render({
+                                elem: '#uploadVoiceButton'
+                                ,url: '../../examItem/uploadVoice.do'
+                                ,accept: 'audio'
+                                ,acceptMime: 'audio/mpeg'
+                                ,done: function(res){
+                                    // 文件上传成功后修改音频路径
+                                    $('#change_voice_voice_path').val(res.data);
+                                    $('#examItemVoiceAudio').attr('src', res.data);
+                                }
+                                ,error: function(){
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: '文件上传失败！'
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="../../examItem/modifyVoicePath.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"id":data.id,"voicePath":$('#change_voice_voice_path').val()},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            voicePath: $('#change_voice_voice_path').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                } else if (layEvent === 'edit') {
+                    layer.open({
+                        type: 1,
+                        title: '编辑',
+                        area:['50%','70%'],
+                        content: $('#editDialog').html(),
+                        btn: ['确定', '取消'],
+                        success: function (index, layero) {
+                            form.render();
+                            // 对于radio单选框，int型数据转成string才能正确check
+                            data.isDel = data.isDel + '';
+                            form.val("editDialogForm", data);
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="../../examItem/modify.do";
+                            var postData = '{"id":'+ $('#id').val() + ',"name":"' + $('#name').val() + '","description":"' + $('#description').val() + '",' +
+                                '"isDel":' + $('input:radio[name="isDel"]:checked').val() + '}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"newExamItemJsonData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        obj.update({
+                                            name: $('#name').val()
+                                            ,description: $('#description').val()
+                                            ,isDel: $('input:radio[name="isDel"]:checked').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                } else if (layEvent === 'changeOperationIds') {
+                    layer.open({
+                        type: 1,
+                        title: '修改操作项ID列表',
+                        area:['70%','80%'],
+                        content: $('#changeOperationIdsDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("changeOperationIdsDialogForm", data);
+                            // 填充change_operationIds_table表格
+                            $.ajax({
+                                "url" : '../../examOperation/findByIdsString.do',
+                                "data" : {"idsString":data.operationIds},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    if (json.code === 200) {
+                                        // 保存到全局变量
+                                        operationData = json.data;
+                                        table.render({
+                                            elem: '#change_operationIds_table'
+                                            , data: json.data
+                                            , width: 750
+                                            , cols: [[
+                                                {title: '考试项包含的操作项（<a class="" style="font-size: 20px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                            ],[ //表头
+                                                {type: 'numbers', title: '序号', width: 60}
+                                                , {field: 'id', title: 'id', width: 60}
+                                                , {field: 'name', title: '名称', width: 300}
+                                                , {field: 'description', title: '描述', width: 250}
+                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeOperationIdsBar'} //这里的toolbar值是模板元素的选择器
+                                            ]]
+                                            , rowDrag: {
+                                                done: function(obj) {
+                                                    // 完成时（松开时）触发(soulTable插件，移动行
+                                                    operationData = obj.cache;
+                                                    var operationIds = [];
+                                                    for (var row of obj.cache) {
+                                                        operationIds.push(row.id);
+                                                    }
+                                                    $('#change_operationIds_operationIds').val(operationIds.join(','));
+                                                }
+                                            }
+                                            , done: function () {
+                                                soulTable.render(this)
+                                            }
+                                        });
+                                    } else {
+                                        // 弹出中间提示框
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message,
+                                            yes: function (index2, layero) {
+                                                if (json.code === 402) {
+                                                    // code==402说明未登录(BaseController.java定义)
+                                                    parent.location.href = "../../login.html";
+                                                }
+                                                layer.close(index2);
+                                            }
+                                        });
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "出现异常！"
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="../../examItem/modifyOperationIds.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"id":data.id,"operationIds":$('#change_operationIds_operationIds').val()},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            operationIds: $('#change_operationIds_operationIds').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                }
+            });
+
+            // 监听changeOperationIdsTable中的工具条
+            table.on('tool(changeOperationIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个操作项吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把change_operationIds_operationIds输入框中的内容更新
+                        var operationIds = $('#change_operationIds_operationIds').val().split(',');
+                        operationIds.splice(objIndex, 1);
+                        if (operationIds.length > 1) {
+                            $('#change_operationIds_operationIds').val(operationIds.join(','));
+                        } else if (operationIds.length === 1) {
+                            $('#change_operationIds_operationIds').val(operationIds);
+                        } else {
+                            $('#change_operationIds_operationIds').val('');
+                        }
+                        operationData.splice(objIndex, 1);
+                        layui.table.reload('change_operationIds_table', {
+                            url: null,
+                            data: operationData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+
+            // 监听addOperationIdsTable中的工具条
+            table.on('tool(addOperationIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个操作项吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把add_operationIds输入框中的内容更新
+                        var operationIds = $('#add_operationIds').val().split(',');
+                        operationIds.splice(objIndex, 1);
+                        if (operationIds.length > 1) {
+                            $('#add_operationIds').val(operationIds.join(','));
+                        } else if (operationIds.length === 1) {
+                            $('#add_operationIds').val(operationIds);
+                        } else {
+                            $('#add_operationIds').val('');
+                        }
+                        operationData.splice(objIndex, 1);
+                        layui.table.reload('add_operationIds_table', {
+                            url: null,
+                            data: operationData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        }
+
+        function checkAddForm() {
+            if ($('#add_name').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "考试项名称不能为空！"
+                });
+                return false;
+            }
+            if (($('#add_score').val() + '').length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "考试项分值必须填写！"
+                });
+                return false;
+            }
+            if ($('#add_description').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "考试操作项描述不能为空！"
+                });
+                return false;
+            }
+            if ($('#add_voice_path').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "考试项的音频不能为空，请上传音频文件！"
+                });
+                return false;
+            }
+            if ($('#add_operationIds').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "考试项的操作项ID列表不能为空！"
+                });
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * 添加operation
+         * @param dialogIndex     dialogIndex===1代表“添加考试项中的添加操作项”，dialogIndex===2代表“修改考试项的操作项中的添加操作项”
+         */
+        function addOperation(dialogIndex) {
+            layer.open({
+                type: 1,
+                title: '添加操作项',
+                area:['80%','80%'],
+                content: $('#operationPageDialog').html(),
+                btn: ['添加', '取消'],
+                success: function (index, layero) {
+                    // 填充change_operationIds_table表格
+                    table.render({
+                        elem: '#all_operation_table'
+                        , height: 550
+                        , defaultToolbar: ['print', 'exports']
+                        , method: 'POST'
+                        , cols: [[
+                            {title: '<a class="" style="font-size: 20px; color:black;">考试操作项表</a>',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                        ],[ //表头
+                            {checkbox: true, LAY_CHECKED: false}
+                            , {field: 'id', title: 'id', width: 70, sort: true}
+                            , {field: 'name', title: '名称', width: 350, sort: true}
+                            , {field: 'description', title: '描述', width: 300, sort: true}
+                            , {field: 'isDel', title: '是否删除', width: 100, sort: true}
+                        ]]
+                        , page: true
+                        , url: "../../examOperation/findByPage.do"
+                        , request: {
+                            pageName: 'pageIndex' //页码的参数名称，默认：page
+                            ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        }
+                        , response: {
+                            statusName: 'code' //规定数据状态的字段名称，默认：code
+                            ,statusCode: 200 //规定成功的状态码，默认：0
+                            ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                            ,countName: 'count' //规定数据总数的字段名称，默认：count
+                            ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                        }
+                        , parseData: function(res){ //res 即为原始返回的数据
+                            return {
+                                "code": res.code, //解析接口状态
+                                "message": res.message, //解析提示文本
+                                "count": res.count, //解析数据长度
+                                "data": res.data //解析数据列表
+                            };
+                        }
+                    });
+                },
+                yes: function (index, layero) {
+                    // 获取all_operation_table选中的id，dialogIndex，分别添加到operationIds尾端
+                    var checkStatus = layui.table.checkStatus('all_operation_table');
+                    if (checkStatus.data.length === 0) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "添加失败，未选择需要添加的操作项！"
+                        });
+                        return false;
+                    }
+                    var operationIds = [];
+                    if (dialogIndex === 1) {
+                        if ($('#add_operationIds').val().length !== 0) {
+                            operationIds = $('#add_operationIds').val().split(',');
+                        }
+                    } else if (dialogIndex === 2) {
+                        if ($('#change_operationIds_operationIds').val().length !== 0) {
+                            operationIds = $('#change_operationIds_operationIds').val().split(',');
+                        }
+                    }
+                    for (var value of checkStatus.data) {
+                        operationIds.push(value.id);
+                        operationData.push(value);
+                    }
+                    layer.close(index);
+                    // 再分别更新add_operationIds_table、change_operationIds_table表
+                    if (dialogIndex === 1) {
+                        if ($('#add_operationIds').val().length === 0) {
+                            // $('#add_operationIds').val()为空，说明是刚打开添加页面，初始化表格
+                            table.render({
+                                elem: '#add_operationIds_table'
+                                , data: operationData
+                                , width: 750
+                                , cols: [[
+                                    {title: '考试项包含的操作项（<a class="" style="font-size: 20px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {type: 'numbers', title: '序号', width: 60}
+                                    , {field: 'id', title: 'id', width: 60}
+                                    , {field: 'name', title: '名称', width: 300}
+                                    , {field: 'description', title: '描述', width: 250}
+                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeOperationIdsBar'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , rowDrag: {
+                                    done: function(obj) {
+                                        // 完成时（松开时）触发(soulTable插件，移动行
+                                        operationData = obj.cache;
+                                        var operationIds = [];
+                                        for (var row of obj.cache) {
+                                            operationIds.push(row.id);
+                                        }
+                                        $('#add_operationIds').val(operationIds.join(','));
+                                    }
+                                }
+                                , done: function () {
+                                    soulTable.render(this)
+                                }
+                            });
+                        } else {
+                            // 否则reload
+                            layui.table.reload('add_operationIds_table', {
+                                url: null,
+                                data: operationData
+                            });
+                        }
+                        $('#add_operationIds').val(operationIds.join(','));
+                    } else if (dialogIndex === 2) {
+                        $('#change_operationIds_operationIds').val(operationIds.join(','));
+                        layui.table.reload('change_operationIds_table', {
+                            url: null,
+                            data: operationData
+                        });
+                    }
+                },
+                btn2: function (index, layero) {
+                    //return false 开启该代码可禁止点击该按钮关闭
+                }
+            });
+        }
+    </script>
+</html>
