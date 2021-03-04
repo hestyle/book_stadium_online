@@ -28,7 +28,7 @@
         <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeOperationIds">修改操作项ID列表</a>
     </script>
     <!--(修改操作项id列表弹窗中的table)每条数据的操作栏-->
-    <script type="text/html" id="changeOperationIdsBar">
+    <script type="text/html" id="changeStadiumCategoryIdsBar">
         <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
     </script>
     <!--每条数据的编辑操作-->
@@ -89,9 +89,9 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">分值</label>
+                <label class="layui-form-label" style="width: 20%;">地址</label>
                 <div class="layui-input-inline">
-                    <input id="add_score" type="number" name="score" placeholder="请输入分值" autocomplete="off" class="layui-input" style="width: 140%;" value="0">
+                    <input id="add_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
                 </div>
             </div>
             <div class="layui-form-item">
@@ -101,33 +101,26 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">音频路径</label>
-                <div class="layui-input-inline">
-                    <input id="add_voice_path" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button type="button" class="layui-btn" id="add_uploadVoiceButton"><i class="layui-icon">&#xe67c;</i>上传音频</button>
+                <label class="layui-form-label" style="width: 20%;">图片</label>
+                <div class="layui-input-inline" style="width: 400px;">
+                    <input id="add_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
+                    <button type="button" class="layui-btn" id="add_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
+                    <label style="color: red;">最多只允许上传5张！</label>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">播放</label>
-                <div class="layui-input-inline">
-                    <audio id="add_examItemVoiceAudio" src="xxxx.mp3" controls="controls"></audio>
+                <label class="layui-form-label" style="width: 20%;">预览</label>
+                <div class="layui-input-inline" id="stadiumImages" style="width: 450px;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">操作项ID列表</label>
+                <label class="layui-form-label" style="width: 20%;">场馆分类ID列表</label>
                 <div class="layui-input-inline">
-                    <input id="add_operationIds" type="text" name="operationIds" placeholder="请输入操作项ID列表，以英文逗号隔开！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button id="select_opeations" type="button" class="layui-btn" onclick="addOperation(1)">选择操作项</button>
+                    <input id="add_stadiumCategoryIds" type="text" name="stadiumCategoryIds" placeholder="请选择场馆分类ID！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button id="select_stadiumCategory" type="button" class="layui-btn" onclick="selectStadiumCategory(1)">选择场馆分类</button>
                 </div>
             </div>
-            <table id="add_operationIds_table" lay-filter="addOperationIdsTable"></table>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">是否删除</label>
-                <div class="layui-input-inline">
-                    <input type="radio" name="add_isDel" value="0" title="未删除" checked>
-                    <input type="radio" name="add_isDel" value="1" title="已删除">
-                </div>
-            </div>
+            <table id="add_stadiumCategoryIds_table" lay-filter="addStadiumCategoryIdsTable"></table>
         </form>
     </script>
     <!--单条数据修改音频资源-->
@@ -186,8 +179,8 @@
         </form>
     </script>
     <!--操作项page列表-->
-    <script type="text/html" id="operationPageDialog">
-        <table id="all_operation_table" lay-filter="allOperationTable"></table>
+    <script type="text/html" id="stadiumCategoryPageDialog">
+        <table id="all_stadiumCategory_table" lay-filter="allOperationTable"></table>
     </script>
     <script>
         layui.config({
@@ -197,8 +190,10 @@
             soulTable: 'soulTable/soulTable.slim'
         });
         layuiModules=['table', 'layer', 'form', 'upload', 'soulTable'];
-        // operationIds对应的操作项
-        var operationData = [];
+        // stadiumCategoryIds对应的操作项
+        var stadiumCategoryData = [];
+        // 上传图片
+        var haveUploadCount = 0;
         function mounted() {
             var url ="/book_stadium_online/stadium/stadiumManagerFindByPage.do";
             $.ajax({
@@ -219,9 +214,9 @@
                                 {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
                             ],[ //表头
                                 {checkbox: true, LAY_CHECKED: false}
-                                , {field: 'id', title: 'id', width: 80, sort: true}
-                                , {field: 'name', title: '名称', width: 150, sort: true}
-                                , {field: 'address', title: '地址', width: 80, sort: true}
+                                , {field: 'id', title: 'id', width: 70, sort: true}
+                                , {field: 'name', title: '名称', width: 200, sort: true}
+                                , {field: 'address', title: '地址', width: 200, sort: true}
                                 , {field: 'description', title: '描述', width: 200, sort: true}
                                 , {field: 'categoryIds', title: '分类', width: 150, sort: true}
                                 , {field: 'imagePaths', title: '图片', width: 150, sort: true}
@@ -289,14 +284,31 @@
                                 operationData = [];
                                 form.render();
                                 upload.render({
-                                    elem: '#add_uploadVoiceButton'
-                                    ,url: '../../examItem/uploadVoice.do'
-                                    ,accept: 'audio'
-                                    ,acceptMime: 'audio/mpeg'
+                                    elem: '#add_uploadImagesButton'
+                                    ,url: '/book_stadium_online/stadium/uploadImage.do'
+                                    ,accept: 'images'
+                                    ,acceptMime: 'image/*'
+                                    ,size: 10240
+                                    ,multiple: false
+                                    ,number: 1
                                     ,done: function(res){
-                                        // 文件上传成功后修改音频路径
-                                        $('#add_voice_path').val(res.data);
-                                        $('#add_examItemVoiceAudio').attr('src', res.data);
+                                        if (res.code === 200) {
+                                            haveUploadCount += 1;
+                                            // 文件上传成功后修改图片路径
+                                            if ($('#add_image_paths').val().length === 0) {
+                                                $('#add_image_paths').val(res.data);
+                                            } else {
+                                                $('#add_image_paths').val($('#add_image_paths').val() + ',' + res.data);
+                                            }
+                                            $('#stadiumImages').append('<img class="loginIcon" src="' + res.data + '" style="width: 80px;height: 80px;margin-right: 10px">');
+                                            if (haveUploadCount > 4) {
+                                                $('#add_uploadImagesButton').hide();
+                                            }
+                                        }
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: res.message
+                                        });
                                     }
                                     ,error: function(){
                                         layer.open({
@@ -310,13 +322,12 @@
                                 if (checkAddForm() === false) {
                                     return false;
                                 }
-                                var url ="../../examItem/add.do";
-                                var postData = '{"name":"' + $('#add_name').val() + '","score":' + $('#add_score').val() + ',"description":"' +
-                                    $('#add_description').val() + '","voicePath":"' + $('#add_voice_path').val() + '","operationIds":"' + $('#add_operationIds').val()  +
-                                    '","isDel":' + $('input:radio[name="add_isDel"]:checked').val() + '}';
+                                var url ="/book_stadium_online/stadium/stadiumManagerAdd.do";
+                                var postData = '{"name":"' + $('#add_name').val() + '","address":"' + $('#add_address').val() + '","description":"' +
+                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","categoryIds":"' + $('#add_stadiumCategoryIds').val() + '"}';
                                 $.ajax({
                                     "url" : url,
-                                    "data" : {"newExamItemJsonData":postData},
+                                    "data" : {"stadiumData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "success" : function (json) {
@@ -538,7 +549,7 @@
                                 "success" : function (json) {
                                     if (json.code === 200) {
                                         // 保存到全局变量
-                                        operationData = json.data;
+                                        stadiumCategoryData = json.data;
                                         table.render({
                                             elem: '#change_operationIds_table'
                                             , data: json.data
@@ -550,12 +561,12 @@
                                                 , {field: 'id', title: 'id', width: 60}
                                                 , {field: 'name', title: '名称', width: 300}
                                                 , {field: 'description', title: '描述', width: 250}
-                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeOperationIdsBar'} //这里的toolbar值是模板元素的选择器
+                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
                                             ]]
                                             , rowDrag: {
                                                 done: function(obj) {
                                                     // 完成时（松开时）触发(soulTable插件，移动行
-                                                    operationData = obj.cache;
+                                                    stadiumCategoryData = obj.cache;
                                                     var operationIds = [];
                                                     for (var row of obj.cache) {
                                                         operationIds.push(row.id);
@@ -647,39 +658,39 @@
                         } else {
                             $('#change_operationIds_operationIds').val('');
                         }
-                        operationData.splice(objIndex, 1);
+                        stadiumCategoryData.splice(objIndex, 1);
                         layui.table.reload('change_operationIds_table', {
                             url: null,
-                            data: operationData
+                            data: stadiumCategoryData
                         });
                         layer.close(index);
                     });
                 }
             });
 
-            // 监听addOperationIdsTable中的工具条
-            table.on('tool(addOperationIdsTable)', function (obj) {
+            // 监听addStadiumCategoryIdsTable中的工具条
+            table.on('tool(addStadiumCategoryIdsTable)', function (obj) {
                 var data = obj.data; //获得当前行数据
                 var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
                 if (layEvent === 'delete') {
-                    layer.confirm('真的删除这个操作项吗？', function(index){
+                    layer.confirm('真的删除这个分类吗？', function(index){
                         // 获取行所在的行index
                         var objIndex = $(tr).attr("data-index");
-                        // 然后把add_operationIds输入框中的内容更新
-                        var operationIds = $('#add_operationIds').val().split(',');
-                        operationIds.splice(objIndex, 1);
-                        if (operationIds.length > 1) {
-                            $('#add_operationIds').val(operationIds.join(','));
-                        } else if (operationIds.length === 1) {
-                            $('#add_operationIds').val(operationIds);
+                        // 然后把add_stadiumCategoryIds输入框中的内容更新
+                        var stadiumCategoryIds = $('#add_stadiumCategoryIds').val().split(',');
+                        stadiumCategoryIds.splice(objIndex, 1);
+                        if (stadiumCategoryIds.length > 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                        } else if (stadiumCategoryIds.length === 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds);
                         } else {
-                            $('#add_operationIds').val('');
+                            $('#add_stadiumCategoryIds').val('');
                         }
-                        operationData.splice(objIndex, 1);
-                        layui.table.reload('add_operationIds_table', {
+                        stadiumCategoryData.splice(objIndex, 1);
+                        layui.table.reload('add_stadiumCategoryIds_table', {
                             url: null,
-                            data: operationData
+                            data: stadiumCategoryData
                         });
                         layer.close(index);
                     });
@@ -691,70 +702,70 @@
             if ($('#add_name').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "考试项名称不能为空！"
+                    content: "场馆名称不能为空！"
                 });
                 return false;
             }
-            if (($('#add_score').val() + '').length === 0) {
+            if (($('#add_address').val() + '').length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "考试项分值必须填写！"
+                    content: "场馆地址必须填写！"
                 });
                 return false;
             }
             if ($('#add_description').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "考试操作项描述不能为空！"
+                    content: "场馆描述不能为空！"
                 });
                 return false;
             }
-            if ($('#add_voice_path').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "考试项的音频不能为空，请上传音频文件！"
-                });
-                return false;
-            }
-            if ($('#add_operationIds').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "考试项的操作项ID列表不能为空！"
-                });
-                return false;
-            }
+            // if ($('#add_voice_path').val().length === 0) {
+            //     layer.open({
+            //         title: "提示信息",
+            //         content: "考试项的音频不能为空，请上传音频文件！"
+            //     });
+            //     return false;
+            // }
+            // if ($('#add_operationIds').val().length === 0) {
+            //     layer.open({
+            //         title: "提示信息",
+            //         content: "考试项的操作项ID列表不能为空！"
+            //     });
+            //     return false;
+            // }
             return true;
         }
 
         /**
          * 添加operation
-         * @param dialogIndex     dialogIndex===1代表“添加考试项中的添加操作项”，dialogIndex===2代表“修改考试项的操作项中的添加操作项”
+         * @param dialogIndex     dialogIndex===1代表“添加体育场馆中的添加操作项”，dialogIndex===2代表“修改考试项的操作项中的添加操作项”
          */
-        function addOperation(dialogIndex) {
+        function selectStadiumCategory(dialogIndex) {
             layer.open({
                 type: 1,
-                title: '添加操作项',
-                area:['80%','80%'],
-                content: $('#operationPageDialog').html(),
+                title: '选择场馆分类',
+                area:['760px','80%'],
+                content: $('#stadiumCategoryPageDialog').html(),
                 btn: ['添加', '取消'],
                 success: function (index, layero) {
                     // 填充change_operationIds_table表格
                     table.render({
-                        elem: '#all_operation_table'
-                        , height: 550
+                        elem: '#all_stadiumCategory_table'
+                        , width: 730
                         , defaultToolbar: ['print', 'exports']
                         , method: 'POST'
                         , cols: [[
-                            {title: '<a class="" style="font-size: 20px; color:black;">考试操作项表</a>',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                            {title: '<a class="" style="font-size: 20px; color:black;">场馆分类表</a>',align: 'center', colspan: 4} //rowspan即纵向跨越的单元格数
                         ],[ //表头
                             {checkbox: true, LAY_CHECKED: false}
                             , {field: 'id', title: 'id', width: 70, sort: true}
-                            , {field: 'name', title: '名称', width: 350, sort: true}
+                            , {field: 'name', title: '名称', width: 300, sort: true}
                             , {field: 'description', title: '描述', width: 300, sort: true}
-                            , {field: 'isDel', title: '是否删除', width: 100, sort: true}
                         ]]
                         , page: true
-                        , url: "../../examOperation/findByPage.do"
+                        , limit: 100
+                        , url: "/book_stadium_online/stadiumCategory/findByPage.do"
                         , request: {
                             pageName: 'pageIndex' //页码的参数名称，默认：page
                             ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
@@ -777,56 +788,48 @@
                     });
                 },
                 yes: function (index, layero) {
-                    // 获取all_operation_table选中的id，dialogIndex，分别添加到operationIds尾端
-                    var checkStatus = layui.table.checkStatus('all_operation_table');
+                    // 获取all_stadiumCategory_table选中的id，dialogIndex，分别更新
+                    var checkStatus = layui.table.checkStatus('all_stadiumCategory_table');
                     if (checkStatus.data.length === 0) {
                         layer.open({
                             title: "提示信息",
-                            content: "添加失败，未选择需要添加的操作项！"
+                            content: "添加失败，未选择需要添加的场馆分类项！"
                         });
                         return false;
                     }
-                    var operationIds = [];
-                    if (dialogIndex === 1) {
-                        if ($('#add_operationIds').val().length !== 0) {
-                            operationIds = $('#add_operationIds').val().split(',');
-                        }
-                    } else if (dialogIndex === 2) {
-                        if ($('#change_operationIds_operationIds').val().length !== 0) {
-                            operationIds = $('#change_operationIds_operationIds').val().split(',');
-                        }
-                    }
+                    var stadiumCategoryIds = [];
+                    stadiumCategoryData = [];
                     for (var value of checkStatus.data) {
-                        operationIds.push(value.id);
-                        operationData.push(value);
+                        stadiumCategoryIds.push(value.id);
+                        stadiumCategoryData.push(value);
                     }
                     layer.close(index);
-                    // 再分别更新add_operationIds_table、change_operationIds_table表
+                    // 再分别更新add_stadiumCategoryIds_table、change_operationIds_table表
                     if (dialogIndex === 1) {
-                        if ($('#add_operationIds').val().length === 0) {
-                            // $('#add_operationIds').val()为空，说明是刚打开添加页面，初始化表格
+                        if ($('#add_stadiumCategoryIds').val().length === 0) {
+                            // $('#add_stadiumCategoryIds').val()为空，说明是刚打开添加页面，初始化表格
                             table.render({
-                                elem: '#add_operationIds_table'
-                                , data: operationData
-                                , width: 750
+                                elem: '#add_stadiumCategoryIds_table'
+                                , data: stadiumCategoryData
+                                , width: 760
                                 , cols: [[
-                                    {title: '考试项包含的操作项（<a class="" style="font-size: 20px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
                                 ],[ //表头
                                     {type: 'numbers', title: '序号', width: 60}
                                     , {field: 'id', title: 'id', width: 60}
                                     , {field: 'name', title: '名称', width: 300}
                                     , {field: 'description', title: '描述', width: 250}
-                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeOperationIdsBar'} //这里的toolbar值是模板元素的选择器
+                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
                                 ]]
                                 , rowDrag: {
                                     done: function(obj) {
                                         // 完成时（松开时）触发(soulTable插件，移动行
-                                        operationData = obj.cache;
-                                        var operationIds = [];
+                                        stadiumCategoryData = obj.cache;
+                                        var stadiumCategoryIds = [];
                                         for (var row of obj.cache) {
-                                            operationIds.push(row.id);
+                                            stadiumCategoryIds.push(row.id);
                                         }
-                                        $('#add_operationIds').val(operationIds.join(','));
+                                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
                                     }
                                 }
                                 , done: function () {
@@ -835,17 +838,17 @@
                             });
                         } else {
                             // 否则reload
-                            layui.table.reload('add_operationIds_table', {
+                            layui.table.reload('add_stadiumCategoryIds_table', {
                                 url: null,
-                                data: operationData
+                                data: stadiumCategoryData
                             });
                         }
-                        $('#add_operationIds').val(operationIds.join(','));
+                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
                     } else if (dialogIndex === 2) {
                         $('#change_operationIds_operationIds').val(operationIds.join(','));
                         layui.table.reload('change_operationIds_table', {
                             url: null,
-                            data: operationData
+                            data: stadiumCategoryData
                         });
                     }
                 },

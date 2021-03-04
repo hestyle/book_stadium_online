@@ -5,8 +5,8 @@
     <!--添加Stadium-->
     <!--void add(Stadium stadium);-->
     <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO `t_stadium`(`manager_id`, `category_ids`, `name`, `address`, `description`, `created_time`, `created_user`)
-        VALUES (#{managerId}, #{categoryIds}, #{name}, #{address}, #{description}, #{createdTime}, #{createdUser})
+        INSERT INTO `t_stadium`(`manager_id`, `category_ids`, `name`, `address`, `description`, `image_paths`, `created_time`, `created_user`)
+        VALUES (#{managerId}, #{categoryIds}, #{name}, #{address}, #{description}, #{imagePaths}, #{createdTime}, #{createdUser})
     </insert>
     <!--分页查询某stadiumManager的Stadium-->
     <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->

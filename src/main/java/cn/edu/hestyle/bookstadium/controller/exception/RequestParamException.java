@@ -1,7 +1,7 @@
 package cn.edu.hestyle.bookstadium.controller.exception;
 
 /**
- * 未登录，就发出请求
+ * 请求参数错误
  * @author hestyle
  * @projectName book_stadium
  * @date 2021/3/3 10:11 上午

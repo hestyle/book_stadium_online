@@ -1,5 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.FileUploadFailedException;
 import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
@@ -52,6 +53,9 @@ public abstract class BaseController {
         } else if (e instanceof FindFailedException) {
             // 407-查找失败
             code = 407;
+        } else if (e instanceof FileUploadFailedException) {
+            // 408-文件上传失败
+            code = 408;
         }
         return new ResponseResult<>(code, e);
     }

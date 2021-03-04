@@ -1,7 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.exception;
 
 /**
- * 登录失败异常
+ * 查找失败
  * @author hestyle
  */
 public class FindFailedException extends ServiceException {
