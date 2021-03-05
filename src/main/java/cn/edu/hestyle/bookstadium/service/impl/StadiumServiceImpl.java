@@ -14,6 +14,7 @@ import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -192,6 +193,7 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
+    @Transactional
     public void stadiumManagerDeleteByIds(String stadiumManagerUsername, List<Integer> stadiumIds) throws DeleteFailedException {
         StadiumManager stadiumManager = null;
         try {
@@ -209,6 +211,7 @@ public class StadiumServiceImpl implements IStadiumService {
             logger.warn("Stadium 删除失败，data = " + stadiumIds + " 未指定需要删除的Stadium id！");
             throw new DeleteFailedException("删除失败，未指定需要删除的场馆！");
         }
+        logger.warn("Stadium 批量删除事务开启==========");
         for (Integer stadiumId : stadiumIds) {
             Stadium stadium = null;
             try {
@@ -216,14 +219,17 @@ public class StadiumServiceImpl implements IStadiumService {
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumId);
+                logger.warn("Stadium 批量删除事务回滚==========");
                 throw new DeleteFailedException("删除失败，数据库发生未知异常！");
             }
             if (stadium == null) {
                 logger.warn("Stadium 删除失败，不存在体育场馆 stadiumId = " + stadiumId);
+                logger.warn("Stadium 批量删除事务回滚==========");
                 throw new DeleteFailedException("删除失败，不存在id = " + stadiumId + " 的体育场馆！");
             }
             if (!stadium.getManagerId().equals(stadiumManager.getId())) {
                 logger.warn("Stadium 删除失败，无删除权限 stadium = " + stadium + "\n\tStadiumManager = " + stadiumManager);
+                logger.warn("Stadium 批量删除事务回滚==========");
                 throw new DeleteFailedException("删除失败，不存在id = " + stadiumId + " 的体育场馆！");
             }
             stadium.setIsDelete(1);
@@ -234,11 +240,13 @@ public class StadiumServiceImpl implements IStadiumService {
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Stadium 删除失败，数据库发生未知异常！stadium = " + stadium);
+                logger.warn("Stadium 批量删除事务回滚==========");
                 throw new DeleteFailedException("删除失败，数据库发生未知异常！");
             }
             logger.info("Stadium 完成体育场馆更新！ stadium = " + stadium);
         }
         logger.info("Stadium 成功删除体育场馆！stadiumIds = " + stadiumIds);
+        logger.warn("Stadium 批量删除事务提交==========");
     }
 
     @Override
