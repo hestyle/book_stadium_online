@@ -41,7 +41,14 @@
             <div id="modifySelfPassword" class="dialogMenu-item">修改密码</div>
             <div id="parentExit" class="dialogMenu-item">退出</div>
         </div>
-
+        <!--修改头像弹框-->
+        <script type="text/html" id="dialogModifyAvatar">
+            <form class="layui-form" id="dialogModifyAvatarForm" style="margin-top:20px;">
+                <input id="change_avatar" type="text" name="avatarPath" placeholder="图片路径" autocomplete="off" class="layui-input" style="display:none;" disabled>
+                <img class="avatar" src="../image/icon.png" style="width: 100px;height: 100px;margin-left: 75px;">
+                <button type="button" class="layui-btn" id="chooseAvatarButton" style="width: 130px;margin-left: 60px;margin-top:20px;"><i class="layui-icon">&#xe67c;</i>选择图片</button>
+            </form>
+        </script>
         <!--修改密码弹框-->
         <script type="text/html" id="dialogModifySelfPassword">
             <form class="layui-form" id="dialogModifySelfPasswordForm" style="margin-top:30px;padding-right:30px;">
@@ -67,7 +74,7 @@
         </script>
         <script>
             var stadiumManagerInfo;
-            layuiModules=['layer', 'form', 'element'];
+            layuiModules=['layer', 'form', 'element', 'upload'];
             function mounted() {
                 // 菜单列表数据(通过id、pid设置父、子级关系)
                 window.menuArray = [
@@ -99,12 +106,93 @@
                 // 设置StadiumManagerInfo（登录的账号信息）
                 setStadiumManagerInfo();
                 // 显示设置弹框
-                $('.loginNameDiv').click(function () {
+                $('.loginUserInfo').click(function () {
                     if ($('.dialogMenu').css('display') === 'block') {
                         $('.dialogMenu').css('display', 'none');
                     } else {
                         $('.dialogMenu').css('display', 'block');
                     }
+                });
+                // 显示头像修改弹框
+                $('.loginIcon').click(function () {
+                    layer.open({
+                        type: 1,
+                        title: '修改头像',
+                        area: ['250px', '300px'],
+                        content: $('#dialogModifyAvatar').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            if (stadiumManagerInfo.avatarPath != null) {
+                                $('#change_avatar').val(stadiumManagerInfo.avatarPath);
+                                $('.avatar').attr("src", stadiumManagerInfo.avatarPath);
+                            }
+                            upload.render({
+                                elem: '#chooseAvatarButton'
+                                ,url: '/book_stadium_online/stadiumManager/uploadAvatar.do'
+                                ,accept: 'images'
+                                ,acceptMime: 'image/*'
+                                ,size: 10240
+                                ,multiple: false
+                                ,number: 1
+                                ,done: function(res){
+                                    if (res.code === 200) {
+                                        // 文件上传成功后修改图片路径
+                                        $('#change_avatar').val(res.data);
+                                        $('.avatar').attr("src", res.data);
+                                    }
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: res.message
+                                    });
+                                }
+                                ,error: function(){
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: '文件上传失败！'
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index1, layero) {
+                            var url ="/book_stadium_online/stadiumManager/modify.do";
+                            var modifyData = '{"avatarPath":"' + $('#change_avatar').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"modifyData":modifyData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message,
+                                        yes: function (index2, layero) {
+                                            if (json.code === 401) {
+                                                // code==402说明未登录(BaseController.java定义)
+                                                parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                                            }
+                                            if (json.code === 200) {
+                                                stadiumManagerInfo.avatarPath = $('#change_avatar').val();
+                                                $('.loginIcon').attr("src", $('#change_avatar').val());
+                                                layer.close(index1);
+                                            }
+                                            layer.close(index2);
+                                        }
+                                    });
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "出现异常！"
+                                    });
+                                }
+                            });
+                        },
+                        cancel: function (index2, layero) {
+                            layer.close(index2);
+                        }
+                    });
                 });
                 //退出登录
                 $('#parentExit').click(function () {

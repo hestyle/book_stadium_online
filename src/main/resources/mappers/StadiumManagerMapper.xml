@@ -36,7 +36,7 @@
 	<!--void update(StadiumManager stadiumManager);-->
 	<update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
 		UPDATE `t_stadium_manager` SET
-			`password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete},
+			`password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath},
 			`is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
 		WHERE
 			`id` = #{id}
