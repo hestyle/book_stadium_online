@@ -24,7 +24,7 @@
     <!--每条数据的操作栏-->
     <script type="text/html" id="barDemo">
         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeVoice">修改音频</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
         <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeOperationIds">修改操作项ID列表</a>
     </script>
     <!--(修改操作项id列表弹窗中的table)每条数据的操作栏-->
@@ -122,32 +122,32 @@
             <table id="add_stadiumCategoryIds_table" lay-filter="addStadiumCategoryIdsTable"></table>
         </form>
     </script>
-    <!--单条数据修改音频资源-->
-    <script type="text/html" id="changeVoiceDialog">
-        <form id="change_voice_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeVoiceDialogForm">
+    <!--单条数据修改图片资源-->
+    <script type="text/html" id="changeImageDialog">
+        <form id="change_Image_form" class="layui-form" action="#" style="padding: 20px;" lay-filter="changeImageDialogForm">
             <div class="layui-form-item">
                 <label class="layui-form-label">id</label>
                 <div class="layui-input-inline">
-                    <input id="change_voice_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="change_image_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">名称</label>
                 <div class="layui-input-inline">
-                    <input id="change_voice_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="change_image_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">音频路径</label>
-                <div class="layui-input-inline">
-                    <input id="change_voice_voice_path" type="text" name="voicePath" placeholder="请输入音频路径" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button type="button" class="layui-btn" id="uploadVoiceButton"><i class="layui-icon">&#xe67c;</i>上传音频</button>
+                <label class="layui-form-label">图片</label>
+                <div class="layui-input-inline" style="width: 400px;">
+                    <input id="change_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
+                    <button type="button" class="layui-btn" id="change_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
+                    <label style="color: red;">最多只允许上传5张！</label>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">播放</label>
-                <div>
-                    <audio id="examItemVoiceAudio" src="xxxx.mp3" controls="controls"></audio>
+                <label class="layui-form-label">预览</label>
+                <div class="layui-input-inline" id="change_stadiumImages" style="width: 450px;">
                 </div>
             </div>
         </form>
@@ -412,29 +412,60 @@
                 var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
 
-                if (layEvent === 'changeVoice') {
+                if (layEvent === 'changeImage') {
                     layer.open({
                         type: 1,
-                        title: '修改音频',
-                        area:['50%','80%'],
-                        content: $('#changeVoiceDialog').html(),
+                        title: '修改图片',
+                        area:['60%','80%'],
+                        content: $('#changeImageDialog').html(),
                         btn: ['保存', '取消'],
                         success: function (index, layero) {
                             // 填充行数据
                             form.render();
-                            form.val("changeVoiceDialogForm", data);
+                            form.val("changeImageDialogForm", data);
 
-                            $('#examItemVoiceAudio').attr('src', data.voicePath);
-
+                            if (data.imagePaths != null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                        + imagePaths[i] + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                        + i + '" onclick="deleteImage(this, 1)">删除</button></div>');
+                                }
+                                haveUploadCount = imagePaths.length;
+                                if (haveUploadCount > 4) {
+                                    $('#add_uploadImagesButton').hide();
+                                }
+                            } else {
+                                haveUploadCount = 0;
+                            }
                             upload.render({
-                                elem: '#uploadVoiceButton'
-                                ,url: '../../examItem/uploadVoice.do'
-                                ,accept: 'audio'
-                                ,acceptMime: 'audio/mpeg'
+                                elem: '#change_uploadImagesButton'
+                                ,url: '/book_stadium_online/stadium/uploadImage.do'
+                                ,accept: 'images'
+                                ,acceptMime: 'image/*'
+                                ,size: 10240
+                                ,multiple: false
+                                ,number: 1
                                 ,done: function(res){
-                                    // 文件上传成功后修改音频路径
-                                    $('#change_voice_voice_path').val(res.data);
-                                    $('#examItemVoiceAudio').attr('src', res.data);
+                                    if (res.code === 200) {
+                                        // 文件上传成功后修改图片路径
+                                        if ($('#change_image_paths').val().length === 0) {
+                                            $('#change_image_paths').val(res.data);
+                                        } else {
+                                            $('#change_image_paths').val($('#change_image_paths').val() + ',' + res.data);
+                                        }
+                                        $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                            + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                            + haveUploadCount + '" onclick="deleteImage(this, 1)">删除</button></div>');
+                                        haveUploadCount += 1;
+                                        if (haveUploadCount > 4) {
+                                            $('#add_uploadImagesButton').hide();
+                                        }
+                                    }
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: res.message
+                                    });
                                 }
                                 ,error: function(){
                                     layer.open({
@@ -446,10 +477,11 @@
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
-                            var url ="../../examItem/modifyVoicePath.do";
+                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#change_image_id').val() + ',"imagePaths":"'+ $('#change_image_paths').val() + '"}';
                             $.ajax({
                                 "url" : url,
-                                "data" : {"id":data.id,"voicePath":$('#change_voice_voice_path').val()},
+                                "data" : {"modifyData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "success" : function (json) {
@@ -460,7 +492,7 @@
                                     if (json.code === 200) {
                                         // 更新成功，则关闭重置窗口
                                         obj.update({
-                                            voicePath: $('#change_voice_voice_path').val()
+                                            imagePaths: $('#change_image_paths').val()
                                         });
                                         layer.close(index);
                                     }
@@ -726,20 +758,6 @@
                 });
                 return false;
             }
-            // if ($('#add_voice_path').val().length === 0) {
-            //     layer.open({
-            //         title: "提示信息",
-            //         content: "考试项的音频不能为空，请上传音频文件！"
-            //     });
-            //     return false;
-            // }
-            // if ($('#add_operationIds').val().length === 0) {
-            //     layer.open({
-            //         title: "提示信息",
-            //         content: "考试项的操作项ID列表不能为空！"
-            //     });
-            //     return false;
-            // }
             return true;
         }
 
@@ -862,6 +880,29 @@
                     //return false 开启该代码可禁止点击该按钮关闭
                 }
             });
+        }
+
+        function deleteImage(obj, index) {
+            var nowI = $(obj).attr("title");
+            var changeImageDivs = $('.changeImageDiv');
+            for (var i = parseInt(nowI) + 1; i < changeImageDivs.length; ++i) {
+                $(changeImageDivs.get(i)).find('button[name=deleteImageBtn]').attr("title", i - 1);
+            }
+            if (index === 1) {
+                if (changeImageDivs.length > 1) {
+                    var imagePaths = $('#change_image_paths').val().split(',');
+                    imagePaths.splice(parseInt(nowI), 1);
+                    if (imagePaths.length === 1) {
+                        $('#change_image_paths').val(imagePaths[0]);
+                    } else {
+                        $('#change_image_paths').val(imagePaths.join(','));
+                    }
+                } else {
+                    $('#change_image_paths').val('');
+                }
+            }
+
+            $('.changeImageDiv')[nowI].remove();
         }
     </script>
 </html>

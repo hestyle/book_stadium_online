@@ -166,6 +166,18 @@ public class StadiumServiceImpl implements IStadiumService {
             }
             stadium.setIsDelete(isDelete);
         }
+        // imagePaths
+        if (modifyDataMap.containsKey("imagePaths")) {
+            String imagePaths = (String) modifyDataMap.get("imagePaths");
+            try {
+                checkImagePaths(stadium.getImagePaths());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Stadium 添加失败，image path列表格式错误！data = " + modifyDataMap);
+                throw new ModifyFailedException("修改失败，场馆图片格式错误！");
+            }
+            stadium.setImagePaths(imagePaths);
+        }
         stadium.setModifiedUser(stadiumManagerUsername);
         stadium.setModifiedTime(new Date());
         try {
