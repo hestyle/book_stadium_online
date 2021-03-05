@@ -376,7 +376,7 @@
                             return;
                         }
                         layer.confirm('删除选中行？', function (index) {
-                            var url ="../../examItem/deleteByIdList.do";
+                            var url ="/book_stadium_online/stadium/stadiumManagerDeleteByIdList.do";
                             $.ajax({
                                 "url" : url,
                                 "data" : {"idListJsonString":postData},
@@ -401,7 +401,6 @@
                                     });
                                 }
                             });
-
                             layer.close(index);
                         });
                         break;

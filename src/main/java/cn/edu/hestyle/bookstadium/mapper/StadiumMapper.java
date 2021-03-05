@@ -32,6 +32,12 @@ public interface StadiumMapper {
     Stadium findById(Integer id);
 
     /**
+     * 通过id删除
+     * @param id    id
+     */
+    void deleteById(Integer id);
+
+    /**
      * 分页查询某stadiumManager的Stadium
      * @param stadiumManagerId  stadiumManager
      * @param beginIndex        id升序排列

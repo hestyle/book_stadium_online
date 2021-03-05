@@ -56,6 +56,9 @@ public abstract class BaseController {
         } else if (e instanceof FileUploadFailedException) {
             // 408-文件上传失败
             code = 408;
+        } else if (e instanceof DeleteFailedException) {
+            // 409-删除失败
+            code = 409;
         }
         return new ResponseResult<>(code, e);
     }

@@ -17,6 +17,13 @@
         WHERE
             `id` = #{id}
     </update>
+    <!--通过id删除-->
+    <!--void deleteById(Integer id);-->
+    <delete id="deleteById">
+        DELETE FROM `t_stadium`
+        WHERE
+            `id` = #{id}
+    </delete>
     <!--通过id查找-->
     <!--Stadium findById(Integer id);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">

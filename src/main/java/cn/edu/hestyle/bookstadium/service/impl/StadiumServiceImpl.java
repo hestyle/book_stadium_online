@@ -8,6 +8,7 @@ import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
@@ -188,6 +189,56 @@ public class StadiumServiceImpl implements IStadiumService {
             throw new ModifyFailedException("修改失败，数据库发生未知异常！");
         }
         logger.warn("Stadium 修改成功！data = " + stadium);
+    }
+
+    @Override
+    public void stadiumManagerDeleteByIds(String stadiumManagerUsername, List<Integer> stadiumIds) throws DeleteFailedException {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null) {
+            logger.warn("Stadium 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
+            throw new DeleteFailedException("删除失败，username = " + stadiumManagerUsername + "用户未注册！");
+        }
+        if (stadiumIds == null || stadiumIds.size() == 0) {
+            logger.warn("Stadium 删除失败，data = " + stadiumIds + " 未指定需要删除的Stadium id！");
+            throw new DeleteFailedException("删除失败，未指定需要删除的场馆！");
+        }
+        for (Integer stadiumId : stadiumIds) {
+            Stadium stadium = null;
+            try {
+                stadium = stadiumMapper.findById(stadiumId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumId);
+                throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+            }
+            if (stadium == null) {
+                logger.warn("Stadium 删除失败，不存在体育场馆 stadiumId = " + stadiumId);
+                throw new DeleteFailedException("删除失败，不存在id = " + stadiumId + " 的体育场馆！");
+            }
+            if (!stadium.getManagerId().equals(stadiumManager.getId())) {
+                logger.warn("Stadium 删除失败，无删除权限 stadium = " + stadium + "\n\tStadiumManager = " + stadiumManager);
+                throw new DeleteFailedException("删除失败，不存在id = " + stadiumId + " 的体育场馆！");
+            }
+            stadium.setIsDelete(1);
+            stadium.setModifiedUser(stadiumManagerUsername);
+            stadium.setModifiedTime(new Date());
+            try {
+                stadiumMapper.update(stadium);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Stadium 删除失败，数据库发生未知异常！stadium = " + stadium);
+                throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+            }
+            logger.info("Stadium 完成体育场馆更新！ stadium = " + stadium);
+        }
+        logger.info("Stadium 成功删除体育场馆！stadiumIds = " + stadiumIds);
     }
 
     @Override
