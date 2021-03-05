@@ -280,7 +280,8 @@
                             btn: ['确定', '取消'],
                             success: function (index, layero) {
                                 // 清空缓存
-                                operationData = [];
+                                stadiumCategoryData = [];
+                                haveUploadCount = 0;
                                 form.render();
                                 upload.render({
                                     elem: '#add_uploadImagesButton'
@@ -292,14 +293,16 @@
                                     ,number: 1
                                     ,done: function(res){
                                         if (res.code === 200) {
-                                            haveUploadCount += 1;
                                             // 文件上传成功后修改图片路径
                                             if ($('#add_image_paths').val().length === 0) {
                                                 $('#add_image_paths').val(res.data);
                                             } else {
                                                 $('#add_image_paths').val($('#add_image_paths').val() + ',' + res.data);
                                             }
-                                            $('#stadiumImages').append('<img class="loginIcon" src="' + res.data + '" style="width: 80px;height: 80px;margin-right: 10px">');
+                                            $('#stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                                + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                                + haveUploadCount + '" onclick="deleteImage(this, 0)">删除</button></div>');
+                                            haveUploadCount += 1;
                                             if (haveUploadCount > 4) {
                                                 $('#add_uploadImagesButton').hide();
                                             }
@@ -763,7 +766,7 @@
 
         /**
          * 添加operation
-         * @param dialogIndex     dialogIndex===1代表“添加体育场馆中的添加操作项”，dialogIndex===2代表“修改考试项的操作项中的添加操作项”
+         * @param dialogIndex     dialogIndex===1代表“添加体育场馆”，dialogIndex===2代表“修改体育场馆分类”
          */
         function selectStadiumCategory(dialogIndex) {
             layer.open({
@@ -882,13 +885,29 @@
             });
         }
 
+        /**
+         * 删除上传的图片
+         * @param index     index===0代表“添加体育场馆弹窗”，index===1代表“修改体育场馆图片弹窗”
+         */
         function deleteImage(obj, index) {
             var nowI = $(obj).attr("title");
             var changeImageDivs = $('.changeImageDiv');
             for (var i = parseInt(nowI) + 1; i < changeImageDivs.length; ++i) {
                 $(changeImageDivs.get(i)).find('button[name=deleteImageBtn]').attr("title", i - 1);
             }
-            if (index === 1) {
+            if (index === 0) {
+                if (changeImageDivs.length > 1) {
+                    var imagePaths = $('#add_image_paths').val().split(',');
+                    imagePaths.splice(parseInt(nowI), 1);
+                    if (imagePaths.length === 1) {
+                        $('#add_image_paths').val(imagePaths[0]);
+                    } else {
+                        $('#add_image_paths').val(imagePaths.join(','));
+                    }
+                } else {
+                    $('#add_image_paths').val('');
+                }
+            } else if (index === 1) {
                 if (changeImageDivs.length > 1) {
                     var imagePaths = $('#change_image_paths').val().split(',');
                     imagePaths.splice(parseInt(nowI), 1);
