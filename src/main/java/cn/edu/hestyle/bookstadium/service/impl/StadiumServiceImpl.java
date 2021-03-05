@@ -184,7 +184,7 @@ public class StadiumServiceImpl implements IStadiumService {
         if (modifyDataMap.containsKey("imagePaths")) {
             String imagePaths = (String) modifyDataMap.get("imagePaths");
             try {
-                checkImagePaths(stadium.getImagePaths());
+                checkImagePaths(imagePaths);
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Stadium 添加失败，image path列表格式错误！data = " + modifyDataMap);
