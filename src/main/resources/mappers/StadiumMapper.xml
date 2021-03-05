@@ -59,7 +59,7 @@
         FROM
             `t_stadium`
         WHERE
-            `manager_id` = #{stadiumManagerId}
+            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
@@ -71,6 +71,6 @@
         FROM
             `t_stadium`
         WHERE
-            `manager_id` = #{stadiumManagerId}
+            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
     </select>
 </mapper>
