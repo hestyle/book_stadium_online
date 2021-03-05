@@ -390,6 +390,9 @@ public class StadiumServiceImpl implements IStadiumService {
                 throw new Exception(imagePath + "文件不存在！");
             }
         }
+        if (imagePaths.length > 5) {
+            throw new Exception("体育场馆最多上传5张照片！");
+        }
         logger.info("Stadium imagePaths = " + imagePathsString + " 通过检查！");
         return false;
     }

@@ -434,7 +434,7 @@
                                 }
                                 haveUploadCount = imagePaths.length;
                                 if (haveUploadCount > 4) {
-                                    $('#add_uploadImagesButton').hide();
+                                    $('#change_uploadImagesButton').hide();
                                 }
                             } else {
                                 haveUploadCount = 0;
@@ -460,7 +460,7 @@
                                             + haveUploadCount + '" onclick="deleteImage(this, 1)">删除</button></div>');
                                         haveUploadCount += 1;
                                         if (haveUploadCount > 4) {
-                                            $('#add_uploadImagesButton').hide();
+                                            $('#change_uploadImagesButton').hide();
                                         }
                                     }
                                     layer.open({
@@ -911,6 +911,7 @@
                 } else {
                     $('#add_image_paths').val('');
                 }
+                $('#add_uploadImagesButton').show();
             } else if (index === 1) {
                 if (changeImageDivs.length > 1) {
                     var imagePaths = $('#change_image_paths').val().split(',');
@@ -923,8 +924,10 @@
                 } else {
                     $('#change_image_paths').val('');
                 }
+                $('#change_uploadImagesButton').show();
             }
-
+            // 删除了一张图片
+            haveUploadCount -= 1;
             $('.changeImageDiv')[nowI].remove();
         }
     </script>
