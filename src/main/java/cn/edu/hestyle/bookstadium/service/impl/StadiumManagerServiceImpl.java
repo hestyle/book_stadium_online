@@ -11,8 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -204,10 +206,21 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             Matcher matcher = pattern.matcher(phoneNumber);
             if (!matcher.matches()) {
                 logger.info("StadiumManager 账号更改保存失败，电话号码非法！data = " + modifyDataMap);
-                throw new RegisterFailedException("账号修改保存失败，输入的电话号码非法！");
+                throw new ModifyFailedException("账号修改保存失败，输入的电话号码非法！");
             } else {
                 stadiumManager.setPhoneNumber(phoneNumber);
             }
+        }
+        if (modifyDataMap.containsKey("avatarPath")) {
+            String avatarPath = (String) modifyDataMap.get("avatarPath");
+            try {
+                checkAvatarPaths(avatarPath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.info("StadiumManager 账号更改保存失败，图片路径非法！data = " + avatarPath);
+                throw new ModifyFailedException("账号修改保存失败，图片路径不在本服务器上！");
+            }
+            stadiumManager.setAvatarPath(avatarPath);
         }
         stadiumManager.setModifiedUser(stadiumManager.getUsername());
         stadiumManager.setModifiedTime(new Date());
@@ -274,5 +287,31 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             src = DigestUtils.md5DigestAsHex(src.getBytes()).toUpperCase();
         }
         return src;
+    }
+
+    /**
+     * 检查imagePaths的合法性
+     * @param avatarPath            avatarPath
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkAvatarPaths(String avatarPath) throws Exception {
+        if (avatarPath == null || avatarPath.length() == 0) {
+            return true;
+        }
+        try {
+            String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/stadiumManager/avatar";
+            String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+            String filePath = pathNameTruth + avatarPath.substring(avatarPath.lastIndexOf('/'));
+            File file = new File(filePath);
+            if (!file.exists()) {
+                throw new Exception(avatarPath + "文件不存在！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(avatarPath + "文件不存在！");
+        }
+        logger.info("StadiumManager avatarPath = " + avatarPath + " 通过检查！");
+        return false;
     }
 }

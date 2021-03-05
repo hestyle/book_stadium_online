@@ -1,7 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.exception;
 
 /**
- * 账号查找失败异常
+ * 账号注册失败异常
  * @author hestyle
  */
 public class RegisterFailedException extends ServiceException {

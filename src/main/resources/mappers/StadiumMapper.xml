@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumMapper">
+    <!--添加Stadium-->
+    <!--void add(Stadium stadium);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium`(`manager_id`, `category_ids`, `name`, `address`, `description`, `image_paths`, `created_time`, `created_user`)
+        VALUES (#{managerId}, #{categoryIds}, #{name}, #{address}, #{description}, #{imagePaths}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--更新stadium-->
+    <!--void update(Stadium stadium);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        UPDATE `t_stadium` SET
+           `category_ids` = #{categoryIds}, `name` = #{name}, `address` = #{address}, `description` = #{description}, `image_paths` = #{imagePaths},
+           `is_delete` = #{isDelete}, `is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过id删除-->
+    <!--void deleteById(Integer id);-->
+    <delete id="deleteById">
+        DELETE FROM `t_stadium`
+        WHERE
+            `id` = #{id}
+    </delete>
+    <!--通过id查找-->
+    <!--Stadium findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        SELECT
+            `id` as `id`,
+            `manager_id` as `managerId`,
+            `category_ids` as `categoryIds`,
+            `name` as `name`,
+            `address` as `address`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium`
+        WHERE
+            `id` = #{id}
+    </select>
+    <!--分页查询某stadiumManager的Stadium-->
+    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
+    <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        SELECT
+            `id` as `id`,
+            `manager_id` as `managerId`,
+            `category_ids` as `categoryIds`,
+            `name` as `name`,
+            `address` as `address`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium`
+        WHERE
+            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取某stadiumManager的stadium个数-->
+    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId);-->
+    <select id="stadiumManagerGetCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium`
+        WHERE
+            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+    </select>
+</mapper>

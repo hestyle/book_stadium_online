@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>考试项列表</title>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
+</head>
+    <body>
+        <table id="stadiumTable" lay-filter="test"></table>
+    </body>
+    <!--顶部操作栏-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+        </div>
+    </script>
+    <!--每条数据的操作栏-->
+    <script type="text/html" id="barDemo">
+        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改分类ID列表</a>
+    </script>
+    <!--(修改分类id列表弹窗中的table)每条数据的操作栏-->
+    <script type="text/html" id="changeStadiumCategoryIdsBar">
+        <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+    </script>
+    <!--每条数据的编辑操作-->
+    <script type="text/html" id="editDialog">
+        <form class="layui-form" action="" style="padding: 20px;" lay-filter="editDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">id</label>
+                <div class="layui-input-inline">
+                    <input id="id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">地址</label>
+                <div class="layui-input-inline">
+                    <input id="address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">描述</label>
+                <div class="layui-input-inline">
+                    <textarea id="description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">图片</label>
+                <div class="layui-input-inline" id="editStadiumImages" style="width: 450px;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">场馆分类ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="stadiumCategoryIds" type="text" name="categoryIds" placeholder="请输入场馆分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">是否删除</label>
+                <div class="layui-input-inline">
+                    <input type="radio" name="isDelete" value="0" title="未删除" checked>
+                    <input id="is_del_true" type="radio" name="isDelete" value="1" title="已删除">
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据的插入操作-->
+    <script type="text/html" id="addDialog">
+        <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="add_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">地址</label>
+                <div class="layui-input-inline">
+                    <input id="add_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">描述</label>
+                <div class="layui-input-inline">
+                    <textarea id="add_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">图片</label>
+                <div class="layui-input-inline" style="width: 400px;">
+                    <input id="add_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
+                    <button type="button" class="layui-btn" id="add_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
+                    <label style="color: red;">最多只允许上传5张！</label>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">预览</label>
+                <div class="layui-input-inline" id="stadiumImages" style="width: 450px;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">场馆分类ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="add_stadiumCategoryIds" type="text" name="stadiumCategoryIds" placeholder="请选择场馆分类ID！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button id="select_stadiumCategory" type="button" class="layui-btn" onclick="selectStadiumCategory(1)">选择场馆分类</button>
+                </div>
+            </div>
+            <table id="add_stadiumCategoryIds_table" lay-filter="addStadiumCategoryIdsTable"></table>
+        </form>
+    </script>
+    <!--单条数据修改图片资源-->
+    <script type="text/html" id="changeImageDialog">
+        <form id="change_Image_form" class="layui-form" action="#" style="padding: 20px;" lay-filter="changeImageDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label">id</label>
+                <div class="layui-input-inline">
+                    <input id="change_image_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">名称</label>
+                <div class="layui-input-inline">
+                    <input id="change_image_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">图片</label>
+                <div class="layui-input-inline" style="width: 400px;">
+                    <input id="change_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
+                    <button type="button" class="layui-btn" id="change_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
+                    <label style="color: red;">最多只允许上传5张！</label>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">预览</label>
+                <div class="layui-input-inline" id="change_stadiumImages" style="width: 450px;">
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据修改分类ID列表-->
+    <script type="text/html" id="changeCategoryIdsDialog">
+        <form id="change_categoryIds_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeCategoryIdsDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">id</label>
+                <div class="layui-input-inline">
+                    <input id="change_categoryIds_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">名称</label>
+                <div class="layui-input-inline">
+                    <input id="change_categoryIds_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">分类ID列表</label>
+                <div class="layui-input-inline">
+                    <input id="change_categoryIds_categoryIds" type="text" name="categoryIds" placeholder="请输入分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <button type="button" class="layui-btn" id="change_categoryId_Button" onclick="selectStadiumCategory(2)">添加场馆分类</button>
+                </div>
+            </div>
+            <table id="change_categoryIds_table" lay-filter="changeCategoryIdsTable"></table>
+        </form>
+    </script>
+    <!--场馆分类page列表-->
+    <script type="text/html" id="stadiumCategoryPageDialog">
+        <table id="all_stadiumCategory_table" lay-filter="allStadiumTable"></table>
+    </script>
+    <script>
+        layui.config({
+            base: '../../plugins/soulTable/',
+            version: 'v1.5.20'
+        }).extend({
+            soulTable: 'soulTable/soulTable.slim'
+        });
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable'];
+        // stadiumCategoryIds对应的分类
+        var stadiumCategoryData = [];
+        // 上传图片
+        var haveUploadCount = 0;
+        function mounted() {
+            var url ="/book_stadium_online/stadium/stadiumManagerFindByPage.do";
+            $.ajax({
+                "url" : url,
+                "data" : {"pageIndex":1, "pageSize":10},
+                "type" : "POST",
+                "dataType" : "json",
+                "success" : function (json) {
+                    if (json.code === 200) {
+                        // 往table填充服务器返回的数据
+                        table.render({
+                            elem: '#stadiumTable'
+                            , toolbar: '#toolbarDemo'
+                            , height: 550
+                            , defaultToolbar: ['print', 'exports']
+                            , method: 'POST'
+                            , cols: [[
+                                {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                            ],[ //表头
+                                {checkbox: true, LAY_CHECKED: false}
+                                , {field: 'id', title: 'id', width: 70, sort: true}
+                                , {field: 'name', title: '名称', width: 200, sort: true}
+                                , {field: 'address', title: '地址', width: 200, sort: true}
+                                , {field: 'description', title: '描述', width: 200, sort: true}
+                                , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                                , {field: 'imagePaths', title: '图片', width: 150, sort: true}
+                                , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                            ]]
+                            , page: true
+                            , url: url
+                            , request: {
+                                pageName: 'pageIndex' //页码的参数名称，默认：page
+                                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                            }
+                            , response: {
+                                statusName: 'code' //规定数据状态的字段名称，默认：code
+                                ,statusCode: 200 //规定成功的状态码，默认：0
+                                ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                            }
+                            , parseData: function(res){ //res 即为原始返回的数据
+                                return {
+                                    "code": res.code, //解析接口状态
+                                    "message": res.message, //解析提示文本
+                                    "count": res.count, //解析数据长度
+                                    "data": res.data //解析数据列表
+                                };
+                            }
+                        });
+                    } else {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: json.message,
+                            yes: function (index2, layero) {
+                                if (json.code === 401) {
+                                    // code==401说明未登录(BaseController.java定义)
+                                    parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                                }
+                                layer.close(index2);
+                            }
+                        });
+                    }
+                },
+                "error" : function () {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "出现异常！"
+                    });
+                }
+            });
+            //监听事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id);
+                switch (obj.event) {
+                    case 'add':
+                        layer.open({
+                            type: 1,
+                            title: '添加',
+                            area:['70%','80%'],
+                            content: $('#addDialog').html(),
+                            btn: ['确定', '取消'],
+                            success: function (index, layero) {
+                                // 清空缓存
+                                stadiumCategoryData = [];
+                                haveUploadCount = 0;
+                                form.render();
+                                upload.render({
+                                    elem: '#add_uploadImagesButton'
+                                    ,url: '/book_stadium_online/stadium/uploadImage.do'
+                                    ,accept: 'images'
+                                    ,acceptMime: 'image/*'
+                                    ,size: 10240
+                                    ,multiple: false
+                                    ,number: 1
+                                    ,done: function(res){
+                                        if (res.code === 200) {
+                                            // 文件上传成功后修改图片路径
+                                            if ($('#add_image_paths').val().length === 0) {
+                                                $('#add_image_paths').val(res.data);
+                                            } else {
+                                                $('#add_image_paths').val($('#add_image_paths').val() + ',' + res.data);
+                                            }
+                                            $('#stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                                + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                                + haveUploadCount + '" onclick="deleteImage(this, 0)">删除</button></div>');
+                                            haveUploadCount += 1;
+                                            if (haveUploadCount > 4) {
+                                                $('#add_uploadImagesButton').hide();
+                                            }
+                                        }
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: res.message
+                                        });
+                                    }
+                                    ,error: function(){
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: '文件上传失败！'
+                                        });
+                                    }
+                                });
+                            },
+                            yes: function (index, layero) {
+                                if (checkAddForm() === false) {
+                                    return false;
+                                }
+                                var url ="/book_stadium_online/stadium/stadiumManagerAdd.do";
+                                var postData = '{"name":"' + $('#add_name').val() + '","address":"' + $('#add_address').val() + '","description":"' +
+                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","categoryIds":"' + $('#add_stadiumCategoryIds').val() + '"}';
+                                $.ajax({
+                                    "url" : url,
+                                    "data" : {"stadiumData":postData},
+                                    "type" : "POST",
+                                    "dataType" : "json",
+                                    "success" : function (json) {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                        if (json.code === 200) {
+                                            layer.close(index);
+                                            // 成功后，表格重载
+                                            layui.table.reload('stadiumTable');
+                                        }
+                                    },
+                                    "error" : function () {
+                                        // 弹出中间提示框
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: "保存失败，出现未知异常！"
+                                        });
+                                    }
+                                });
+                            },
+                            btn2: function (index, layero) {
+                                //return false 开启该代码可禁止点击该按钮关闭
+                            }
+                        });
+                        break;
+                    case 'delete':
+                        // 拼接选中行的username
+                        var postData = '[';
+                        for (var value of checkStatus.data) {
+                            if (postData.length > 1) {
+                                postData += ',"' + value.id + '"';
+                            } else {
+                                postData += '"' + value.id + '"';
+                            }
+                        }
+                        postData += ']';
+                        // 判断是否选中待删除行
+                        if (postData.length === 2) {
+                            layer.open({
+                                title: "提示信息",
+                                content: "请选中需要删除的数据！"
+                            });
+                            return;
+                        }
+                        layer.confirm('删除选中行？', function (index) {
+                            var url ="/book_stadium_online/stadium/stadiumManagerDeleteByIdList.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"idListJsonString":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口、刷新表格
+                                        layer.close(index);
+                                        table.reload('stadiumTable');
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                            layer.close(index);
+                        });
+                        break;
+                }
+            });
+
+            //监听工具条
+            table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'changeImage') {
+                    layer.open({
+                        type: 1,
+                        title: '修改图片',
+                        area:['60%','80%'],
+                        content: $('#changeImageDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("changeImageDialogForm", data);
+
+                            if (data.imagePaths != null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                        + imagePaths[i] + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                        + i + '" onclick="deleteImage(this, 1)">删除</button></div>');
+                                }
+                                haveUploadCount = imagePaths.length;
+                                if (haveUploadCount > 4) {
+                                    $('#change_uploadImagesButton').hide();
+                                }
+                            } else {
+                                haveUploadCount = 0;
+                            }
+                            upload.render({
+                                elem: '#change_uploadImagesButton'
+                                ,url: '/book_stadium_online/stadium/uploadImage.do'
+                                ,accept: 'images'
+                                ,acceptMime: 'image/*'
+                                ,size: 10240
+                                ,multiple: false
+                                ,number: 1
+                                ,done: function(res){
+                                    if (res.code === 200) {
+                                        // 文件上传成功后修改图片路径
+                                        if ($('#change_image_paths').val().length === 0) {
+                                            $('#change_image_paths').val(res.data);
+                                        } else {
+                                            $('#change_image_paths').val($('#change_image_paths').val() + ',' + res.data);
+                                        }
+                                        $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
+                                            + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
+                                            + haveUploadCount + '" onclick="deleteImage(this, 1)">删除</button></div>');
+                                        haveUploadCount += 1;
+                                        if (haveUploadCount > 4) {
+                                            $('#change_uploadImagesButton').hide();
+                                        }
+                                    }
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: res.message
+                                    });
+                                }
+                                ,error: function(){
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: '文件上传失败！'
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#change_image_id').val() + ',"imagePaths":"'+ $('#change_image_paths').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"modifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            imagePaths: $('#change_image_paths').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                } else if (layEvent === 'edit') {
+                    layer.open({
+                        type: 1,
+                        title: '编辑',
+                        area:['70%','70%'],
+                        content: $('#editDialog').html(),
+                        btn: ['确定', '取消'],
+                        success: function (index, layero) {
+                            form.render();
+                            // 对于radio单选框，int型数据转成string才能正确check
+                            data.isDelete = data.isDelete + '';
+                            if (data.imagePaths != null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#editStadiumImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-right: 10px">');
+                                }
+                            }
+                            form.val("editDialogForm", data);
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#id').val() + ',"name":"' + $('#name').val() + '","address":"' + $('#address').val() +  '","description":"' + $('#description').val() + '",' +
+                                '"isDelete":' + $('input:radio[name="isDelete"]:checked').val() + '}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"modifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 如果删除了，则不显示
+                                        if ($('input:radio[name="isDelete"]:checked').val() === '1') {
+                                            // 成功后，表格重载
+                                            layui.table.reload('stadiumTable');
+                                        } else {
+                                            obj.update({
+                                                name: $('#name').val()
+                                                ,address: $('#address').val()
+                                                ,description: $('#description').val()
+                                            });
+                                        }
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'changeCategoryIds') {
+                    layer.open({
+                        type: 1,
+                        title: '修改场馆分类',
+                        area:['70%','80%'],
+                        content: $('#changeCategoryIdsDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("changeCategoryIdsDialogForm", data);
+                            // 填充change_categoryIds_table表格
+                            $.ajax({
+                                "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
+                                "data" : {"stadiumCategoryIds":data.categoryIds},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    if (json.code === 200) {
+                                        // 保存到全局变量
+                                        stadiumCategoryData = json.data;
+                                        table.render({
+                                            elem: '#change_categoryIds_table'
+                                            , data: json.data
+                                            , width: 730
+                                            , cols: [[
+                                                {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                            ],[ //表头
+                                                {type: 'numbers', title: '序号', width: 60}
+                                                , {field: 'id', title: 'id', width: 60}
+                                                , {field: 'name', title: '名称', width: 250}
+                                                , {field: 'description', title: '描述', width: 250}
+                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
+                                            ]]
+                                            , rowDrag: {
+                                                done: function(obj) {
+                                                    // 完成时（松开时）触发(soulTable插件，移动行
+                                                    stadiumCategoryData = obj.cache;
+                                                    var categoryIds = [];
+                                                    for (var row of obj.cache) {
+                                                        categoryIds.push(row.id);
+                                                    }
+                                                    $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
+                                                }
+                                            }
+                                            , done: function () {
+                                                soulTable.render(this)
+                                            }
+                                        });
+                                    } else {
+                                        // 弹出中间提示框
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message,
+                                            yes: function (index2, layero) {
+                                                if (json.code === 402) {
+                                                    // code==402说明未登录(BaseController.java定义)
+                                                    parent.location.href = "../../login.html";
+                                                }
+                                                layer.close(index2);
+                                            }
+                                        });
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "出现异常！"
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
+                            var postData = '{"id":'+ data.id + ',"categoryIds":"' + $('#change_categoryIds_categoryIds').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"modifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            categoryIds: $('#change_categoryIds_categoryIds').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                }
+            });
+
+            // 监听changeCategoryIdsTable中的工具条
+            table.on('tool(changeCategoryIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个分类吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把change_categoryIds_categoryIds输入框中的内容更新
+                        var categoryIds = $('#change_categoryIds_categoryIds').val().split(',');
+                        categoryIds.splice(objIndex, 1);
+                        if (categoryIds.length > 1) {
+                            $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
+                        } else if (categoryIds.length === 1) {
+                            $('#change_categoryIds_categoryIds').val(categoryIds);
+                        } else {
+                            $('#change_categoryIds_categoryIds').val('');
+                        }
+                        stadiumCategoryData.splice(objIndex, 1);
+                        layui.table.reload('change_categoryIds_table', {
+                            url: null,
+                            data: stadiumCategoryData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+
+            // 监听addStadiumCategoryIdsTable中的工具条
+            table.on('tool(addStadiumCategoryIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个分类吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把add_stadiumCategoryIds输入框中的内容更新
+                        var stadiumCategoryIds = $('#add_stadiumCategoryIds').val().split(',');
+                        stadiumCategoryIds.splice(objIndex, 1);
+                        if (stadiumCategoryIds.length > 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                        } else if (stadiumCategoryIds.length === 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds);
+                        } else {
+                            $('#add_stadiumCategoryIds').val('');
+                        }
+                        stadiumCategoryData.splice(objIndex, 1);
+                        layui.table.reload('add_stadiumCategoryIds_table', {
+                            url: null,
+                            data: stadiumCategoryData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        }
+
+        function checkAddForm() {
+            if ($('#add_name').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "场馆名称不能为空！"
+                });
+                return false;
+            }
+            if (($('#add_address').val() + '').length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "场馆地址必须填写！"
+                });
+                return false;
+            }
+            if ($('#add_description').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "场馆描述不能为空！"
+                });
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * 添加category
+         * @param dialogIndex     dialogIndex===1代表“添加体育场馆”，dialogIndex===2代表“修改体育场馆分类”
+         */
+        function selectStadiumCategory(dialogIndex) {
+            layer.open({
+                type: 1,
+                title: '选择场馆分类',
+                area:['760px','80%'],
+                content: $('#stadiumCategoryPageDialog').html(),
+                btn: ['添加', '取消'],
+                success: function (index, layero) {
+                    // 填充change_categoryIds_table表格
+                    table.render({
+                        elem: '#all_stadiumCategory_table'
+                        , width: 730
+                        , defaultToolbar: ['print', 'exports']
+                        , method: 'POST'
+                        , cols: [[
+                            {title: '<a class="" style="font-size: 20px; color:black;">场馆分类表</a>',align: 'center', colspan: 4} //rowspan即纵向跨越的单元格数
+                        ],[ //表头
+                            {checkbox: true, LAY_CHECKED: false}
+                            , {field: 'id', title: 'id', width: 70, sort: true}
+                            , {field: 'name', title: '名称', width: 300, sort: true}
+                            , {field: 'description', title: '描述', width: 300, sort: true}
+                        ]]
+                        , page: true
+                        , limit: 100
+                        , url: "/book_stadium_online/stadiumCategory/findByPage.do"
+                        , request: {
+                            pageName: 'pageIndex' //页码的参数名称，默认：page
+                            ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        }
+                        , response: {
+                            statusName: 'code' //规定数据状态的字段名称，默认：code
+                            ,statusCode: 200 //规定成功的状态码，默认：0
+                            ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                            ,countName: 'count' //规定数据总数的字段名称，默认：count
+                            ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                        }
+                        , parseData: function(res){ //res 即为原始返回的数据
+                            return {
+                                "code": res.code, //解析接口状态
+                                "message": res.message, //解析提示文本
+                                "count": res.count, //解析数据长度
+                                "data": res.data //解析数据列表
+                            };
+                        }
+                    });
+                },
+                yes: function (index, layero) {
+                    // 获取all_stadiumCategory_table选中的id，dialogIndex，分别更新
+                    var checkStatus = layui.table.checkStatus('all_stadiumCategory_table');
+                    if (checkStatus.data.length === 0) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "添加失败，未选择需要添加的场馆分类项！"
+                        });
+                        return false;
+                    }
+                    var stadiumCategoryIds = [];
+                    stadiumCategoryData = [];
+                    for (var value of checkStatus.data) {
+                        stadiumCategoryIds.push(value.id);
+                        stadiumCategoryData.push(value);
+                    }
+                    layer.close(index);
+                    // 再分别更新add_stadiumCategoryIds_table、change_categoryIds_table表
+                    if (dialogIndex === 1) {
+                        if ($('#add_stadiumCategoryIds').val().length === 0) {
+                            // $('#add_stadiumCategoryIds').val()为空，说明是刚打开添加页面，初始化表格
+                            table.render({
+                                elem: '#add_stadiumCategoryIds_table'
+                                , data: stadiumCategoryData
+                                , width: 760
+                                , cols: [[
+                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {type: 'numbers', title: '序号', width: 60}
+                                    , {field: 'id', title: 'id', width: 60}
+                                    , {field: 'name', title: '名称', width: 300}
+                                    , {field: 'description', title: '描述', width: 250}
+                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , rowDrag: {
+                                    done: function(obj) {
+                                        // 完成时（松开时）触发(soulTable插件，移动行
+                                        stadiumCategoryData = obj.cache;
+                                        var stadiumCategoryIds = [];
+                                        for (var row of obj.cache) {
+                                            stadiumCategoryIds.push(row.id);
+                                        }
+                                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                                    }
+                                }
+                                , done: function () {
+                                    soulTable.render(this)
+                                }
+                            });
+                        } else {
+                            // 否则reload
+                            layui.table.reload('add_stadiumCategoryIds_table', {
+                                url: null,
+                                data: stadiumCategoryData
+                            });
+                        }
+                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                    } else if (dialogIndex === 2) {
+                        $('#change_categoryIds_categoryIds').val(stadiumCategoryIds.join(','));
+                        layui.table.reload('change_categoryIds_table', {
+                            url: null,
+                            data: stadiumCategoryData
+                        });
+                    }
+                },
+                btn2: function (index, layero) {
+                    //return false 开启该代码可禁止点击该按钮关闭
+                }
+            });
+        }
+
+        /**
+         * 删除上传的图片
+         * @param index     index===0代表“添加体育场馆弹窗”，index===1代表“修改体育场馆图片弹窗”
+         */
+        function deleteImage(obj, index) {
+            var nowI = $(obj).attr("title");
+            var changeImageDivs = $('.changeImageDiv');
+            for (var i = parseInt(nowI) + 1; i < changeImageDivs.length; ++i) {
+                $(changeImageDivs.get(i)).find('button[name=deleteImageBtn]').attr("title", i - 1);
+            }
+            if (index === 0) {
+                if (changeImageDivs.length > 1) {
+                    var imagePaths = $('#add_image_paths').val().split(',');
+                    imagePaths.splice(parseInt(nowI), 1);
+                    if (imagePaths.length === 1) {
+                        $('#add_image_paths').val(imagePaths[0]);
+                    } else {
+                        $('#add_image_paths').val(imagePaths.join(','));
+                    }
+                } else {
+                    $('#add_image_paths').val('');
+                }
+                $('#add_uploadImagesButton').show();
+            } else if (index === 1) {
+                if (changeImageDivs.length > 1) {
+                    var imagePaths = $('#change_image_paths').val().split(',');
+                    imagePaths.splice(parseInt(nowI), 1);
+                    if (imagePaths.length === 1) {
+                        $('#change_image_paths').val(imagePaths[0]);
+                    } else {
+                        $('#change_image_paths').val(imagePaths.join(','));
+                    }
+                } else {
+                    $('#change_image_paths').val('');
+                }
+                $('#change_uploadImagesButton').show();
+            }
+            // 删除了一张图片
+            haveUploadCount -= 1;
+            $('.changeImageDiv')[nowI].remove();
+        }
+    </script>
+</html>

@@ -15,14 +15,14 @@ window.formArray2Data=function(array=[]){
 function initRouter() {
     var url = window.location.href;
     var router;
-    if (url.indexOf("#/") > -1) {
+    if (!url.endsWith('#/') && url.indexOf("#/") > -1) {
         router = url.substring(url.indexOf('#/') + 2);
         if (router === '') {
             router = 'index.html';
         }
         $('#iframeParent').attr('src', './' + router);
     } else {
-        $('#iframeParent').attr('src', 'html/index.html');
+        $('#iframeParent').attr('src', '/book_stadium_online/html/index.html');
         history.replaceState(null, null, '#/');
     }
     //地址栏修改不刷新的解决方案
