@@ -23,9 +23,19 @@
     </script>
     <!--每条数据的操作栏-->
     <script type="text/html" id="barDemo">
-        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
-        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改分类ID列表</a>
+        {{#  if(d.bookState === 0){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="edit" style="background-color: #1BC98E;">编辑</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="startStadiumBook">开始预约</a>
+        <a class="layui-btn layui-btn-xs" lay-event="delete" style="background-color: #FF0000;">删除</a>
+        {{#  } else if(d.bookState === 1){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="check" style="background-color: #008800;">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="modifyBookCount" style="background-color: #9F85FF;">调整预约容量</a>
+        <a class="layui-btn layui-btn-xs" lay-event="endStadiumBook" style="background-color: #FFB800;">结束预约</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-xs" lay-event="edit" style="background-color: #1BC98E;">编辑</a>
+        <a class="layui-btn layui-btn-disabled layui-btn-xs">开始预约</a>
+        <a class="layui-btn layui-btn-xs" lay-event="delete" style="background-color: #FF0000;">删除</a>
+        {{#  } }}
     </script>
     <!--(修改分类id列表弹窗中的table)每条数据的操作栏-->
     <script type="text/html" id="changeStadiumCategoryIdsBar">
@@ -181,6 +191,16 @@
     <script type="text/html" id="stadiumCategoryPageDialog">
         <table id="all_stadiumCategory_table" lay-filter="allStadiumTable"></table>
     </script>
+    <!--体育场馆表 col模板-->
+    <script type="text/html" id="bookStateTemplate">
+        {{#  if(d.bookState === 0){ }}
+        <span style="color: #000000;">暂未开始</span>
+        {{#  } else if(d.bookState === 1){ }}
+        <span style="color: #FF0000;">正在进行</span>
+        {{#  } else { }}
+        <span style="color: #0000FF;">已结束</span>
+        {{#  } }}
+    </script>
     <script>
         layui.config({
             base: '../../plugins/soulTable/',
@@ -214,13 +234,13 @@
                             ],[ //表头
                                 {checkbox: true, LAY_CHECKED: false}
                                 , {field: 'id', title: 'id', width: 70, sort: true}
-                                , {field: 'stadiumId', title: '场馆Id', width: 90, sort: true}
-                                , {field: 'bookState', title: '预约状态', width: 120, sort: true}
-                                , {field: 'maxBookCount', title: '最大预约数', width: 120, sort: true}
-                                , {field: 'nowBookCount', title: '已预约数', width: 120, sort: true}
-                                , {field: 'startTime', title: '起始时间', width: 150, sort: true}
-                                , {field: 'endTime', title: '终止时间', width: 150, sort: true}
-                                , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                                , {field: 'stadiumId', title: '场馆id', width: 90, sort: true}
+                                , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
+                                , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
+                                , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
+                                , {field: 'startTime', title: '起始时间', width: 165, sort: true}
+                                , {field: 'endTime', title: '终止时间', width: 165, sort: true}
+                                , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                             ]]
                             , page: true
                             , url: url
