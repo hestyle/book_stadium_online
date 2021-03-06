@@ -1,5 +1,8 @@
 package cn.edu.hestyle.bookstadium.entity;
 
+import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 /**
@@ -14,8 +17,10 @@ public class StadiumBook {
     /** stadium id */
     private Integer stadiumId;
     /** 起始时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date startTime;
     /** 结束时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date endTime;
     /** 预约状态，0 未开始预约，1 正在预约，2 已结束预约 */
     private Integer bookState;
@@ -28,10 +33,12 @@ public class StadiumBook {
     /**创建者*/
     private String createdUser;
     /**创建时间*/
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date createdTime;
     /**修改者*/
     private String modifiedUser;
     /**修改时间*/
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date modifiedTime;
 
     public Integer getId() {

@@ -7,7 +7,11 @@ import java.io.Serializable;
  * @param <E> 服务器端向客户端响应数据的类型
  * @author hestyle
  */
-public class ResponseResult<E> implements Serializable{
+public class ResponseResult<E> implements Serializable {
+
+	/** DATE字段转json格式 */
+	public static final String DATE_FORMAT = "yyyy-MM-dd";
+	public static final String DATETIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
 
 	private static final long serialVersionUID = -1626793180717240861L;
 

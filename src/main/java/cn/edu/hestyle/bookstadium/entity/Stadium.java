@@ -1,5 +1,8 @@
 package cn.edu.hestyle.bookstadium.entity;
 
+import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Date;
 
 /**
@@ -30,10 +33,12 @@ public class Stadium {
     /**创建者*/
     private String createdUser;
     /**创建时间*/
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date createdTime;
     /**修改者*/
     private String modifiedUser;
     /**修改时间*/
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
     private Date modifiedTime;
 
     public Integer getId() {
