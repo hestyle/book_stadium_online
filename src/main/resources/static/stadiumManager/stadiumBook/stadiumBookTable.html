@@ -88,45 +88,54 @@
             </div>
         </form>
     </script>
-    <!--单条数据的插入操作-->
+    <!--单条数据的添加操作-->
     <script type="text/html" id="addDialog">
         <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">名称</label>
-                <div class="layui-input-inline">
-                    <input id="add_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                <label class="layui-form-label" style="width: 20%;">体育场馆名称</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                    <input id="add_stadium_name" type="text" name="name" placeholder="请选择体育场馆" autocomplete="off" class="layui-input" style="width: 50%;display: inline;" disabled>
+                    <button id="select_stadium" type="button" class="layui-btn" onclick="selectStadium()">选择我的场馆</button>
+                </div>
+                <div id="add_stadium_detail" class="layui-input-inline" style="display: none;width: 70%;margin-left: 22%;margin-top: 10px;">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 6%;text-align: left;">地址</label>
+                        <div class="layui-input-inline" style="width: 30%;">
+                            <input id="add_stadium_address" type="text" name="stadiumAddress" autocomplete="off" class="layui-input" disabled>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 6%;text-align: left;">描述</label>
+                        <div class="layui-input-inline" style="width: 30%;">
+                            <textarea id="add_stadium_description" name="stadium_description" placeholder="请输入描述" class="layui-textarea" disabled></textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">地址</label>
-                <div class="layui-input-inline">
-                    <input id="add_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
+                <label class="layui-form-label" style="width: 20%;">预约状态</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input type="radio" name="add_book_state" id="gender_man" value="0" title="暂不开始" checked>
+                    <input type="radio" name="add_book_state" id="gender_women" value="1" title="开始预约">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">描述</label>
-                <div class="layui-input-inline">
-                    <textarea id="add_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                <label class="layui-form-label" style="width: 20%;">预约容量</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" style="width: 50%;" value="1" min="1">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">图片</label>
-                <div class="layui-input-inline" style="width: 400px;">
-                    <input id="add_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
-                    <button type="button" class="layui-btn" id="add_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
-                    <label style="color: red;">最多只允许上传5张！</label>
+                <label class="layui-form-label" style="width: 20%;">起始时间</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" style="width: 50%;" readonly>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">预览</label>
-                <div class="layui-input-inline" id="stadiumImages" style="width: 450px;">
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">场馆分类ID列表</label>
-                <div class="layui-input-inline">
-                    <input id="add_stadiumCategoryIds" type="text" name="stadiumCategoryIds" placeholder="请选择场馆分类ID！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button id="select_stadiumCategory" type="button" class="layui-btn" onclick="selectStadiumCategory(1)">选择场馆分类</button>
+                <label class="layui-form-label" style="width: 20%;">终止时间</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" style="width: 50%;">
                 </div>
             </div>
             <table id="add_stadiumCategoryIds_table" lay-filter="addStadiumCategoryIdsTable"></table>
@@ -162,30 +171,9 @@
             </div>
         </form>
     </script>
-    <!--单条数据修改分类ID列表-->
-    <script type="text/html" id="changeCategoryIdsDialog">
-        <form id="change_categoryIds_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeCategoryIdsDialogForm">
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">id</label>
-                <div class="layui-input-inline">
-                    <input id="change_categoryIds_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">名称</label>
-                <div class="layui-input-inline">
-                    <input id="change_categoryIds_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">分类ID列表</label>
-                <div class="layui-input-inline">
-                    <input id="change_categoryIds_categoryIds" type="text" name="categoryIds" placeholder="请输入分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button type="button" class="layui-btn" id="change_categoryId_Button" onclick="selectStadiumCategory(2)">添加场馆分类</button>
-                </div>
-            </div>
-            <table id="change_categoryIds_table" lay-filter="changeCategoryIdsTable"></table>
-        </form>
+    <!--选择体育场馆-->
+    <script type="text/html" id="selectStadiumDialog">
+        <table id="select_stadium_table" lay-filter="selectStadiumTable"></table>
     </script>
     <!--场馆分类page列表-->
     <script type="text/html" id="stadiumCategoryPageDialog">
@@ -208,7 +196,7 @@
         }).extend({
             soulTable: 'soulTable/soulTable.slim'
         });
-        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable'];
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable', 'laydate'];
         // stadiumCategoryIds对应的分类
         var stadiumCategoryData = [];
         // 上传图片
@@ -303,53 +291,28 @@
                                 stadiumCategoryData = [];
                                 haveUploadCount = 0;
                                 form.render();
-                                upload.render({
-                                    elem: '#add_uploadImagesButton'
-                                    ,url: '/book_stadium_online/stadium/uploadImage.do'
-                                    ,accept: 'images'
-                                    ,acceptMime: 'image/*'
-                                    ,size: 10240
-                                    ,multiple: false
-                                    ,number: 1
-                                    ,done: function(res){
-                                        if (res.code === 200) {
-                                            // 文件上传成功后修改图片路径
-                                            if ($('#add_image_paths').val().length === 0) {
-                                                $('#add_image_paths').val(res.data);
-                                            } else {
-                                                $('#add_image_paths').val($('#add_image_paths').val() + ',' + res.data);
-                                            }
-                                            $('#stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
-                                                + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
-                                                + haveUploadCount + '" onclick="deleteImage(this, 0)">删除</button></div>');
-                                            haveUploadCount += 1;
-                                            if (haveUploadCount > 4) {
-                                                $('#add_uploadImagesButton').hide();
-                                            }
-                                        }
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: res.message
-                                        });
-                                    }
-                                    ,error: function(){
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: '文件上传失败！'
-                                        });
-                                    }
+                                // 自定义日期格式
+                                laydate.render({
+                                    elem: '#add_start_time'
+                                    ,type: 'datetime'
+                                    ,format: 'yyyy-MM-dd HH:mm:ss'
+                                });
+                                laydate.render({
+                                    elem: '#add_end_time'
+                                    ,type: 'datetime'
+                                    ,format: 'yyyy-MM-dd HH:mm:ss'
                                 });
                             },
                             yes: function (index, layero) {
                                 if (checkAddForm() === false) {
                                     return false;
                                 }
-                                var url ="/book_stadium_online/stadium/stadiumManagerAdd.do";
-                                var postData = '{"name":"' + $('#add_name').val() + '","address":"' + $('#add_address').val() + '","description":"' +
-                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","categoryIds":"' + $('#add_stadiumCategoryIds').val() + '"}';
+                                var url ="/book_stadium_online/stadiumBook/stadiumManagerAdd.do";
+                                var postData = '{"stadiumId":"' + $('#add_stadium_id').val() + '","bookState":"' + $('input[name=add_book_state]:checked').val() + '","maxBookCount":"' +
+                                    $('#add_max_book_count').val() + '","startTime":"' + $('#add_start_time').val() + '","endTime":"' + $('#add_end_time').val() + '"}';
                                 $.ajax({
                                     "url" : url,
-                                    "data" : {"stadiumData":postData},
+                                    "data" : {"stadiumBookData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "success" : function (json) {
@@ -360,7 +323,7 @@
                                         if (json.code === 200) {
                                             layer.close(index);
                                             // 成功后，表格重载
-                                            layui.table.reload('stadiumTable');
+                                            layui.table.reload('stadiumBookTable');
                                         }
                                     },
                                     "error" : function () {
@@ -765,59 +728,56 @@
         }
 
         function checkAddForm() {
-            if ($('#add_name').val().length === 0) {
+            if ($('#add_stadium_id').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "场馆名称不能为空！"
+                    content: "请选择需要添加预约的体育场馆！"
                 });
                 return false;
             }
-            if (($('#add_address').val() + '').length === 0) {
+            if ($('#add_start_time').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "场馆地址必须填写！"
+                    content: "请设置场馆预约时间段起始时间！"
                 });
                 return false;
             }
-            if ($('#add_description').val().length === 0) {
+            if ($('#add_end_time').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "场馆描述不能为空！"
+                    content: "请设置场馆预约时间段终止时间！"
                 });
                 return false;
             }
             return true;
         }
 
-        /**
-         * 添加category
-         * @param dialogIndex     dialogIndex===1代表“添加体育场馆”，dialogIndex===2代表“修改体育场馆分类”
-         */
-        function selectStadiumCategory(dialogIndex) {
+        function selectStadium() {
             layer.open({
                 type: 1,
-                title: '选择场馆分类',
-                area:['760px','80%'],
-                content: $('#stadiumCategoryPageDialog').html(),
-                btn: ['添加', '取消'],
+                title: '选择体育场馆',
+                area:['70%','80%'],
+                content: $('#selectStadiumDialog').html(),
+                btn: ['确定', '取消'],
                 success: function (index, layero) {
-                    // 填充change_categoryIds_table表格
                     table.render({
-                        elem: '#all_stadiumCategory_table'
-                        , width: 730
+                        elem: '#select_stadium_table'
                         , defaultToolbar: ['print', 'exports']
                         , method: 'POST'
                         , cols: [[
-                            {title: '<a class="" style="font-size: 20px; color:black;">场馆分类表</a>',align: 'center', colspan: 4} //rowspan即纵向跨越的单元格数
+                            {title: '<a class="" style="font-size: 20px; color:black;">我的体育场馆</a>',align: 'center', colspan: 7} //rowspan即纵向跨越的单元格数
                         ],[ //表头
-                            {checkbox: true, LAY_CHECKED: false}
+                            {type:'radio'}
                             , {field: 'id', title: 'id', width: 70, sort: true}
-                            , {field: 'name', title: '名称', width: 300, sort: true}
-                            , {field: 'description', title: '描述', width: 300, sort: true}
+                            , {field: 'name', title: '名称', width: 200, sort: true}
+                            , {field: 'address', title: '地址', width: 200, sort: true}
+                            , {field: 'description', title: '描述', width: 200, sort: true}
+                            , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                            , {field: 'imagePaths', title: '图片', width: 150, sort: true}
                         ]]
                         , page: true
-                        , limit: 100
-                        , url: "/book_stadium_online/stadiumCategory/findByPage.do"
+                        , limit: 200
+                        , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
                         , request: {
                             pageName: 'pageIndex' //页码的参数名称，默认：page
                             ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
@@ -840,116 +800,27 @@
                     });
                 },
                 yes: function (index, layero) {
-                    // 获取all_stadiumCategory_table选中的id，dialogIndex，分别更新
-                    var checkStatus = layui.table.checkStatus('all_stadiumCategory_table');
+                    // 获取select_stadium_table选中的id
+                    var checkStatus = layui.table.checkStatus('select_stadium_table');
                     if (checkStatus.data.length === 0) {
                         layer.open({
                             title: "提示信息",
-                            content: "添加失败，未选择需要添加的场馆分类项！"
+                            content: "未选择体育场馆！"
                         });
                         return false;
                     }
-                    var stadiumCategoryIds = [];
-                    stadiumCategoryData = [];
-                    for (var value of checkStatus.data) {
-                        stadiumCategoryIds.push(value.id);
-                        stadiumCategoryData.push(value);
-                    }
+                    var stadiumData = checkStatus.data[0];
+                    $('#add_stadium_id').val(stadiumData.id);
+                    $('#add_stadium_name').val(stadiumData.name);
+                    $('#add_stadium_address').val(stadiumData.address);
+                    $('#add_stadium_description').val(stadiumData.description);
+                    $('#add_stadium_detail').show();
                     layer.close(index);
-                    // 再分别更新add_stadiumCategoryIds_table、change_categoryIds_table表
-                    if (dialogIndex === 1) {
-                        if ($('#add_stadiumCategoryIds').val().length === 0) {
-                            // $('#add_stadiumCategoryIds').val()为空，说明是刚打开添加页面，初始化表格
-                            table.render({
-                                elem: '#add_stadiumCategoryIds_table'
-                                , data: stadiumCategoryData
-                                , width: 760
-                                , cols: [[
-                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
-                                ],[ //表头
-                                    {type: 'numbers', title: '序号', width: 60}
-                                    , {field: 'id', title: 'id', width: 60}
-                                    , {field: 'name', title: '名称', width: 300}
-                                    , {field: 'description', title: '描述', width: 250}
-                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
-                                ]]
-                                , rowDrag: {
-                                    done: function(obj) {
-                                        // 完成时（松开时）触发(soulTable插件，移动行
-                                        stadiumCategoryData = obj.cache;
-                                        var stadiumCategoryIds = [];
-                                        for (var row of obj.cache) {
-                                            stadiumCategoryIds.push(row.id);
-                                        }
-                                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
-                                    }
-                                }
-                                , done: function () {
-                                    soulTable.render(this)
-                                }
-                            });
-                        } else {
-                            // 否则reload
-                            layui.table.reload('add_stadiumCategoryIds_table', {
-                                url: null,
-                                data: stadiumCategoryData
-                            });
-                        }
-                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
-                    } else if (dialogIndex === 2) {
-                        $('#change_categoryIds_categoryIds').val(stadiumCategoryIds.join(','));
-                        layui.table.reload('change_categoryIds_table', {
-                            url: null,
-                            data: stadiumCategoryData
-                        });
-                    }
                 },
                 btn2: function (index, layero) {
                     //return false 开启该代码可禁止点击该按钮关闭
                 }
             });
-        }
-
-        /**
-         * 删除上传的图片
-         * @param index     index===0代表“添加体育场馆弹窗”，index===1代表“修改体育场馆图片弹窗”
-         */
-        function deleteImage(obj, index) {
-            var nowI = $(obj).attr("title");
-            var changeImageDivs = $('.changeImageDiv');
-            for (var i = parseInt(nowI) + 1; i < changeImageDivs.length; ++i) {
-                $(changeImageDivs.get(i)).find('button[name=deleteImageBtn]').attr("title", i - 1);
-            }
-            if (index === 0) {
-                if (changeImageDivs.length > 1) {
-                    var imagePaths = $('#add_image_paths').val().split(',');
-                    imagePaths.splice(parseInt(nowI), 1);
-                    if (imagePaths.length === 1) {
-                        $('#add_image_paths').val(imagePaths[0]);
-                    } else {
-                        $('#add_image_paths').val(imagePaths.join(','));
-                    }
-                } else {
-                    $('#add_image_paths').val('');
-                }
-                $('#add_uploadImagesButton').show();
-            } else if (index === 1) {
-                if (changeImageDivs.length > 1) {
-                    var imagePaths = $('#change_image_paths').val().split(',');
-                    imagePaths.splice(parseInt(nowI), 1);
-                    if (imagePaths.length === 1) {
-                        $('#change_image_paths').val(imagePaths[0]);
-                    } else {
-                        $('#change_image_paths').val(imagePaths.join(','));
-                    }
-                } else {
-                    $('#change_image_paths').val('');
-                }
-                $('#change_uploadImagesButton').show();
-            }
-            // 删除了一张图片
-            haveUploadCount -= 1;
-            $('.changeImageDiv')[nowI].remove();
         }
     </script>
 </html>

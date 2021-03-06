@@ -13,6 +13,12 @@ import java.util.List;
 @Mapper
 public interface StadiumBookMapper {
     /**
+     * 添加场馆预约
+     * @param stadiumBook   stadiumBook
+     */
+    void add(StadiumBook stadiumBook);
+
+    /**
      * stadiumManager分页查询所有Stadium的StadiumBook
      * @param stadiumManagerId      stadiumManagerId
      * @param beginIndex            id升序排列

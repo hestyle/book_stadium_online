@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumBookMapper">
+    <!--添加场馆预约-->
+    <!--void add(StadiumBook stadiumBook);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumBook" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium_book`(`stadium_id`, `start_time`, `end_time`, `book_state`, `max_book_count`, `now_book_count`, `created_time`, `created_user`)
+        VALUES (#{stadiumId}, #{startTime}, #{endTime}, #{bookState}, #{maxBookCount}, #{nowBookCount}, #{createdTime}, #{createdUser})
+    </insert>
     <!--stadiumManager分页查询所有Stadium的StadiumBook-->
     <!--List<StadiumBook> stadiumManagerFindAllByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
     <select id="stadiumManagerFindAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">
