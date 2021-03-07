@@ -50,6 +50,12 @@ public class StadiumController extends BaseController {
     @Autowired
     private IStadiumService stadiumService;
 
+    @PostMapping("/findById.do")
+    public ResponseResult<Stadium> handleFindById(@RequestParam(name = "stadiumId") Integer stadiumId, HttpSession session) {
+        Stadium stadium = stadiumService.findById(stadiumId);
+        return new ResponseResult<Stadium>(SUCCESS, "查询成功！", stadium);
+    }
+
     @PostMapping("/stadiumManagerAdd.do")
     public ResponseResult<Void> handleStadiumManagerAdd(@RequestParam(name = "stadiumData") String stadiumData, HttpSession session) {
         // 判断是否登录

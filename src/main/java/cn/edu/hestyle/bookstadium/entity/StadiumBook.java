@@ -6,29 +6,29 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
 
 /**
- * Stadium实体类
+ * StadiumBook 实体类
  * @author hestyle
  * @projectName book_stadium
- * @date 2021/3/4 9:45 上午
+ * @date 2021/3/6 10:48 上午
  */
-public class Stadium {
-    /**id*/
+public class StadiumBook {
+    /** id */
     private Integer id;
-    /**manager id*/
-    private Integer managerId;
-    /**category id*/
-    private String categoryIds;
-    /**场馆名*/
-    private String name;
-    /**地址*/
-    private String address;
-    /**描述*/
-    private String description;
-    /**照片*/
-    private String imagePaths;
-    /**是否认证，0未认证，1已认证*/
-    private Integer isAuthenticate;
-    /**是否删除，0未删除，1已删除，2因违规被拉黑、屏蔽*/
+    /** stadium id */
+    private Integer stadiumId;
+    /** 起始时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
+    private Date startTime;
+    /** 结束时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
+    private Date endTime;
+    /** 预约状态，0 未开始预约，1 正在预约，2 已结束预约 */
+    private Integer bookState;
+    /** 最大可预约数量 */
+    private Integer maxBookCount;
+    /** 已经预约的数量 */
+    private Integer nowBookCount;
+    /**是否删除，0未删除，1已删除*/
     private Integer isDelete;
     /**创建者*/
     private String createdUser;
@@ -49,60 +49,52 @@ public class Stadium {
         this.id = id;
     }
 
-    public Integer getManagerId() {
-        return managerId;
+    public Integer getStadiumId() {
+        return stadiumId;
     }
 
-    public void setManagerId(Integer managerId) {
-        this.managerId = managerId;
+    public void setStadiumId(Integer stadiumId) {
+        this.stadiumId = stadiumId;
     }
 
-    public String getCategoryIds() {
-        return categoryIds;
+    public Date getStartTime() {
+        return startTime;
     }
 
-    public void setCategoryIds(String categoryIds) {
-        this.categoryIds = categoryIds;
+    public void setStartTime(Date startTime) {
+        this.startTime = startTime;
     }
 
-    public String getName() {
-        return name;
+    public Date getEndTime() {
+        return endTime;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEndTime(Date endTime) {
+        this.endTime = endTime;
     }
 
-    public String getAddress() {
-        return address;
+    public Integer getBookState() {
+        return bookState;
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public void setBookState(Integer bookState) {
+        this.bookState = bookState;
     }
 
-    public String getDescription() {
-        return description;
+    public Integer getMaxBookCount() {
+        return maxBookCount;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setMaxBookCount(Integer maxBookCount) {
+        this.maxBookCount = maxBookCount;
     }
 
-    public String getImagePaths() {
-        return imagePaths;
+    public Integer getNowBookCount() {
+        return nowBookCount;
     }
 
-    public void setImagePaths(String imagePaths) {
-        this.imagePaths = imagePaths;
-    }
-
-    public Integer getIsAuthenticate() {
-        return isAuthenticate;
-    }
-
-    public void setIsAuthenticate(Integer isAuthenticate) {
-        this.isAuthenticate = isAuthenticate;
+    public void setNowBookCount(Integer nowBookCount) {
+        this.nowBookCount = nowBookCount;
     }
 
     public Integer getIsDelete() {
@@ -147,15 +139,14 @@ public class Stadium {
 
     @Override
     public String toString() {
-        return "Stadium{" +
+        return "StadiumBook{" +
                 "id=" + id +
-                ", managerId=" + managerId +
-                ", categoryIds='" + categoryIds + '\'' +
-                ", name='" + name + '\'' +
-                ", address='" + address + '\'' +
-                ", description='" + description + '\'' +
-                ", imagePaths='" + imagePaths + '\'' +
-                ", isAuthenticate=" + isAuthenticate +
+                ", stadiumId=" + stadiumId +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", bookState=" + bookState +
+                ", maxBookCount=" + maxBookCount +
+                ", nowBookCount=" + nowBookCount +
                 ", isDelete=" + isDelete +
                 ", createdUser='" + createdUser + '\'' +
                 ", createdTime=" + createdTime +

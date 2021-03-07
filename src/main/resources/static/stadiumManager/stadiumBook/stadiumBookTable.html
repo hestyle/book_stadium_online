@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>场馆预约</title>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
+</head>
+    <body>
+        <table id="stadiumBookTable" lay-filter="test"></table>
+    </body>
+    <!--顶部操作栏-->
+    <script type="text/html" id="toolbarDemo">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-sm" lay-event="delete" style="background-color: #FF0000;">删除</button>
+        </div>
+    </script>
+    <!--每条数据的操作栏-->
+    <script type="text/html" id="barDemo">
+        {{#  if(d.bookState === 0){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="edit" style="background-color: #1BC98E;">编辑</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="startStadiumBook">开始预约</a>
+        <a class="layui-btn layui-btn-xs" lay-event="delete" style="background-color: #FF0000;">删除</a>
+        {{#  } else if(d.bookState === 1){ }}
+        <a class="layui-btn layui-btn-xs" lay-event="check" style="background-color: #008800;">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="modifyMaxBookCount" style="background-color: #9F85FF;">调整预约容量</a>
+        <a class="layui-btn layui-btn-xs" lay-event="endStadiumBook" style="background-color: #FFB800;">结束预约</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-xs" lay-event="edit" style="background-color: #1BC98E;">编辑</a>
+        <a class="layui-btn layui-btn-disabled layui-btn-xs">开始预约</a>
+        <a class="layui-btn layui-btn-xs" lay-event="delete" style="background-color: #FF0000;">删除</a>
+        {{#  } }}
+    </script>
+    <!--(修改分类id列表弹窗中的table)每条数据的操作栏-->
+    <script type="text/html" id="changeStadiumCategoryIdsBar">
+        <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+    </script>
+    <!--单条数据的添加操作-->
+    <script type="text/html" id="addDialog">
+        <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">体育场馆名称</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                    <input id="add_stadium_name" type="text" name="name" placeholder="请选择体育场馆" autocomplete="off" class="layui-input" style="width: 50%;display: inline;" disabled>
+                    <button id="select_stadium" type="button" class="layui-btn" onclick="selectStadium()">选择我的场馆</button>
+                </div>
+                <div id="add_stadium_detail" class="layui-input-inline" style="display: none;width: 70%;margin-left: 22%;margin-top: 10px;">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 6%;text-align: left;">地址</label>
+                        <div class="layui-input-inline" style="width: 30%;">
+                            <input id="add_stadium_address" type="text" name="stadiumAddress" autocomplete="off" class="layui-input" disabled>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 6%;text-align: left;">描述</label>
+                        <div class="layui-input-inline" style="width: 30%;">
+                            <textarea id="add_stadium_description" name="stadium_description" placeholder="请输入描述" class="layui-textarea" disabled></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">预约状态</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_book_state_0" type="radio" name="add_book_state" value="0" title="暂不开始" checked>
+                    <input id="add_book_state_1" type="radio" name="add_book_state" value="1" title="开始预约">
+                    <input id="add_book_state_2" type="radio" name="add_book_state" value="2" title="结束预约" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">预约容量</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" style="width: 50%;" value="1" min="1">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">起始时间</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" style="width: 50%;" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">终止时间</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="add_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" style="width: 50%;" readonly>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--每条数据的编辑操作-->
+    <script type="text/html" id="editDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 700px;" lay-filter="editDialogForm">
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">体育场馆信息</label>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">体育场馆名称</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                        <input id="edit_stadium_name" type="text" name="name" placeholder="体育场馆名称" autocomplete="off" class="layui-input" style="display: inline;" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">地址</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_stadium_address" type="text" name="stadiumAddress" placeholder="体育场馆地址" autocomplete="off" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">描述</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <textarea id="edit_stadium_description" name="stadium_description" placeholder="体育场馆描述" class="layui-textarea" disabled></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">图片</label>
+                    <div id="edit_stadium_image" class="layui-input-inline" style="width: 75%;">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">场馆预约信息</label>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约状态</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_book_state_0" type="radio" name="edit_book_state" value="0" title="暂不开始" checked>
+                        <input id="edit_book_state_1" type="radio" name="edit_book_state" value="1" title="开始预约">
+                        <input id="edit_book_state_2" type="radio" name="edit_book_state" value="2" title="结束预约">
+                        <input id="edit_stadiumBook_id" type="text" name="id" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约容量</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" value="1" min="1">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">起始时间</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">终止时间</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="edit_is_delete">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">删除</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="edit_is_delete_0" type="radio" name="edit_is_delete" value="0" title="未删除" checked>
+                        <input id="edit_is_delete_1" type="radio" name="edit_is_delete" value="1" title="已删除">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--单条数据调整预约容量-->
+    <script type="text/html" id="modifyMaxBookCountDialog">
+        <form id="modifyMaxBookCount_form" class="layui-form" action="#" style="padding: 20px;width: 400px;" lay-filter="modifyMaxBookCountDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;display: inline;">id</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_id" type="text" name="id" placeholder="场馆预约id" autocomplete="off" class="layui-input" style="display: inline;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;display: inline;">预约容量</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_maxBookCount" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" style="display: inline;">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;display: inline;">已预约数</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_nowBookCount" type="number" name="nowBookCount" placeholder="当前预约数量" autocomplete="off" class="layui-input" style="display: inline;" disabled>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--选择体育场馆-->
+    <script type="text/html" id="selectStadiumDialog">
+        <table id="select_stadium_table" lay-filter="selectStadiumTable"></table>
+    </script>
+    <!--场馆分类page列表-->
+    <script type="text/html" id="stadiumCategoryPageDialog">
+        <table id="all_stadiumCategory_table" lay-filter="allStadiumTable"></table>
+    </script>
+    <!--体育场馆表 col模板-->
+    <script type="text/html" id="bookStateTemplate">
+        {{#  if(d.bookState === 0){ }}
+        <span style="color: #000000;">暂未开始</span>
+        {{#  } else if(d.bookState === 1){ }}
+        <span style="color: #FF0000;">正在进行</span>
+        {{#  } else { }}
+        <span style="color: #0000FF;">已结束</span>
+        {{#  } }}
+    </script>
+    <script>
+        layui.config({
+            base: '../../plugins/soulTable/',
+            version: 'v1.5.20'
+        }).extend({
+            soulTable: 'soulTable/soulTable.slim'
+        });
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable', 'laydate'];
+        function mounted() {
+            table.render({
+                elem: '#stadiumBookTable'
+                , toolbar: '#toolbarDemo'
+                , height: 550
+                , defaultToolbar: ['print', 'exports']
+                , method: 'POST'
+                , cols: [[
+                    {title: '<a class="" style="font-size: 20px; color:black;">体育场馆预约表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                ],[ //表头
+                    {checkbox: true, LAY_CHECKED: false}
+                    , {field: 'id', title: 'id', width: 70, sort: true}
+                    , {field: 'stadiumId', title: '场馆id', width: 90, sort: true}
+                    , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
+                    , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
+                    , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
+                    , {field: 'startTime', title: '起始时间', width: 165, sort: true}
+                    , {field: 'endTime', title: '终止时间', width: 165, sort: true}
+                    , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                ]]
+                , page: true
+                , url: "/book_stadium_online/stadiumBook/stadiumManagerFindAllByPage.do"
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , response: {
+                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                    ,statusCode: 200 //规定成功的状态码，默认：0
+                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                }
+                , parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "message": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+            //监听事件
+            table.on('toolbar(test)', function (obj) {
+                var checkStatus = table.checkStatus(obj.config.id);
+                switch (obj.event) {
+                    case 'add':
+                        layer.open({
+                            type: 1,
+                            title: '添加',
+                            area:['70%','80%'],
+                            content: $('#addDialog').html(),
+                            btn: ['确定', '取消'],
+                            success: function (index, layero) {
+                                // 清空缓存
+                                form.render();
+                                // 自定义日期格式
+                                laydate.render({
+                                    elem: '#add_start_time'
+                                    ,type: 'datetime'
+                                    ,format: 'yyyy-MM-dd HH:mm:ss'
+                                });
+                                laydate.render({
+                                    elem: '#add_end_time'
+                                    ,type: 'datetime'
+                                    ,format: 'yyyy-MM-dd HH:mm:ss'
+                                });
+                            },
+                            yes: function (index, layero) {
+                                if (checkAddForm() === false) {
+                                    return false;
+                                }
+                                var url ="/book_stadium_online/stadiumBook/stadiumManagerAdd.do";
+                                var postData = '{"stadiumId":"' + $('#add_stadium_id').val() + '","bookState":"' + $('input[name=add_book_state]:checked').val() + '","maxBookCount":"' +
+                                    $('#add_max_book_count').val() + '","startTime":"' + $('#add_start_time').val() + '","endTime":"' + $('#add_end_time').val() + '"}';
+                                $.ajax({
+                                    "url" : url,
+                                    "data" : {"stadiumBookData":postData},
+                                    "type" : "POST",
+                                    "dataType" : "json",
+                                    "success" : function (json) {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                        if (json.code === 200) {
+                                            layer.close(index);
+                                            // 成功后，表格重载
+                                            layui.table.reload('stadiumBookTable');
+                                        }
+                                    },
+                                    "error" : function () {
+                                        // 弹出中间提示框
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: "保存失败，出现未知异常！"
+                                        });
+                                    }
+                                });
+                            },
+                            btn2: function (index, layero) {
+                                //return false 开启该代码可禁止点击该按钮关闭
+                            }
+                        });
+                        break;
+                    case 'delete':
+                        // 拼接选中行的id
+                        var postData = '[';
+                        for (var value of checkStatus.data) {
+                            if (postData.length > 1) {
+                                postData += ',"' + value.id + '"';
+                            } else {
+                                postData += '"' + value.id + '"';
+                            }
+                        }
+                        postData += ']';
+                        // 判断是否选中待删除行
+                        if (postData.length === 2) {
+                            layer.open({
+                                title: "提示信息",
+                                content: "请选中需要删除的数据！"
+                            });
+                            return;
+                        }
+                        layer.confirm('删除选中行？', function (index) {
+                            var url ="/book_stadium_online/stadiumBook/stadiumManagerDeleteByIdList.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"idListJsonString":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口、刷新表格
+                                        layer.close(index);
+                                        table.reload('stadiumBookTable');
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                            layer.close(index);
+                        });
+                        break;
+                }
+            });
+
+            //监听工具条
+            table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'edit') {
+                    layer.open({
+                        type: 1,
+                        title: '编辑场馆预约',
+                        area:['770px','80%'],
+                        content: $('#editDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            form.render();
+                            if (data.bookState === 0) {
+                                $('#edit_book_state_0').attr("checked", "checked");
+                            } else if (data.bookState === 1) {
+                                $('#edit_book_state_1').attr("checked", "checked");
+                            } else {
+                                $('#edit_book_state_0').attr("disabled", "disabled");
+                                $('#edit_book_state_1').attr("disabled", "disabled");
+                                $('#edit_book_state_2').attr("checked", "checked");
+                            }
+                            if (data.isDelete === 0) {
+                                $('#edit_is_delete_0').attr("checked", "checked");
+                            } else {
+                                $('#edit_is_delete_1').attr("checked", "checked");
+                            }
+                            form.val("editDialogForm", data);
+                            // 自定义日期格式
+                            laydate.render({
+                                elem: '#edit_start_time'
+                                ,type: 'datetime'
+                                ,format: 'yyyy-MM-dd HH:mm:ss'
+                            });
+                            laydate.render({
+                                elem: '#edit_end_time'
+                                ,type: 'datetime'
+                                ,format: 'yyyy-MM-dd HH:mm:ss'
+                            });
+                            $.ajax({
+                                "url" : "/book_stadium_online/stadium/findById.do",
+                                "data" : {"stadiumId":data.stadiumId},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    if (json.code === 200) {
+                                        // 展示场馆信息
+                                        $('#edit_stadium_name').val(json.data.name);
+                                        $('#edit_stadium_address').val(json.data.address);
+                                        $('#edit_stadium_description').val(json.data.description);
+                                        if (json.data.imagePaths != null && json.data.imagePaths.length !== 0) {
+                                            var imagePaths = json.data.imagePaths.split(',');
+                                            for (var i in imagePaths) {
+                                                $('#edit_stadium_image').append('<img src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-left: 10px;"/>');
+                                            }
+                                        }
+                                        layer.close(index);
+                                    } else {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#edit_stadiumBook_id').val() + ',"bookState":"' + $('input[name=edit_book_state]:checked').val() + '","maxBookCount":"' + $('#edit_max_book_count').val()
+                                + '","startTime":"' + $('#edit_start_time').val() + '","endTime":"' + $('#edit_end_time').val() + '",' + '"isDelete":' + $('input:radio[name=edit_is_delete]:checked').val() + '}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumBookModifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 如果改了bookState、isDelete，则刷新整个表格
+                                        if ($('input:radio[name=edit_is_delete]:checked').val() !== data.isDelete || $('input[name=edit_book_state]:checked').val() !== data.bookState) {
+                                            // 成功后，表格重载
+                                            layui.table.reload('stadiumBookTable');
+                                        } else {
+                                            obj.update({
+                                                bookState: $('input[name=edit_book_state]:checked').val()
+                                                ,maxBookCount: $('#edit_max_book_count').val()
+                                                ,startTime: $('#edit_start_time').val()
+                                                ,endTime: $('#edit_end_time').val()
+                                            });
+                                        }
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'check') {
+                    layer.open({
+                        type: 1,
+                        title: '查看场馆预约',
+                        area:['770px','80%'],
+                        content: $('#editDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            if (data.bookState === 0) {
+                                $('#edit_book_state_0').attr("checked", "checked");
+                                $('#edit_book_state_1').attr("disabled", "disabled");
+                                $('#edit_book_state_2').attr("disabled", "disabled");
+                            } else if (data.bookState === 1) {
+                                $('#edit_book_state_0').attr("disabled", "disabled");
+                                $('#edit_book_state_1').attr("checked", "checked");
+                                $('#edit_book_state_2').attr("disabled", "disabled");
+                            } else {
+                                $('#edit_book_state_0').attr("disabled", "disabled");
+                                $('#edit_book_state_1').attr("disabled", "disabled");
+                                $('#edit_book_state_2').attr("checked", "checked");
+                            }
+                            if (data.isDelete === 0) {
+                                $('#edit_is_delete_0').attr("checked", "checked");
+                                $('#edit_is_delete_1').attr("disabled", "disabled");
+                            } else {
+                                $('#edit_is_delete_0').attr("disabled", "disabled");
+                                $('#edit_is_delete_1').attr("checked", "checked");
+                            }
+                            form.val("editDialogForm", data);
+                            $('#edit_max_book_count').attr("disabled", "disabled");
+                            $('#edit_start_time').attr("disabled", "disabled");
+                            $('#edit_end_time').attr("disabled", "disabled");
+                            $.ajax({
+                                "url" : "/book_stadium_online/stadium/findById.do",
+                                "data" : {"stadiumId":data.stadiumId},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    if (json.code === 200) {
+                                        // 展示场馆信息
+                                        $('#edit_stadium_name').val(json.data.name);
+                                        $('#edit_stadium_address').val(json.data.address);
+                                        $('#edit_stadium_description').val(json.data.description);
+                                        if (json.data.imagePaths != null && json.data.imagePaths.length !== 0) {
+                                            var imagePaths = json.data.imagePaths.split(',');
+                                            for (var i in imagePaths) {
+                                                $('#edit_stadium_image').append('<img src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-left: 10px;"/>');
+                                            }
+                                        }
+                                        layer.close(index);
+                                    } else {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        },
+                    });
+                } else if (layEvent === 'startStadiumBook') {
+                    if (data.bookState > 2) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约已结束，无法再次开启预约！"
+                        });
+                        return false;
+                    } else if (data.bookState === 2) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约正在进行预约！"
+                        });
+                        return false;
+                    }
+                    layer.confirm('是否开启该场馆预约？', function(index){
+                        var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                        var postData = '{"id":'+ data.id + ',"bookState":' + 1 + '}';
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"stadiumBookModifyData":postData},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "success" : function (json) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: json.message
+                                });
+                                if (json.code === 200) {
+                                    // 如果改了bookStat，则刷新整个表格
+                                    layui.table.reload('stadiumBookTable');
+                                }
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "保存失败，出现未知异常！"
+                                });
+                            }
+                        });
+                        layer.close(index);
+                    });
+
+                } else if (layEvent === 'endStadiumBook') {
+                    if (data.bookState > 2) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约已结束，无需再次结束！"
+                        });
+                        return false;
+                    } else if (data.bookState < 1) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约未开始预约，无需结束预约！"
+                        });
+                        return false;
+                    }
+                    layer.confirm('是否结束该场馆预约？<label style="display:block; color: red;">该操作不可逆！无法再次开始预约！</label>', function(index){
+                        var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                        var postData = '{"id":'+ data.id + ',"bookState":' + 2 + '}';
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"stadiumBookModifyData":postData},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "success" : function (json) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: json.message
+                                });
+                                if (json.code === 200) {
+                                    // 如果改了bookStat，则刷新整个表格
+                                    layui.table.reload('stadiumBookTable');
+                                }
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "保存失败，出现未知异常！"
+                                });
+                            }
+                        });
+                        layer.close(index);
+                    });
+                } else if (layEvent === 'modifyMaxBookCount') {
+                    layer.open({
+                        type: 1,
+                        title: '调整场馆预约容量',
+                        area:['460px','60%'],
+                        content: $('#modifyMaxBookCountDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            form.render();
+                            form.val("modifyMaxBookCountDialogForm", data);
+                            if (data.nowBookCount != null && data.nowBookCount > 0) {
+                                $('#modifyMaxBookCount_maxBookCount').attr('min', data.nowBookCount);
+                            } else {
+                                $('#modifyMaxBookCount_maxBookCount').attr('min', 1);
+                            }
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#modifyMaxBookCount_id').val() + ',"maxBookCount":' + $('#modifyMaxBookCount_maxBookCount').val() + '}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumBookModifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        obj.update({
+                                            maxBookCount: $('#modifyMaxBookCount_maxBookCount').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'delete') {
+                    if (data.bookState === 1) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "删除失败，该预约正在进行，无法进行删除操作！"
+                        });
+                        return false;
+                    }
+                    if (data.bookState > 1 && data.nowBookCount > 0) {
+                        var endTime = new Date(Date.parse(data.endTime.replace(/-/g, "/")));
+                        var nowTime = new Date();
+                        if (endTime > nowTime) {
+                            layer.open({
+                                title: "提示信息",
+                                content: "删除失败，该预约有用户已预约，且时间段的终点时刻还未到达，无法进行删除操作！"
+                            });
+                            return false;
+                        }
+                    }
+                    layer.confirm('确定删除该场馆预约？<label style="display:block; color: red;">删除后无法恢复！</label>', function(index){
+                        var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                        var postData = '{"id":'+ data.id + ',"isDelete":' + 1 + '}';
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"stadiumBookModifyData":postData},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "success" : function (json) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: json.message
+                                });
+                                if (json.code === 200) {
+                                    // 删除了预约，则刷新整个表格
+                                    layui.table.reload('stadiumBookTable');
+                                }
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "删除失败，出现未知异常！"
+                                });
+                            }
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+
+            // 监听changeCategoryIdsTable中的工具条
+            table.on('tool(changeCategoryIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个分类吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把change_categoryIds_categoryIds输入框中的内容更新
+                        var categoryIds = $('#change_categoryIds_categoryIds').val().split(',');
+                        categoryIds.splice(objIndex, 1);
+                        if (categoryIds.length > 1) {
+                            $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
+                        } else if (categoryIds.length === 1) {
+                            $('#change_categoryIds_categoryIds').val(categoryIds);
+                        } else {
+                            $('#change_categoryIds_categoryIds').val('');
+                        }
+                        stadiumCategoryData.splice(objIndex, 1);
+                        layui.table.reload('change_categoryIds_table', {
+                            url: null,
+                            data: stadiumCategoryData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+
+            // 监听addStadiumCategoryIdsTable中的工具条
+            table.on('tool(addStadiumCategoryIdsTable)', function (obj) {
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+                if (layEvent === 'delete') {
+                    layer.confirm('真的删除这个分类吗？', function(index){
+                        // 获取行所在的行index
+                        var objIndex = $(tr).attr("data-index");
+                        // 然后把add_stadiumCategoryIds输入框中的内容更新
+                        var stadiumCategoryIds = $('#add_stadiumCategoryIds').val().split(',');
+                        stadiumCategoryIds.splice(objIndex, 1);
+                        if (stadiumCategoryIds.length > 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                        } else if (stadiumCategoryIds.length === 1) {
+                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds);
+                        } else {
+                            $('#add_stadiumCategoryIds').val('');
+                        }
+                        stadiumCategoryData.splice(objIndex, 1);
+                        layui.table.reload('add_stadiumCategoryIds_table', {
+                            url: null,
+                            data: stadiumCategoryData
+                        });
+                        layer.close(index);
+                    });
+                }
+            });
+        }
+
+        function checkAddForm() {
+            if ($('#add_stadium_id').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请选择需要添加预约的体育场馆！"
+                });
+                return false;
+            }
+            if ($('#add_start_time').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请设置场馆预约时间段起始时间！"
+                });
+                return false;
+            }
+            if ($('#add_end_time').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请设置场馆预约时间段终止时间！"
+                });
+                return false;
+            }
+            return true;
+        }
+
+        function selectStadium() {
+            layer.open({
+                type: 1,
+                title: '选择体育场馆',
+                area:['70%','80%'],
+                content: $('#selectStadiumDialog').html(),
+                btn: ['确定', '取消'],
+                success: function (index, layero) {
+                    table.render({
+                        elem: '#select_stadium_table'
+                        , defaultToolbar: ['print', 'exports']
+                        , method: 'POST'
+                        , cols: [[
+                            {title: '<a class="" style="font-size: 20px; color:black;">我的体育场馆</a>',align: 'center', colspan: 7} //rowspan即纵向跨越的单元格数
+                        ],[ //表头
+                            {type:'radio'}
+                            , {field: 'id', title: 'id', width: 70, sort: true}
+                            , {field: 'name', title: '名称', width: 200, sort: true}
+                            , {field: 'address', title: '地址', width: 200, sort: true}
+                            , {field: 'description', title: '描述', width: 200, sort: true}
+                            , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                            , {field: 'imagePaths', title: '图片', width: 150, sort: true}
+                        ]]
+                        , page: true
+                        , limit: 200
+                        , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
+                        , request: {
+                            pageName: 'pageIndex' //页码的参数名称，默认：page
+                            ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                        }
+                        , response: {
+                            statusName: 'code' //规定数据状态的字段名称，默认：code
+                            ,statusCode: 200 //规定成功的状态码，默认：0
+                            ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                            ,countName: 'count' //规定数据总数的字段名称，默认：count
+                            ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                        }
+                        , parseData: function(res){ //res 即为原始返回的数据
+                            return {
+                                "code": res.code, //解析接口状态
+                                "message": res.message, //解析提示文本
+                                "count": res.count, //解析数据长度
+                                "data": res.data //解析数据列表
+                            };
+                        }
+                    });
+                },
+                yes: function (index, layero) {
+                    // 获取select_stadium_table选中的id
+                    var checkStatus = layui.table.checkStatus('select_stadium_table');
+                    if (checkStatus.data.length === 0) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "未选择体育场馆！"
+                        });
+                        return false;
+                    }
+                    var stadiumData = checkStatus.data[0];
+                    $('#add_stadium_id').val(stadiumData.id);
+                    $('#add_stadium_name').val(stadiumData.name);
+                    $('#add_stadium_address').val(stadiumData.address);
+                    $('#add_stadium_description').val(stadiumData.description);
+                    $('#add_stadium_detail').show();
+                    layer.close(index);
+                },
+                btn2: function (index, layero) {
+                    //return false 开启该代码可禁止点击该按钮关闭
+                }
+            });
+        }
+    </script>
+</html>

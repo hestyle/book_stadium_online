@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>考试项列表</title>
+    <title>体育场馆</title>
     <script src="../../js/jquery.min.js"></script>
     <script src="../../layui/layui.all.js"></script>
     <script src="../../js/common.js"></script>
@@ -194,76 +194,44 @@
         // 上传图片
         var haveUploadCount = 0;
         function mounted() {
-            var url ="/book_stadium_online/stadium/stadiumManagerFindByPage.do";
-            $.ajax({
-                "url" : url,
-                "data" : {"pageIndex":1, "pageSize":10},
-                "type" : "POST",
-                "dataType" : "json",
-                "success" : function (json) {
-                    if (json.code === 200) {
-                        // 往table填充服务器返回的数据
-                        table.render({
-                            elem: '#stadiumTable'
-                            , toolbar: '#toolbarDemo'
-                            , height: 550
-                            , defaultToolbar: ['print', 'exports']
-                            , method: 'POST'
-                            , cols: [[
-                                {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
-                            ],[ //表头
-                                {checkbox: true, LAY_CHECKED: false}
-                                , {field: 'id', title: 'id', width: 70, sort: true}
-                                , {field: 'name', title: '名称', width: 200, sort: true}
-                                , {field: 'address', title: '地址', width: 200, sort: true}
-                                , {field: 'description', title: '描述', width: 200, sort: true}
-                                , {field: 'categoryIds', title: '分类', width: 150, sort: true}
-                                , {field: 'imagePaths', title: '图片', width: 150, sort: true}
-                                , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
-                            ]]
-                            , page: true
-                            , url: url
-                            , request: {
-                                pageName: 'pageIndex' //页码的参数名称，默认：page
-                                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
-                            }
-                            , response: {
-                                statusName: 'code' //规定数据状态的字段名称，默认：code
-                                ,statusCode: 200 //规定成功的状态码，默认：0
-                                ,msgName: 'message' //规定状态信息的字段名称，默认：msg
-                                ,countName: 'count' //规定数据总数的字段名称，默认：count
-                                ,dataName: 'data' //规定数据列表的字段名称，默认：data
-                            }
-                            , parseData: function(res){ //res 即为原始返回的数据
-                                return {
-                                    "code": res.code, //解析接口状态
-                                    "message": res.message, //解析提示文本
-                                    "count": res.count, //解析数据长度
-                                    "data": res.data //解析数据列表
-                                };
-                            }
-                        });
-                    } else {
-                        // 弹出中间提示框
-                        layer.open({
-                            title: "提示信息",
-                            content: json.message,
-                            yes: function (index2, layero) {
-                                if (json.code === 401) {
-                                    // code==401说明未登录(BaseController.java定义)
-                                    parent.location.href = "/book_stadium_online/stadiumManager/login.html";
-                                }
-                                layer.close(index2);
-                            }
-                        });
-                    }
-                },
-                "error" : function () {
-                    // 弹出中间提示框
-                    layer.open({
-                        title: "提示信息",
-                        content: "出现异常！"
-                    });
+            table.render({
+                elem: '#stadiumTable'
+                , toolbar: '#toolbarDemo'
+                , height: 550
+                , defaultToolbar: ['print', 'exports']
+                , method: 'POST'
+                , cols: [[
+                    {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                ],[ //表头
+                    {checkbox: true, LAY_CHECKED: false}
+                    , {field: 'id', title: 'id', width: 70, sort: true}
+                    , {field: 'name', title: '名称', width: 200, sort: true}
+                    , {field: 'address', title: '地址', width: 200, sort: true}
+                    , {field: 'description', title: '描述', width: 200, sort: true}
+                    , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                    , {field: 'imagePaths', title: '图片', width: 150, sort: true}
+                    , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                ]]
+                , page: true
+                , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , response: {
+                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                    ,statusCode: 200 //规定成功的状态码，默认：0
+                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                }
+                , parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "message": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
                 }
             });
             //监听事件

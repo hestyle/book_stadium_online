@@ -23,6 +23,14 @@ public interface IStadiumService {
     void add(String stadiumManagerUsername, Stadium stadium) throws AddFailedException;
 
     /**
+     * 通过stadiumId查找stadium
+     * @param stadiumId             stadiumId
+     * @return                      stadium
+     * @throws FindFailedException  查找失败异常
+     */
+    Stadium findById(Integer stadiumId) throws FindFailedException;
+
+    /**
      * 修改stadium
      * @param stadiumManagerUsername    stadiumManager用户名
      * @param modifyDataMap             key value
