@@ -157,8 +157,8 @@
                         <input id="edit_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" readonly>
                     </div>
                 </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">终止时间</label>
+                <div class="layui-form-item" id="edit_is_delete">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">删除</label>
                     <div class="layui-input-inline" style="width: 75%;">
                         <input id="edit_is_delete_0" type="radio" name="edit_is_delete" value="0" title="未删除" checked>
                         <input id="edit_is_delete_1" type="radio" name="edit_is_delete" value="1" title="已删除">
@@ -498,67 +498,62 @@
                             layer.close(index);
                         }
                     });
-                } else if (layEvent === 'changeCategoryIds') {
+                } else if (layEvent === 'check') {
                     layer.open({
                         type: 1,
-                        title: '修改场馆分类',
-                        area:['70%','80%'],
-                        content: $('#changeCategoryIdsDialog').html(),
-                        btn: ['保存', '取消'],
+                        title: '查看场馆预约',
+                        area:['770px','80%'],
+                        content: $('#editDialog').html(),
+                        btn: ['关闭'],
                         success: function (index, layero) {
                             // 填充行数据
                             form.render();
-                            form.val("changeCategoryIdsDialogForm", data);
-                            // 填充change_categoryIds_table表格
+                            if (data.bookState === 0) {
+                                $('#edit_book_state_0').attr("checked", "checked");
+                                $('#edit_book_state_1').attr("disabled", "disabled");
+                                $('#edit_book_state_2').attr("disabled", "disabled");
+                            } else if (data.bookState === 1) {
+                                $('#edit_book_state_0').attr("disabled", "disabled");
+                                $('#edit_book_state_1').attr("checked", "checked");
+                                $('#edit_book_state_2').attr("disabled", "disabled");
+                            } else {
+                                $('#edit_book_state_0').attr("disabled", "disabled");
+                                $('#edit_book_state_1').attr("disabled", "disabled");
+                                $('#edit_book_state_2').attr("checked", "checked");
+                            }
+                            if (data.isDelete === 0) {
+                                $('#edit_is_delete_0').attr("checked", "checked");
+                                $('#edit_is_delete_1').attr("disabled", "disabled");
+                            } else {
+                                $('#edit_is_delete_0').attr("disabled", "disabled");
+                                $('#edit_is_delete_1').attr("checked", "checked");
+                            }
+                            form.val("editDialogForm", data);
+                            $('#edit_max_book_count').attr("disabled", "disabled");
+                            $('#edit_start_time').attr("disabled", "disabled");
+                            $('#edit_end_time').attr("disabled", "disabled");
                             $.ajax({
-                                "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
-                                "data" : {"stadiumCategoryIds":data.categoryIds},
+                                "url" : "/book_stadium_online/stadium/findById.do",
+                                "data" : {"stadiumId":data.stadiumId},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "success" : function (json) {
                                     if (json.code === 200) {
-                                        // 保存到全局变量
-                                        stadiumCategoryData = json.data;
-                                        table.render({
-                                            elem: '#change_categoryIds_table'
-                                            , data: json.data
-                                            , width: 730
-                                            , cols: [[
-                                                {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
-                                            ],[ //表头
-                                                {type: 'numbers', title: '序号', width: 60}
-                                                , {field: 'id', title: 'id', width: 60}
-                                                , {field: 'name', title: '名称', width: 250}
-                                                , {field: 'description', title: '描述', width: 250}
-                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
-                                            ]]
-                                            , rowDrag: {
-                                                done: function(obj) {
-                                                    // 完成时（松开时）触发(soulTable插件，移动行
-                                                    stadiumCategoryData = obj.cache;
-                                                    var categoryIds = [];
-                                                    for (var row of obj.cache) {
-                                                        categoryIds.push(row.id);
-                                                    }
-                                                    $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
-                                                }
+                                        // 展示场馆信息
+                                        $('#edit_stadium_name').val(json.data.name);
+                                        $('#edit_stadium_address').val(json.data.address);
+                                        $('#edit_stadium_description').val(json.data.description);
+                                        if (json.data.imagePaths != null && json.data.imagePaths.length !== 0) {
+                                            var imagePaths = json.data.imagePaths.split(',');
+                                            for (var i in imagePaths) {
+                                                $('#edit_stadium_image').append('<img src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-left: 10px;"/>');
                                             }
-                                            , done: function () {
-                                                soulTable.render(this)
-                                            }
-                                        });
+                                        }
+                                        layer.close(index);
                                     } else {
-                                        // 弹出中间提示框
                                         layer.open({
                                             title: "提示信息",
-                                            content: json.message,
-                                            yes: function (index2, layero) {
-                                                if (json.code === 402) {
-                                                    // code==402说明未登录(BaseController.java定义)
-                                                    parent.location.href = "../../login.html";
-                                                }
-                                                layer.close(index2);
-                                            }
+                                            content: json.message
                                         });
                                     }
                                 },
@@ -566,45 +561,14 @@
                                     // 弹出中间提示框
                                     layer.open({
                                         title: "提示信息",
-                                        content: "出现异常！"
+                                        content: "保存失败，出现未知异常！"
                                     });
                                 }
                             });
                         },
                         yes: function (index, layero) {
-                            // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ data.id + ',"categoryIds":"' + $('#change_categoryIds_categoryIds').val() + '"}';
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"modifyData":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口
-                                        obj.update({
-                                            categoryIds: $('#change_categoryIds_categoryIds').val()
-                                        });
-                                        layer.close(index);
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "删除失败，出现未知异常！"
-                                    });
-                                }
-                            });
+                            layer.close(index);
                         },
-                        btn2: function (index, layero) {
-                            //return false 开启该代码可禁止点击该按钮关闭
-                        }
                     });
                 }
             });
