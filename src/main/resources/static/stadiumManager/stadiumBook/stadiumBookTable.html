@@ -570,6 +570,49 @@
                             layer.close(index);
                         },
                     });
+                } else if (layEvent === 'startStadiumBook') {
+                    if (data.bookState > 2) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约已结束，无法再次开启预约！"
+                        });
+                        return false;
+                    } else if (data.bookState === 2) {
+                        layer.open({
+                            title: "提示信息",
+                            content: "该场馆预约正在进行预约！"
+                        });
+                        return false;
+                    }
+                    layer.confirm('是否开启该场馆预约？', function(index){
+                        var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                        var postData = '{"id":'+ data.id + ',"bookState":' + 1 + '}';
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"stadiumBookModifyData":postData},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "success" : function (json) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: json.message
+                                });
+                                if (json.code === 200) {
+                                    // 如果改了bookStat，则刷新整个表格
+                                    layui.table.reload('stadiumBookTable');
+                                }
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "保存失败，出现未知异常！"
+                                });
+                            }
+                        });
+                        layer.close(index);
+                    });
+
                 }
             });
 
