@@ -214,6 +214,10 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
                 logger.warn("StadiumBook 修改失败，场馆预约删除状态不可逆！data = " + stadiumBook);
                 throw new ModifyFailedException("修改失败，场馆预约删除状态不可逆！");
             }
+            if (stadiumBookModify.getNowBookCount() > 0 && stadiumBookModify.getEndTime().after(new Date())) {
+                logger.warn("StadiumBook 修改失败，无法删除有用户预约，且还未到预约时间段的终止时间的场馆预约！stadiumBookModify = " + stadiumBookModify);
+                throw new ModifyFailedException("修改失败，无法删除有用户预约，且还未到预约时间段的终止时间的场馆预约！");
+            }
             stadiumBookModify.setIsDelete(stadiumBook.getIsDelete());
         }
         stadiumBookModify.setModifiedUser(stadiumManager.getUsername());
