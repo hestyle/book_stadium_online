@@ -29,7 +29,7 @@
         <a class="layui-btn layui-btn-xs" lay-event="delete" style="background-color: #FF0000;">删除</a>
         {{#  } else if(d.bookState === 1){ }}
         <a class="layui-btn layui-btn-xs" lay-event="check" style="background-color: #008800;">查看</a>
-        <a class="layui-btn layui-btn-xs" lay-event="modifyBookCount" style="background-color: #9F85FF;">调整预约容量</a>
+        <a class="layui-btn layui-btn-xs" lay-event="modifyMaxBookCount" style="background-color: #9F85FF;">调整预约容量</a>
         <a class="layui-btn layui-btn-xs" lay-event="endStadiumBook" style="background-color: #FFB800;">结束预约</a>
         {{#  } else { }}
         <a class="layui-btn layui-btn-xs" lay-event="edit" style="background-color: #1BC98E;">编辑</a>
@@ -167,32 +167,25 @@
             </div>
         </form>
     </script>
-    <!--单条数据修改图片资源-->
-    <script type="text/html" id="changeImageDialog">
-        <form id="change_Image_form" class="layui-form" action="#" style="padding: 20px;" lay-filter="changeImageDialogForm">
+    <!--单条数据调整预约容量-->
+    <script type="text/html" id="modifyMaxBookCountDialog">
+        <form id="modifyMaxBookCount_form" class="layui-form" action="#" style="padding: 20px;width: 400px;" lay-filter="modifyMaxBookCountDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label">id</label>
-                <div class="layui-input-inline">
-                    <input id="change_image_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                <label class="layui-form-label" style="width: 20%;display: inline;">id</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_id" type="text" name="id" placeholder="场馆预约id" autocomplete="off" class="layui-input" style="display: inline;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">名称</label>
-                <div class="layui-input-inline">
-                    <input id="change_image_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                <label class="layui-form-label" style="width: 20%;display: inline;">预约容量</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_maxBookCount" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" style="display: inline;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label">图片</label>
-                <div class="layui-input-inline" style="width: 400px;">
-                    <input id="change_image_paths" type="text" name="imagePaths" placeholder="图片路径" autocomplete="off" class="layui-input" style="width: 140%; display:none;" disabled>
-                    <button type="button" class="layui-btn" id="change_uploadImagesButton"><i class="layui-icon">&#xe67c;</i>添加图片</button>
-                    <label style="color: red;">最多只允许上传5张！</label>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label">预览</label>
-                <div class="layui-input-inline" id="change_stadiumImages" style="width: 450px;">
+                <label class="layui-form-label" style="width: 20%;display: inline;">已预约数</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="modifyMaxBookCount_nowBookCount" type="number" name="nowBookCount" placeholder="当前预约数量" autocomplete="off" class="layui-input" style="display: inline;" disabled>
                 </div>
             </div>
         </form>
@@ -655,7 +648,56 @@
                         });
                         layer.close(index);
                     });
-
+                } else if (layEvent === 'modifyMaxBookCount') {
+                    layer.open({
+                        type: 1,
+                        title: '调整场馆预约容量',
+                        area:['460px','60%'],
+                        content: $('#modifyMaxBookCountDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            form.render();
+                            form.val("modifyMaxBookCountDialogForm", data);
+                            if (data.nowBookCount != null && data.nowBookCount > 0) {
+                                $('#modifyMaxBookCount_maxBookCount').attr('min', data.nowBookCount);
+                            } else {
+                                $('#modifyMaxBookCount_maxBookCount').attr('min', 1);
+                            }
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                            var postData = '{"id":'+ $('#modifyMaxBookCount_id').val() + ',"maxBookCount":' + $('#modifyMaxBookCount_maxBookCount').val() + '}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumBookModifyData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        obj.update({
+                                            maxBookCount: $('#modifyMaxBookCount_maxBookCount').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
                 }
             });
 
