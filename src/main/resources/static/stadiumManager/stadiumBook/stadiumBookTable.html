@@ -224,77 +224,45 @@
         });
         layuiModules=['table', 'layer', 'form', 'upload', 'soulTable', 'laydate'];
         function mounted() {
-            var url ="/book_stadium_online/stadiumBook/stadiumManagerFindAllByPage.do";
-            $.ajax({
-                "url" : url,
-                "data" : {"pageIndex":1, "pageSize":10},
-                "type" : "POST",
-                "dataType" : "json",
-                "success" : function (json) {
-                    if (json.code === 200) {
-                        // 往table填充服务器返回的数据
-                        table.render({
-                            elem: '#stadiumBookTable'
-                            , toolbar: '#toolbarDemo'
-                            , height: 550
-                            , defaultToolbar: ['print', 'exports']
-                            , method: 'POST'
-                            , cols: [[
-                                {title: '<a class="" style="font-size: 20px; color:black;">体育场馆预约表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
-                            ],[ //表头
-                                {checkbox: true, LAY_CHECKED: false}
-                                , {field: 'id', title: 'id', width: 70, sort: true}
-                                , {field: 'stadiumId', title: '场馆id', width: 90, sort: true}
-                                , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
-                                , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
-                                , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
-                                , {field: 'startTime', title: '起始时间', width: 165, sort: true}
-                                , {field: 'endTime', title: '终止时间', width: 165, sort: true}
-                                , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
-                            ]]
-                            , page: true
-                            , url: url
-                            , request: {
-                                pageName: 'pageIndex' //页码的参数名称，默认：page
-                                ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
-                            }
-                            , response: {
-                                statusName: 'code' //规定数据状态的字段名称，默认：code
-                                ,statusCode: 200 //规定成功的状态码，默认：0
-                                ,msgName: 'message' //规定状态信息的字段名称，默认：msg
-                                ,countName: 'count' //规定数据总数的字段名称，默认：count
-                                ,dataName: 'data' //规定数据列表的字段名称，默认：data
-                            }
-                            , parseData: function(res){ //res 即为原始返回的数据
-                                return {
-                                    "code": res.code, //解析接口状态
-                                    "message": res.message, //解析提示文本
-                                    "count": res.count, //解析数据长度
-                                    "data": res.data //解析数据列表
-                                };
-                            }
-                        });
-                    } else {
-                        // 弹出中间提示框
-                        layer.open({
-                            title: "提示信息",
-                            content: json.message,
-                            yes: function (index2, layero) {
-                                if (json.code === 401) {
-                                    // code==401说明未登录(BaseController.java定义)
-                                    parent.location.href = "/book_stadium_online/stadiumManager/login.html";
-                                }
-                                layer.close(index2);
-                            }
-                        });
-                    }
-                },
-                "error" : function () {
-                    // 弹出中间提示框
-                    layer.open({
-                        title: "提示信息",
-                        content: "出现异常！"
-                    });
+            table.render({
+                elem: '#stadiumBookTable'
+                , toolbar: '#toolbarDemo'
+                , height: 550
+                , defaultToolbar: ['print', 'exports']
+                , method: 'POST'
+                , cols: [[
+                    {title: '<a class="" style="font-size: 20px; color:black;">体育场馆预约表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                ],[ //表头
+                    {checkbox: true, LAY_CHECKED: false}
+                    , {field: 'id', title: 'id', width: 70, sort: true}
+                    , {field: 'stadiumId', title: '场馆id', width: 90, sort: true}
+                    , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
+                    , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
+                    , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
+                    , {field: 'startTime', title: '起始时间', width: 165, sort: true}
+                    , {field: 'endTime', title: '终止时间', width: 165, sort: true}
+                    , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                ]]
+                , page: true
+                , url: "/book_stadium_online/stadiumBook/stadiumManagerFindAllByPage.do"
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , response: {
+                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                    ,statusCode: 200 //规定成功的状态码，默认：0
+                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                }
+                , parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "message": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
                 }
             });
             //监听事件
