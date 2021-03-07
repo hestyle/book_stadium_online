@@ -19,6 +19,19 @@ public interface StadiumBookMapper {
     void add(StadiumBook stadiumBook);
 
     /**
+     * 更新stadiumBook
+     * @param stadiumBook   stadiumBook
+     */
+    void update(StadiumBook stadiumBook);
+
+    /**
+     * 通过id查找StadiumBook
+     * @param id        StadiumBook id
+     * @return          StadiumBook
+     */
+    StadiumBook findById(Integer id);
+
+    /**
      * stadiumManager分页查询所有Stadium的StadiumBook
      * @param stadiumManagerId      stadiumManagerId
      * @param beginIndex            id升序排列

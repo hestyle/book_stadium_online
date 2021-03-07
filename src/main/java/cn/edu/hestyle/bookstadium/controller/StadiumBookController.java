@@ -50,6 +50,26 @@ public class StadiumBookController extends BaseController {
         return new ResponseResult<>(SUCCESS, "添加成功！");
     }
 
+    @PostMapping("/stadiumManagerModify.do")
+    public ResponseResult<Void> handleStadiumManagerModify(@RequestParam(name = "stadiumBookModifyData") String stadiumBookModifyData, HttpSession session) {
+        // 判断是否登录
+        String username = (String) session.getAttribute("stadiumManagerUsername");
+        if (null == username) {
+            throw new NotLoginException("请求失败，请先进行登录！");
+        }
+        ObjectMapper objectMapper = new ObjectMapper();
+        StadiumBook stadiumBook = null;
+        try {
+            stadiumBook = objectMapper.readValue(stadiumBookModifyData, StadiumBook.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 添加失败，数据格式错误！stadiumBookModifyData = " + stadiumBookModifyData);
+            throw new RequestParamException("StadiumBook 修改失败，数据格式错误！");
+        }
+        stadiumBookService.stadiumManagerModify(username, stadiumBook);
+        return new ResponseResult<>(SUCCESS, "修改成功！");
+    }
+
     @PostMapping("/stadiumManagerFindAllByPage.do")
     public ResponseResult<List<StadiumBook>> handleStadiumManagerFindAllByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {

@@ -8,6 +8,36 @@
         INSERT INTO `t_stadium_book`(`stadium_id`, `start_time`, `end_time`, `book_state`, `max_book_count`, `now_book_count`, `created_time`, `created_user`)
         VALUES (#{stadiumId}, #{startTime}, #{endTime}, #{bookState}, #{maxBookCount}, #{nowBookCount}, #{createdTime}, #{createdUser})
     </insert>
+    <!--更新stadiumBook-->
+    <!--void update(StadiumBook stadiumBook);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumBook">
+        UPDATE `t_stadium_book` SET
+           `start_time` = #{startTime}, `end_time` = #{endTime}, `book_state` = #{bookState}, `max_book_count` = #{maxBookCount}, `now_book_count` = #{nowBookCount}, `is_delete` = #{isDelete},
+           `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过id查找StadiumBook-->
+    <!--StadiumBook findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">
+        SELECT
+            `id` as `id`,
+            `stadium_id` as `stadiumId`,
+            `start_time` as `startTime`,
+            `end_time` as `endTime`,
+            `book_state` as `bookState`,
+            `max_book_count` as `maxBookCount`,
+            `now_book_count` as `nowBookCount`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium_book`
+        WHERE
+            `id` = #{id}
+    </select>
     <!--stadiumManager分页查询所有Stadium的StadiumBook-->
     <!--List<StadiumBook> stadiumManagerFindAllByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
     <select id="stadiumManagerFindAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">

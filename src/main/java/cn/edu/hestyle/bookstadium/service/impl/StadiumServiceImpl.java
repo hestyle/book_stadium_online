@@ -84,6 +84,24 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
+    public Stadium findById(Integer stadiumId) throws FindFailedException {
+        if (stadiumId == null) {
+            logger.warn("Stadium 查询失败，未指定需要查询的场馆id！");
+            throw new FindFailedException("查询失败，未指定需要查询的场馆id！");
+        }
+        Stadium stadium = null;
+        try {
+            stadium = stadiumMapper.findById(stadiumId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("Stadium 查询成功！stadium = " + stadium);
+        return stadium;
+    }
+
+    @Override
     public void stadiumManagerModify(String stadiumManagerUsername, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
         StadiumManager stadiumManager = null;
         try {
