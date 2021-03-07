@@ -32,6 +32,12 @@ public interface StadiumBookMapper {
     StadiumBook findById(Integer id);
 
     /**
+     * 通过id删除StadiumBook
+     * @param id        StadiumBook id
+     */
+    void deleteById(Integer id);
+
+    /**
      * stadiumManager分页查询所有Stadium的StadiumBook
      * @param stadiumManagerId      stadiumManagerId
      * @param beginIndex            id升序排列

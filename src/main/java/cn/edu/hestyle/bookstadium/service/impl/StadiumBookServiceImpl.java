@@ -8,17 +8,19 @@ import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -230,6 +232,81 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
             throw new ModifyFailedException("修改失败，数据库发生未知异常！");
         }
         logger.info("StadiumBook 更新成功！stadiumBookModify = " + stadiumBookModify);
+    }
+
+    @Override
+    @Transactional
+    public void stadiumManagerDeleteByIdList(String stadiumManagerUsername, List<Integer> stadiumBookIdList) throws DeleteFailedException {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            throw new DeleteFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null) {
+            logger.warn("StadiumManager 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
+            throw new DeleteFailedException("修改失败，username = " + stadiumManagerUsername + "用户未注册！");
+        }
+        if (stadiumBookIdList == null || stadiumBookIdList.size() == 0) {
+            logger.warn("StadiumBook 批量删除失败，未指定需要删除的场馆预约！stadiumBookIdList = " + stadiumBookIdList);
+            throw new DeleteFailedException("批量删除失败，未指定需要删除的场馆预约！");
+        }
+        // 用于记录stadiumManager拥有的 stadium id
+        HashSet<Integer> stadiumIdSet = new HashSet<>();
+        for (Integer stadiumBookId : stadiumBookIdList) {
+            // 检查StadiumBook是否存在
+            if (stadiumBookId == null) {
+                logger.warn("StadiumBook 批量删除失败，场馆预约id格式错误！stadiumBookIdList = " + stadiumBookIdList);
+                throw new DeleteFailedException("StadiumBook 批量删除失败，场馆预约id格式错误！");
+            }
+            StadiumBook stadiumBook = null;
+            try {
+                stadiumBook = stadiumBookMapper.findById(stadiumBookId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumBook 查询失败，数据库发生未知异常！stadiumBookId = " + stadiumBookId);
+                throw new DeleteFailedException("StadiumBook 批量删除失败，数据库发生未知异常！");
+            }
+            if (stadiumBook == null) {
+                logger.warn("StadiumBook 批量删除失败，指定的体育场馆预约不存在！stadiumBookId = " + stadiumBookId);
+                throw new DeleteFailedException("StadiumBook 批量删除失败，场馆预约 id = " + stadiumBookId + "不存在！");
+            }
+            // 检查StadiumManager是否有权限修改StadiumBook
+            if (!stadiumIdSet.contains(stadiumBook.getStadiumId())) {
+                Stadium stadium = null;
+                try {
+                    stadium = stadiumMapper.findById(stadiumBook.getStadiumId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumBook.getStadiumId());
+                    throw new DeleteFailedException("StadiumBook 批量删除失败，数据库发生未知异常！");
+                }
+                if (!stadiumManager.getId().equals(stadium.getManagerId())) {
+                    logger.warn("StadiumBook 修改失败，stadiumManager = " + stadiumManager + "，无权限修改体育场馆 Stadium = " + stadium + "的预约！");
+                    throw new DeleteFailedException("修改失败，体育场馆 " + stadium.getName() + " 不是您的账户创建的，无法修改其场馆预约！");
+                }
+                stadiumIdSet.add(stadium.getManagerId());
+            }
+            // 检查该stadiumBook是否可以删除
+            if (stadiumBook.getBookState() == 1) {
+                logger.warn("StadiumBook 删除失败，无法删除正在进行预约的场馆预约！stadiumBook = " + stadiumBook);
+                throw new DeleteFailedException("StadiumBook 批量删除失败，无法删除id = " + stadiumBook.getId() + "正在进行预约的场馆预约！");
+            }
+            if (stadiumBook.getNowBookCount() > 0 && stadiumBook.getEndTime().after(new Date())) {
+                logger.warn("StadiumBook 删除失败，无法删除有用户预约，且还未到预约时间段的终止时间的场馆预约！stadiumBook = " + stadiumBook);
+                throw new DeleteFailedException("修改失败，无法删除有用户预约，且还未到预约时间段的终止时间的场馆预约 id = " + stadiumBook.getId() + " ！");
+            }
+            try {
+                stadiumBookMapper.deleteById(stadiumBookId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumBook 删除失败，数据库发生未知异常！stadiumBook = " + stadiumBook);
+                throw new DeleteFailedException("StadiumBook 批量删除失败，数据库发生未知异常！");
+            }
+        }
+        logger.warn("StadiumBook 批量删除成功！stadiumBookIdList = " + stadiumBookIdList);
     }
 
     @Override

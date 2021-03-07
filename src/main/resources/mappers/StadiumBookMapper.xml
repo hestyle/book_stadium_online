@@ -38,6 +38,14 @@
         WHERE
             `id` = #{id}
     </select>
+    <!--通过id删除StadiumBook-->
+    <!--void deleteById(Integer id);-->
+    <update id="deleteById">
+        UPDATE `t_stadium_book` SET
+            `is_delete` = 1
+        WHERE
+            `id` = #{id}
+    </update>
     <!--stadiumManager分页查询所有Stadium的StadiumBook-->
     <!--List<StadiumBook> stadiumManagerFindAllByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
     <select id="stadiumManagerFindAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">

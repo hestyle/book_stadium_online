@@ -18,7 +18,7 @@
     <script type="text/html" id="toolbarDemo">
         <div class="layui-btn-container">
             <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
-            <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
+            <button class="layui-btn layui-btn-sm" lay-event="delete" style="background-color: #FF0000;">删除</button>
         </div>
     </script>
     <!--每条数据的操作栏-->
@@ -322,7 +322,7 @@
                         });
                         break;
                     case 'delete':
-                        // 拼接选中行的username
+                        // 拼接选中行的id
                         var postData = '[';
                         for (var value of checkStatus.data) {
                             if (postData.length > 1) {
@@ -341,7 +341,7 @@
                             return;
                         }
                         layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/stadium/stadiumManagerDeleteByIdList.do";
+                            var url ="/book_stadium_online/stadiumBook/stadiumManagerDeleteByIdList.do";
                             $.ajax({
                                 "url" : url,
                                 "data" : {"idListJsonString":postData},
@@ -355,7 +355,7 @@
                                     if (json.code === 200) {
                                         // 更新成功，则关闭重置窗口、刷新表格
                                         layer.close(index);
-                                        table.reload('stadiumTable');
+                                        table.reload('stadiumBookTable');
                                     }
                                 },
                                 "error" : function () {

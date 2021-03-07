@@ -5,6 +5,8 @@ import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumBook;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +70,25 @@ public class StadiumBookController extends BaseController {
         }
         stadiumBookService.stadiumManagerModify(username, stadiumBook);
         return new ResponseResult<>(SUCCESS, "修改成功！");
+    }
+
+    @PostMapping("/stadiumManagerDeleteByIdList.do")
+    public ResponseResult<Void> handleStadiumManagerDeleteByIdList(@RequestParam(name = "idListJsonString") String idListJsonString, HttpSession session) {
+        // 判断是否登录
+        String username = (String) session.getAttribute("stadiumManagerUsername");
+        if (null == username) {
+            throw new NotLoginException("请求失败，请先进行登录！");
+        }
+        List<Integer> idList = null;
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            idList = objectMapper.readValue(idListJsonString, new TypeReference<List<Integer>>() {});
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return new ResponseResult<>(FAILURE, "批量删除失败，场馆预约id list数据格式不正确！");
+        }
+        stadiumBookService.stadiumManagerDeleteByIdList(username, idList);
+        return new ResponseResult<>(SUCCESS, "批量删除成功！");
     }
 
     @PostMapping("/stadiumManagerFindAllByPage.do")

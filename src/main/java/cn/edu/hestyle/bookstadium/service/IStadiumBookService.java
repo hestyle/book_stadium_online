@@ -2,6 +2,7 @@ package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumBook;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
@@ -29,6 +30,14 @@ public interface IStadiumBookService {
      * @throws ModifyFailedException    修改失败异常
      */
     void stadiumManagerModify(String stadiumManagerUsername, StadiumBook stadiumBook) throws ModifyFailedException;
+
+    /**
+     * stadiumManager 批量删除 stadiumBook
+     * @param stadiumManagerUsername    stadiumManager用户名
+     * @param stadiumBookIdList         stadiumBookId List
+     * @throws DeleteFailedException    删除失败异常
+     */
+    void stadiumManagerDeleteByIdList(String stadiumManagerUsername, List<Integer> stadiumBookIdList) throws DeleteFailedException;
 
     /**
      * stadiumManager分页查询其所有Stadium的StadiumBook
