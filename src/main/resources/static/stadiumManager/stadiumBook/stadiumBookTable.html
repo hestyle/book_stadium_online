@@ -69,8 +69,9 @@
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">预约状态</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input type="radio" name="add_book_state" id="gender_man" value="0" title="暂不开始" checked>
-                    <input type="radio" name="add_book_state" id="gender_women" value="1" title="开始预约">
+                    <input id="add_book_state_0" type="radio" name="add_book_state" value="0" title="暂不开始" checked>
+                    <input id="add_book_state_1" type="radio" name="add_book_state" value="1" title="开始预约">
+                    <input id="add_book_state_2" type="radio" name="add_book_state" value="2" title="结束预约" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -309,8 +310,6 @@
                             btn: ['确定', '取消'],
                             success: function (index, layero) {
                                 // 清空缓存
-                                stadiumCategoryData = [];
-                                haveUploadCount = 0;
                                 form.render();
                                 // 自定义日期格式
                                 laydate.render({
