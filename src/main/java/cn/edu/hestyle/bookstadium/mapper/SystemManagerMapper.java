@@ -15,4 +15,17 @@ public interface SystemManagerMapper {
      * @return          SystemManager
      */
     SystemManager findByUsername(String username);
+
+    /**
+     * 通过id查询SystemManager
+     * @param id        SystemManager id
+     * @return          SystemManager
+     */
+    SystemManager findById(Integer id);
+
+    /**
+     * 更新systemManager
+     * @param systemManager systemManager
+     */
+    void update(SystemManager systemManager);
 }

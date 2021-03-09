@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.UserMapper">
+    <!--添加user-->
+    <!--void add(User user);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_user`(`username`, `password`, `salt_value`, `gender`, `address`, `phone_number`, `created_time`, `created_user`)
+        VALUES (#{username}, #{password}, #{saltValue}, #{gender}, #{address}, #{phoneNumber}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--更新user-->
+    <!--void update(User user);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.User">
+        UPDATE `t_user` SET
+           `password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath},
+           `is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}, `token` = #{token}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过id查找-->
+    <!--User findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.User">
+        SELECT
+            `id` as `id`,
+            `username` as `username`,
+            `password` as `password`,
+            `salt_value` as `saltValue`,
+            `avatar_path` as `avatarPath`,
+            `gender` as `gender`,
+            `address` as `address`,
+            `phone_number` as `phoneNumber`,
+            `credit_score` as `creditScore`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`,
+            `token` as `token`
+        FROM
+            `t_user`
+        WHERE
+            `id`=#{id}
+    </select>
+    <!--通过username查找-->
+    <!--User findByUsername(String username);-->
+    <select id="findByUsername" resultType="cn.edu.hestyle.bookstadium.entity.User">
+        SELECT
+            `id` as `id`,
+            `username` as `username`,
+            `password` as `password`,
+            `salt_value` as `saltValue`,
+            `avatar_path` as `avatarPath`,
+            `gender` as `gender`,
+            `address` as `address`,
+            `phone_number` as `phoneNumber`,
+            `credit_score` as `creditScore`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`,
+            `token` as `token`
+        FROM
+            `t_user`
+        WHERE
+            `username`=#{username}
+    </select>
+</mapper>

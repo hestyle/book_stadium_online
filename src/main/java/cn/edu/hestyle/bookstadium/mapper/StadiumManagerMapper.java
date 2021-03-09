@@ -19,6 +19,13 @@ public interface StadiumManagerMapper {
     StadiumManager findByUsername(String username);
 
     /**
+     * 通过id进行查找
+     * @param id        StadiumManager id
+     * @return          StadiumManager
+     */
+    StadiumManager findById(Integer id);
+
+    /**
      * StadiumManager 账号添加
      * @param stadiumManager    待添加的账号
      */

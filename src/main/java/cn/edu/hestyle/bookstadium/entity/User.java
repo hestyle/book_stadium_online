@@ -6,13 +6,13 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.util.Date;
 
 /**
- * StadiumManager 实体类
+ * User entity
  * @author hestyle
  * @projectName book_stadium
- * @date 2021/3/3 9:46 上午
+ * @date 2021/3/9 12:32 下午
  */
-public class StadiumManager {
-    public final static String STADIUM_MANAGER_ROLE = "STADIUM_MANAGER_ROLE";
+public class User {
+    public final static String USER_ROLE = "USER_ROLE";
 
     /**id*/
     private Integer id;
@@ -179,7 +179,7 @@ public class StadiumManager {
 
     @Override
     public String toString() {
-        return "StadiumManager{" +
+        return "User{" +
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +

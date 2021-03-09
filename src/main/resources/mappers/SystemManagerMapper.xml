@@ -18,4 +18,29 @@
 		WHERE
 		    `username`=#{username}
     </select>
+	<!--根据id查找-->
+	<!--SystemManager findById(Integer id);-->
+	<select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SystemManager">
+		SELECT
+			`id` as `id`,
+			`username` as `username`,
+			`password` as `password`,
+			`salt_value` as `saltValue`,
+			`avatar_path` as `avatarPath`,
+			`phone_number` as `phoneNumber`,
+			`is_delete` as `isDelete`,
+		    `token` as `token`
+		FROM
+			`t_system_manager`
+		WHERE
+			`id`=#{id}
+	</select>
+	<!--更新systemManager-->
+	<!--void update(SystemManager systemManager);-->
+	<update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
+		UPDATE `t_system_manager` SET
+		   `password` = #{password}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath}, `token` = #{token}
+		WHERE
+			`id` = #{id}
+	</update>
 </mapper>

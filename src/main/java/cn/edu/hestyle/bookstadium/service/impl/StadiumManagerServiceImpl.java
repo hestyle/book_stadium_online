@@ -3,14 +3,12 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
-import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
+import cn.edu.hestyle.bookstadium.util.EncryptUtil;
+import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -56,8 +54,20 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new LoginFailedException("登录失败，用户名 " + username + " 未注册！");
         }
         // 判断密码是否匹配
-        String encryptedPassword = StadiumManagerServiceImpl.encryptPassword(password, stadiumManager.getSaltValue());
+        String encryptedPassword = EncryptUtil.encryptPassword(password, stadiumManager.getSaltValue());
         if (password != null && encryptedPassword.equals(stadiumManager.getPassword())) {
+            // 生成token
+            stadiumManager.setToken(TokenUtil.getToken(stadiumManager));
+            // 更新数据库中的token
+            stadiumManager.setModifiedUser(stadiumManager.getUsername());
+            stadiumManager.setModifiedTime(new Date());
+            try {
+                stadiumManagerMapper.update(stadiumManager);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Token 数据库更新失败，发生未知错误！stadiumManager = " + stadiumManager);
+                throw new LoginFailedException("登录失败，数据库发生未知异常！");
+            }
             // 将password、saltValue剔除
             stadiumManager.setPassword(null);
             stadiumManager.setSaltValue(null);
@@ -129,7 +139,7 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         // 补充StadiumManager信息
         String saltValue = UUID.randomUUID().toString().toUpperCase();
         stadiumManager.setSaltValue(saltValue);
-        stadiumManager.setPassword(encryptPassword(stadiumManager.getPassword(), saltValue));
+        stadiumManager.setPassword(EncryptUtil.encryptPassword(stadiumManager.getPassword(), saltValue));
         stadiumManager.setCreditScore(60);
         stadiumManager.setCreatedUser(stadiumManager.getUsername());
         stadiumManager.setCreatedTime(new Date());
@@ -169,6 +179,24 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             logger.info("StadiumManager username=" + username + ", 查找账号信息成功！");
             return stadiumManager;
         }
+    }
+
+    @Override
+    public StadiumManager findById(Integer id) throws FindFailedException {
+        if (id == null) {
+            logger.warn("StadiumManager 查询失败，StadiumManager ID！");
+            throw new FindFailedException("查询失败，未指定需要查询的StadiumManager ID！");
+        }
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！id = " + id);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 查询成功！stadiumManager = " + stadiumManager);
+        return stadiumManager;
     }
 
     @Override
@@ -249,7 +277,7 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new ModifyFailedException("更新保存失败，用户名 " + username + "未注册！");
         }
         // 检查原密码是否正确
-        if (!stadiumManager.getPassword().equals(encryptPassword(beforePassword, stadiumManager.getSaltValue()))) {
+        if (!stadiumManager.getPassword().equals(EncryptUtil.encryptPassword(beforePassword, stadiumManager.getSaltValue()))) {
             logger.info("StadiumManager 密码更新失败，原密码错误！beforePassword = " + beforePassword);
             throw new ModifyFailedException("密码更新失败，原密码错误！");
         }
@@ -262,7 +290,7 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             logger.info("StadiumManager 密码更新失败，新密码超过20个字符！newPassword = " + newPassword);
             throw new ModifyFailedException("密码更新失败，新密码超过了20个字符！");
         }
-        stadiumManager.setPassword(encryptPassword(newPassword, stadiumManager.getSaltValue()));
+        stadiumManager.setPassword(EncryptUtil.encryptPassword(newPassword, stadiumManager.getSaltValue()));
         stadiumManager.setModifiedUser(stadiumManager.getUsername());
         stadiumManager.setModifiedTime(new Date());
         try {
@@ -273,20 +301,6 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new ModifyFailedException("密码更新保存失败，数据库发生未知异常！");
         }
         logger.info("StadiumManager 账号密码更改保存成功！data = " + stadiumManager);
-    }
-
-    /**
-     * 对原始密码和盐值执行MD5加密
-     * @param srcPassword 原始密码
-     * @param saltValue 盐值
-     * @return 加密后的密码
-     */
-    private static String encryptPassword(String srcPassword, String saltValue) {
-        String src = saltValue + srcPassword + saltValue;
-        for (int i = 0; i < 10 ; i++) {
-            src = DigestUtils.md5DigestAsHex(src.getBytes()).toUpperCase();
-        }
-        return src;
     }
 
     /**

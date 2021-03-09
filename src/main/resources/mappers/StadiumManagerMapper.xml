@@ -26,6 +26,31 @@
 		WHERE
 		    `username`=#{username}
     </select>
+	<!--通过id进行查找-->
+	<!--StadiumManager findById(Integer id);-->
+	<select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
+		SELECT
+			`id` as `id`,
+			`username` as `username`,
+			`password` as `password`,
+			`salt_value` as `saltValue`,
+			`avatar_path` as `avatarPath`,
+			`gender` as `gender`,
+			`address` as `address`,
+			`phone_number` as `phoneNumber`,
+			`credit_score` as `creditScore`,
+			`is_authenticate` as `isAuthenticate`,
+			`is_delete` as `isDelete`,
+			`created_user` as `createdUser`,
+			`created_time` as `createdTime`,
+			`modified_user` as `modifiedUser`,
+			`modified_time` as `modifiedTime`,
+		    `token` as `token`
+		FROM
+			`t_stadium_manager`
+		WHERE
+			`id`=#{id}
+	</select>
 	<!--添加账号-->
 	<!--void add(StadiumManager stadiumManager);-->
 	<insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager" useGeneratedKeys="true" keyProperty="id">
@@ -37,7 +62,7 @@
 	<update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
 		UPDATE `t_stadium_manager` SET
 			`password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath},
-			`is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
+			`is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}, `token` = #{token}
 		WHERE
 			`id` = #{id}
 	</update>
