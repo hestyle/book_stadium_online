@@ -29,6 +29,15 @@ public class UserController extends BaseController {
     @Autowired
     private IUserService userService;
 
+    @PostMapping("/login.do")
+    public ResponseResult<User> handleLogin(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
+        // 执行业务端的业务
+        User user = userService.login(username, password);
+        // 将userId发到session中，保存到服务端
+        session.setAttribute("userId", user.getId());
+        return new ResponseResult<>(SUCCESS, "登录成功！", user);
+    }
+
     @PostMapping("/register.do")
     public ResponseResult<Void> handleRegister(@RequestParam(name = "userData") String userData, HttpSession session) {
         ObjectMapper objectMapper = new ObjectMapper();

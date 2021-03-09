@@ -4,8 +4,10 @@ import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
+import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,52 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Override
+    public User login(String username, String password) throws LoginFailedException {
+        // 检查用户名字符串
+        if (username == null || username.length() == 0) {
+            logger.info("User username=" + username + ", password=" + password + " 登录失败，未输入用户名！");
+            throw new LoginFailedException("登录失败，未输入用户名！");
+        }
+        User user = null;
+        try {
+            user = userMapper.findByUsername(username);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("User username=" + username + ", password=" + password + " 登录失败，数据库发生未知异常！");
+            throw new LoginFailedException("登录失败，数据库发生未知异常！");
+        }
+        // 判断username是否注册
+        if (user == null) {
+            logger.info("User username=" + username + ", password=" + password + " 登录失败，用户名 " + username + " 未注册！");
+            throw new LoginFailedException("登录失败，用户名 " + username + " 未注册！");
+        }
+        // 判断密码是否匹配
+        String encryptedPassword = EncryptUtil.encryptPassword(password, user.getSaltValue());
+        if (password != null && encryptedPassword.equals(user.getPassword())) {
+            // 生成token
+            user.setToken(TokenUtil.getToken(user));
+            // 更新数据库中的token
+            user.setModifiedUser(user.getUsername());
+            user.setModifiedTime(new Date());
+            try {
+                userMapper.update(user);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Token 数据库更新失败，发生未知错误！user = " + user);
+                throw new LoginFailedException("登录失败，数据库发生未知异常！");
+            }
+            // 将password、saltValue剔除
+            user.setPassword(null);
+            user.setSaltValue(null);
+            logger.info("User username=" + username + ", password=" + password + " 登录成功！");
+            return user;
+        } else {
+            logger.info("User username=" + username + ", password=" + password + " 登录失败，密码错误！");
+            throw new LoginFailedException("登录失败，密码错误！");
+        }
+    }
 
     @Override
     public void register(User user) throws RegisterFailedException {

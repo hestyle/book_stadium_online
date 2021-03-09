@@ -8,6 +8,15 @@
         INSERT INTO `t_user`(`username`, `password`, `salt_value`, `gender`, `address`, `phone_number`, `created_time`, `created_user`)
         VALUES (#{username}, #{password}, #{saltValue}, #{gender}, #{address}, #{phoneNumber}, #{createdTime}, #{createdUser})
     </insert>
+    <!--更新user-->
+    <!--void update(User user);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.User">
+        UPDATE `t_user` SET
+           `password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath},
+           `is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}, `token` = #{token}
+        WHERE
+            `id` = #{id}
+    </update>
     <!--通过id查找-->
     <!--User findById(Integer id);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.User">

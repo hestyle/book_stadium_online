@@ -18,6 +18,12 @@ public interface UserMapper {
     void add(User user);
 
     /**
+     * 更新user
+     * @param user  user
+     */
+    void update(User user);
+
+    /**
      * 通过id查找
      * @param id    id
      * @return      User
