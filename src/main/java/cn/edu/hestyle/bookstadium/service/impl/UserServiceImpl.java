@@ -4,11 +4,17 @@ import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.util.EncryptUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
+import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author hestyle
@@ -22,6 +28,80 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private UserMapper userMapper;
+
+    @Override
+    public void register(User user) throws RegisterFailedException {
+        if (user == null) {
+            logger.info("User 账号注册失败，未输入账号信息！data = " + user);
+            throw new RegisterFailedException("账号注册失败，请输入账号信息！");
+        }
+        // 检查用户名
+        if (user.getUsername() == null || user.getUsername().length() == 0) {
+            logger.info("User 账号注册失败，未输入用户名！data = " + user);
+            throw new RegisterFailedException("账号注册失败，未输入用户名！");
+        }
+        if (user.getUsername().length() > 20) {
+            logger.info("User 账号注册失败，用户名长度超过20个字符！data = " + user);
+            throw new RegisterFailedException("账号注册失败，用户名长度超过20个字符！");
+        }
+        // 检查用户名是否已被注册
+        User account = null;
+        try {
+            account = userMapper.findByUsername(user.getUsername());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("User 账号注册失败, 数据库发生未知异常！data = " + user);
+            throw new RegisterFailedException("账号注册失败，数据库发生未知异常！");
+        }
+        if (account != null) {
+            logger.error("User 账号注册失败,  用户名" + user.getUsername() + "已被注册！data = " + user);
+            throw new RegisterFailedException("账号注册失败，用户名" + user.getUsername() + "已被注册！");
+        }
+        // 检查密码
+        if (user.getPassword() == null || user.getPassword().length() == 0) {
+            logger.info("User 账号注册失败，未输入密码！data = " + user);
+            throw new RegisterFailedException("账号注册失败，未输入密码！");
+        }
+        if (user.getPassword().length() > 20) {
+            logger.info("User 账号注册失败，密码长度超过20个字符！data = " + user);
+            throw new RegisterFailedException("账号注册失败，密码长度超过20个字符！");
+        }
+        // 检查性别
+        if (user.getGender() == null || user.getGender().length() == 0) {
+            logger.info("User 账号注册失败，未选择性别！data = " + user);
+            throw new RegisterFailedException("账号注册失败，未选择性别！");
+        }
+        if (!user.getGender().equals("男") && !user.getGender().equals("女")) {
+            logger.info("User 账号注册失败，性别非法！data = " + user);
+            throw new RegisterFailedException("账号注册失败，性别非法，只能设置为 男 或 女！");
+        }
+        // 检查电话号码
+        if (user.getPhoneNumber() == null || user.getPhoneNumber().length() == 0) {
+            logger.info("User 账号注册失败，未输入电话号码！data = " + user);
+            throw new RegisterFailedException("账号注册失败，请输入电话号码！");
+        }
+        Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+        Matcher matcher = pattern.matcher(user.getPhoneNumber());
+        if (!matcher.matches()) {
+            logger.info("User 账号注册失败，电话号码非法！data = " + user);
+            throw new RegisterFailedException("账号注册失败，输入的电话号码非法！");
+        }
+        // 补充User信息
+        String saltValue = UUID.randomUUID().toString().toUpperCase();
+        user.setSaltValue(saltValue);
+        user.setPassword(EncryptUtil.encryptPassword(user.getPassword(), saltValue));
+        user.setCreditScore(60);
+        user.setCreatedUser(user.getUsername());
+        user.setCreatedTime(new Date());
+        try {
+            userMapper.add(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("User 账号注册失败, 数据库发生未知异常！data = " + user);
+            throw new RegisterFailedException("账号注册失败，数据库发生未知异常！");
+        }
+        logger.info("User 账号注册成功！data = " + user);
+    }
 
     @Override
     public User findById(Integer id) throws FindFailedException {

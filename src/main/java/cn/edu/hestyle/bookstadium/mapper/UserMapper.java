@@ -10,10 +10,24 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface UserMapper {
+
+    /**
+     * 添加user
+     * @param user  user
+     */
+    void add(User user);
+
     /**
      * 通过id查找
      * @param id    id
-     * @return      Stadium
+     * @return      User
      */
     User findById(Integer id);
+
+    /**
+     * 通过username查找
+     * @param username  username
+     * @return          User
+     */
+    User findByUsername(String username);
 }

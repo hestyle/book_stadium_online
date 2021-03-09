@@ -5,14 +5,13 @@ import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.ISystemManagerService;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.util.EncryptUtil;
 import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import java.util.Date;
 
 /**
  * SystemManager service层接口实现类
@@ -47,7 +46,7 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
             throw new LoginFailedException("登录失败，用户名 " + username + " 未注册！");
         }
         // 判断密码是否匹配
-        String encryptedPassword = SystemManagerServiceImpl.encryptPassword(password, systemManager.getSaltValue());
+        String encryptedPassword = EncryptUtil.encryptPassword(password, systemManager.getSaltValue());
         if (password != null && encryptedPassword.equals(systemManager.getPassword())) {
             // 生成token
             systemManager.setToken(TokenUtil.getToken(systemManager));
@@ -86,19 +85,5 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
         }
         logger.warn("SystemManager 查询成功！systemManager = " + systemManager);
         return systemManager;
-    }
-
-    /**
-     * 对原始密码和盐值执行MD5加密
-     * @param srcPassword 原始密码
-     * @param saltValue 盐值
-     * @return 加密后的密码
-     */
-    private static String encryptPassword(String srcPassword, String saltValue) {
-        String src = saltValue + srcPassword + saltValue;
-        for (int i = 0; i < 10 ; i++) {
-            src = DigestUtils.md5DigestAsHex(src.getBytes()).toUpperCase();
-        }
-        return src;
     }
 }
