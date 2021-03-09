@@ -3,13 +3,16 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.ISystemManagerService;
+import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
+import java.util.Date;
 
 /**
  * SystemManager service层接口实现类
@@ -46,6 +49,16 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
         // 判断密码是否匹配
         String encryptedPassword = SystemManagerServiceImpl.encryptPassword(password, systemManager.getSaltValue());
         if (password != null && encryptedPassword.equals(systemManager.getPassword())) {
+            // 生成token
+            systemManager.setToken(TokenUtil.getToken(systemManager));
+            // 更新数据库中的token
+            try {
+                systemManagerMapper.update(systemManager);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("Token 数据库更新失败，发生未知错误！systemManager = " + systemManager);
+                throw new LoginFailedException("登录失败，数据库发生未知异常！");
+            }
             // 将password、saltValue剔除
             systemManager.setPassword(null);
             systemManager.setSaltValue(null);
@@ -55,6 +68,24 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
             logger.info("SystemManager username=" + username + ", password=" + password + " 登录失败，密码错误！");
             throw new LoginFailedException("登录失败，密码错误！");
         }
+    }
+
+    @Override
+    public SystemManager findById(Integer id) throws FindFailedException {
+        if (id == null) {
+            logger.warn("SystemManager 查询失败，未指定SystemManager ID！");
+            throw new FindFailedException("查询失败，未指定需要查询的SystemManager ID！");
+        }
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！id = " + id);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("SystemManager 查询成功！systemManager = " + systemManager);
+        return systemManager;
     }
 
     /**

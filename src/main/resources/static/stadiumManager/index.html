@@ -336,6 +336,9 @@
                     "data" : null,
                     "type" : "POST",
                     "dataType" : "json",
+                    "beforeSend": function (request) {
+                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                    },
                     "success" : function (json) {
                         stadiumManagerInfo = json.data;
                         if (json.code !== 200) {

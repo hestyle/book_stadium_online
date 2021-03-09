@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
@@ -74,6 +75,7 @@ public class StadiumManagerController extends BaseController {
     }
 
     @PostMapping("/getInfo.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<StadiumManager> handleGetInfo(HttpSession session) {
         // 判断是否登录
         String username = (String) session.getAttribute("stadiumManagerUsername");

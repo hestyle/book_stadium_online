@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
+import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
 
 /**
@@ -15,4 +16,11 @@ public interface ISystemManagerService {
      * @return          manager账号
      */
     SystemManager login(String username, String password) throws LoginFailedException;
+
+    /**
+     * 通过id查找(controller不能直接调用，会泄露盐值、token)
+     * @param id    id
+     * @return      Stadium
+     */
+    SystemManager findById(Integer id) throws FindFailedException;
 }

@@ -5,6 +5,8 @@ package cn.edu.hestyle.bookstadium.entity;
  * @author hestyle
  */
 public class SystemManager {
+    public final static String SYSTEM_MANAGER_ROLE = "SYSTEM_MANAGER_ROLE";
+
     /**id*/
     private Integer id;
     /**用户名*/
@@ -19,6 +21,8 @@ public class SystemManager {
     private String phoneNumber;
     /**是否删除，0未删除，1已删除*/
     private Integer isDelete;
+    /**token*/
+    private String token;
 
     public Integer getId() {
         return id;
@@ -76,6 +80,14 @@ public class SystemManager {
         this.isDelete = isDelete;
     }
 
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
     @Override
     public String toString() {
         return "SystemManager{" +
@@ -86,6 +98,7 @@ public class SystemManager {
                 ", avatarPath='" + avatarPath + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", isDelete=" + isDelete +
+                ", token='" + token + '\'' +
                 '}';
     }
 }

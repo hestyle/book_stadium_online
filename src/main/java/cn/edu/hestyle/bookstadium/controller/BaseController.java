@@ -4,6 +4,7 @@ import cn.edu.hestyle.bookstadium.controller.exception.FileUploadFailedException
 import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
+import cn.edu.hestyle.bookstadium.jwt.exception.TokenVerificationFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +25,7 @@ public abstract class BaseController {
      */
     public static final Integer FAILURE = -1;
 
-    @ExceptionHandler({ServiceException.class, RequestException.class})// 异常的范围
+    @ExceptionHandler({ServiceException.class, RequestException.class, TokenVerificationFailedException.class})// 异常的范围
     @ResponseBody
     public ResponseResult<Void> handleException(Exception e) {
 
@@ -59,6 +60,9 @@ public abstract class BaseController {
         } else if (e instanceof DeleteFailedException) {
             // 409-删除失败
             code = 409;
+        } else if (e instanceof TokenVerificationFailedException) {
+            // 410-token验证失败
+            code = 410;
         }
         return new ResponseResult<>(code, e);
     }

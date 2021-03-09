@@ -1,10 +1,7 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
-import cn.edu.hestyle.bookstadium.service.exception.AccountNotFoundException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
 
 import java.util.HashMap;
 
@@ -37,6 +34,13 @@ public interface IStadiumManagerService {
      * @return                          StadiumManager
      */
     StadiumManager findByUsername(String username) throws AccountNotFoundException;
+
+    /**
+     * 通过id查找(controller不能直接调用，会泄露盐值、token)
+     * @param id    id
+     * @return      Stadium
+     */
+    StadiumManager findById(Integer id) throws FindFailedException;
 
     /**
      * 更新StadiumManager账号信息
