@@ -572,69 +572,75 @@
                             form.render();
                             form.val("changeCategoryIdsDialogForm", data);
                             // 填充change_categoryIds_table表格
-                            $.ajax({
-                                "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
-                                "data" : {"stadiumCategoryIds":data.categoryIds},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    if (json.code === 200) {
-                                        // 保存到全局变量
-                                        stadiumCategoryData = json.data;
-                                        table.render({
-                                            elem: '#change_categoryIds_table'
-                                            , data: json.data
-                                            , width: 730
-                                            , cols: [[
-                                                {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
-                                            ],[ //表头
-                                                {type: 'numbers', title: '序号', width: 60}
-                                                , {field: 'id', title: 'id', width: 60}
-                                                , {field: 'name', title: '名称', width: 250}
-                                                , {field: 'description', title: '描述', width: 250}
-                                                , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
-                                            ]]
-                                            , rowDrag: {
-                                                done: function(obj) {
-                                                    // 完成时（松开时）触发(soulTable插件，移动行
-                                                    stadiumCategoryData = obj.cache;
-                                                    var categoryIds = [];
-                                                    for (var row of obj.cache) {
-                                                        categoryIds.push(row.id);
+                            table.render({
+                                elem: '#change_categoryIds_table'
+                                , data: null
+                                , width: 730
+                                , cols: [[
+                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {type: 'numbers', title: '序号', width: 60}
+                                    , {field: 'id', title: 'id', width: 60}
+                                    , {field: 'name', title: '名称', width: 250}
+                                    , {field: 'description', title: '描述', width: 250}
+                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , rowDrag: {
+                                    done: function(obj) {
+                                        // 完成时（松开时）触发(soulTable插件，移动行
+                                        stadiumCategoryData = obj.cache;
+                                        var categoryIds = [];
+                                        for (var row of obj.cache) {
+                                            categoryIds.push(row.id);
+                                        }
+                                        $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
+                                    }
+                                }
+                                , done: function () {
+                                    soulTable.render(this)
+                                }
+                            });
+                            if (data.categoryIds != null && data.categoryIds.length !== 0) {
+                                $.ajax({
+                                    "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
+                                    "data" : {"stadiumCategoryIds":data.categoryIds},
+                                    "type" : "POST",
+                                    "dataType" : "json",
+                                    "beforeSend": function (request) {
+                                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                    },
+                                    "success" : function (json) {
+                                        if (json.code === 200) {
+                                            // 保存到全局变量
+                                            stadiumCategoryData = json.data;
+                                            layui.table.reload('change_categoryIds_table', {
+                                                url: null,
+                                                data: stadiumCategoryData
+                                            });
+                                        } else {
+                                            // 弹出中间提示框
+                                            layer.open({
+                                                title: "提示信息",
+                                                content: json.message,
+                                                yes: function (index2, layero) {
+                                                    if (json.code === 402) {
+                                                        // code==402说明未登录(BaseController.java定义)
+                                                        parent.location.href = "../../login.html";
                                                     }
-                                                    $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
+                                                    layer.close(index2);
                                                 }
-                                            }
-                                            , done: function () {
-                                                soulTable.render(this)
-                                            }
-                                        });
-                                    } else {
+                                            });
+                                        }
+                                    },
+                                    "error" : function () {
                                         // 弹出中间提示框
                                         layer.open({
                                             title: "提示信息",
-                                            content: json.message,
-                                            yes: function (index2, layero) {
-                                                if (json.code === 402) {
-                                                    // code==402说明未登录(BaseController.java定义)
-                                                    parent.location.href = "../../login.html";
-                                                }
-                                                layer.close(index2);
-                                            }
+                                            content: "出现异常！"
                                         });
                                     }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "出现异常！"
-                                    });
-                                }
-                            });
+                                });
+                            }
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
