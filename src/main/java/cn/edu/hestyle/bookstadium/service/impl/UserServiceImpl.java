@@ -5,6 +5,7 @@ import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.LogoutFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
 import cn.edu.hestyle.bookstadium.util.TokenUtil;
@@ -75,6 +76,33 @@ public class UserServiceImpl implements IUserService {
             logger.info("User username=" + username + ", password=" + password + " 登录失败，密码错误！");
             throw new LoginFailedException("登录失败，密码错误！");
         }
+    }
+
+    @Override
+    public void logout(Integer id) throws LogoutFailedException {
+        if (id == null) {
+            logger.warn("User 注销失败，未指定用户ID");
+            throw new LogoutFailedException("User 注销失败，未指定需要注销的用户ID");
+        }
+        User user = null;
+        try {
+            user = userMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + id);
+            throw new LogoutFailedException("User 注销失败，数据库发生未知异常！");
+        }
+        user.setToken(null);
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！user = " + user);
+            throw new LogoutFailedException("User 注销失败，数据库发生未知异常！");
+        }
+        logger.warn("User 注销成功！user = " + user);
     }
 
     @Override

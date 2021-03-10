@@ -1,7 +1,9 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
+import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +38,15 @@ public class UserController extends BaseController {
         // 将userId发到session中，保存到服务端
         session.setAttribute("userId", user.getId());
         return new ResponseResult<>(SUCCESS, "登录成功！", user);
+    }
+
+    @PostMapping("/logout.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleLogout(HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userService.logout(userId);
+        return new ResponseResult<>(SUCCESS, "登录注销成功！");
     }
 
     @PostMapping("/register.do")
