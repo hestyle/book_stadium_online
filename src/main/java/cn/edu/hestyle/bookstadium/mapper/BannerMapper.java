@@ -14,8 +14,20 @@ import java.util.List;
 public interface BannerMapper {
 
     /**
+     * 添加banner
+     * @param banner    banner
+     */
+    void add(Banner banner);
+
+    /**
      * 获取所有banner
      * @return          List Banner
      */
     List<Banner> findAll();
+
+    /**
+     * 获取当前轮播的数量
+     * @return          当前所有未删除的banner数量
+     */
+    Integer getAllCount();
 }

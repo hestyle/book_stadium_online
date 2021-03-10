@@ -18,7 +18,7 @@
     <!--顶部操作栏-->
     <script type="text/html" id="toolbarDemo">
         <div class="layui-btn-container">
-            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
+            <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="add">添加</button>
             <button class="layui-btn layui-btn-sm" lay-event="delete" style="background-color: #FF0000;">删除</button>
         </div>
     </script>
@@ -33,53 +33,25 @@
     </script>
     <!--单条数据的添加操作-->
     <script type="text/html" id="addDialog">
-        <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
+        <form id="add_form" class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="addDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">体育场馆名称</label>
+                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播名称</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
-                    <input id="add_stadium_name" type="text" name="name" placeholder="请选择体育场馆" autocomplete="off" class="layui-input" style="width: 50%;display: inline;" disabled>
-                    <button id="select_stadium" type="button" class="layui-btn" onclick="selectStadium()">选择我的场馆</button>
-                </div>
-                <div id="add_stadium_detail" class="layui-input-inline" style="display: none;width: 70%;margin-left: 22%;margin-top: 10px;">
-                    <div class="layui-form-item">
-                        <label class="layui-form-label" style="width: 6%;text-align: left;">地址</label>
-                        <div class="layui-input-inline" style="width: 30%;">
-                            <input id="add_stadium_address" type="text" name="stadiumAddress" autocomplete="off" class="layui-input" disabled>
-                        </div>
-                    </div>
-                    <div class="layui-form-item">
-                        <label class="layui-form-label" style="width: 6%;text-align: left;">描述</label>
-                        <div class="layui-input-inline" style="width: 30%;">
-                            <textarea id="add_stadium_description" name="stadium_description" placeholder="请输入描述" class="layui-textarea" disabled></textarea>
-                        </div>
-                    </div>
+                    <input id="add_banner_title" type="text" name="title" placeholder="请输入轮播名称" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">预约状态</label>
+                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播内容</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_book_state_0" type="radio" name="add_book_state" value="0" title="暂不开始" checked>
-                    <input id="add_book_state_1" type="radio" name="add_book_state" value="1" title="开始预约">
-                    <input id="add_book_state_2" type="radio" name="add_book_state" value="2" title="结束预约" disabled>
+                    <textarea id="add_banner_content" name="content" placeholder="请输入描述" class="layui-textarea"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">预约容量</label>
+                <label class="layui-form-label" style="width: 20%;text-align: left;">图片</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" style="width: 50%;" value="1" min="1">
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">起始时间</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" style="width: 50%;" readonly>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">终止时间</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" style="width: 50%;" readonly>
+                    <input id="add_banner_image_path" type="text" name="imagePath" placeholder="请输入轮播内容" autocomplete="off" class="layui-input" disabled style="display: none;">
+                    <button type="button" class="layui-btn layui-btn-normal" id="add_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>添加图片</button>
+                    <img id="add_banner_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
                 </div>
             </div>
         </form>
@@ -241,38 +213,57 @@
                         layer.open({
                             type: 1,
                             title: '添加',
-                            area:['70%','80%'],
+                            area:['460px','80%'],
                             content: $('#addDialog').html(),
                             btn: ['确定', '取消'],
                             success: function (index, layero) {
                                 // 清空缓存
                                 form.render();
-                                // 自定义日期格式
-                                laydate.render({
-                                    elem: '#add_start_time'
-                                    ,type: 'datetime'
-                                    ,format: 'yyyy-MM-dd HH:mm:ss'
-                                });
-                                laydate.render({
-                                    elem: '#add_end_time'
-                                    ,type: 'datetime'
-                                    ,format: 'yyyy-MM-dd HH:mm:ss'
+                                upload.render({
+                                    elem: '#add_uploadImageButton'
+                                    ,url: '/book_stadium_online/banner/uploadImage.do'
+                                    ,accept: 'images'
+                                    ,acceptMime: 'image/*'
+                                    ,size: 10240
+                                    ,multiple: false
+                                    ,number: 1
+                                    ,headers: {
+                                        "token": $.cookie("systemManagerToken")
+                                    }
+                                    ,done: function(res){
+                                        if (res.code === 200) {
+                                            // 文件上传成功后修改图片路径
+                                            $('#add_banner_image_path').val(res.data);
+                                            $('#add_banner_image').attr("src", res.data);
+                                            $('#add_banner_image').show();
+                                        }
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: res.message
+                                        });
+                                    }
+                                    ,error: function(){
+                                        layer.open({
+                                            title: '提示信息',
+                                            content: '文件上传失败！'
+                                        });
+                                    }
                                 });
                             },
                             yes: function (index, layero) {
                                 if (checkAddForm() === false) {
                                     return false;
                                 }
-                                var url ="/book_stadium_online/stadiumBook/stadiumManagerAdd.do";
-                                var postData = '{"stadiumId":"' + $('#add_stadium_id').val() + '","bookState":"' + $('input[name=add_book_state]:checked').val() + '","maxBookCount":"' +
-                                    $('#add_max_book_count').val() + '","startTime":"' + $('#add_start_time').val() + '","endTime":"' + $('#add_end_time').val() + '"}';
+                                var url ="/book_stadium_online/banner/add.do";
+                                var postData = '{"title":"' + $('#add_banner_title').val() + '","content":"' + $('#add_banner_content').val()
+                                    + '","imagePath":"' + $('#add_banner_image_path').val() + '"}';
                                 $.ajax({
                                     "url" : url,
-                                    "data" : {"stadiumBookData":postData},
+                                    "data" : {"bannerData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
-                                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                        request.setRequestHeader("token", $.cookie("systemManagerToken"))
                                     },
                                     "success" : function (json) {
                                         layer.open({
@@ -810,24 +801,24 @@
         }
 
         function checkAddForm() {
-            if ($('#add_stadium_id').val().length === 0) {
+            if ($('#add_banner_title').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请选择需要添加预约的体育场馆！"
+                    content: "请输入轮播名称！"
                 });
                 return false;
             }
-            if ($('#add_start_time').val().length === 0) {
+            if ($('#add_banner_content').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请设置场馆预约时间段起始时间！"
+                    content: "请输入轮播内容！"
                 });
                 return false;
             }
-            if ($('#add_end_time').val().length === 0) {
+            if ($('#add_banner_image_path').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请设置场馆预约时间段终止时间！"
+                    content: "请上传轮播图片！"
                 });
                 return false;
             }

@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.BannerMapper">
+    <!--添加banner-->
+    <!--void add(Banner banner);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Banner" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_banner`(`title`, `content`, `image_path`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{content}, #{imagePath}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
     <!--获取所有banner-->
     <!--List<Banner> findAll();-->
     <select id="findAll" resultType="cn.edu.hestyle.bookstadium.entity.Banner">
@@ -15,6 +21,16 @@
             `created_time` as `createdTime`,
             `modified_user` as `modifiedUser`,
             `modified_time` as `modifiedTime`
+        FROM
+            `t_banner`
+        WHERE
+            `is_delete`=0
+    </select>
+    <!--获取当前(未删除)轮播的数量-->
+    <!--Integer getAllCount();-->
+    <select id="getAllCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
         FROM
             `t_banner`
         WHERE
