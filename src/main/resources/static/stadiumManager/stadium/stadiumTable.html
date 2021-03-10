@@ -262,6 +262,9 @@
                                     ,size: 10240
                                     ,multiple: false
                                     ,number: 1
+                                    ,headers: {
+                                        token: $.cookie("stadiumManagerToken")
+                                    }
                                     ,done: function(res){
                                         if (res.code === 200) {
                                             // 文件上传成功后修改图片路径
