@@ -54,6 +54,9 @@
                 "data" : null,
                 "type" : "POST",
                 "dataType" : "json",
+                "beforeSend": function (request) {
+                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                },
                 "success" : function (json) {
                     if (json.code === 200) {
                         // 往dialogModifySelfBaseInfoForm填充服务器返回的账号信息
@@ -101,6 +104,9 @@
                 "data" : {"modifyData":modifyData},
                 "type" : "POST",
                 "dataType" : "json",
+                "beforeSend": function (request) {
+                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                },
                 "success" : function (json) {
                     // 弹出中间提示框
                     layer.open({

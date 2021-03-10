@@ -41,18 +41,14 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
     private StadiumBookMapper stadiumBookMapper;
 
     @Override
-    public void stadiumManagerAdd(String stadiumManagerUsername, StadiumBook stadiumBook) throws AddFailedException {
+    public void stadiumManagerAdd(Integer stadiumManagerId, StadiumBook stadiumBook) throws AddFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！id = " + stadiumManagerId);
             throw new AddFailedException("添加失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("StadiumManager 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new AddFailedException("添加失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         // 检查stadium是否存在
         if (stadiumBook.getStadiumId() == null) {
@@ -119,18 +115,14 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
     }
 
     @Override
-    public void stadiumManagerModify(String stadiumManagerUsername, StadiumBook stadiumBook) throws ModifyFailedException {
+    public void stadiumManagerModify(Integer stadiumManagerId, StadiumBook stadiumBook) throws ModifyFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new ModifyFailedException("修改失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("StadiumManager 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new ModifyFailedException("修改失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         // 检查StadiumBook是否存在
         if (stadiumBook.getId() == null) {
@@ -236,18 +228,14 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
 
     @Override
     @Transactional
-    public void stadiumManagerDeleteByIdList(String stadiumManagerUsername, List<Integer> stadiumBookIdList) throws DeleteFailedException {
+    public void stadiumManagerDeleteByIdList(Integer stadiumManagerId, List<Integer> stadiumBookIdList) throws DeleteFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new DeleteFailedException("修改失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("StadiumManager 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new DeleteFailedException("修改失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         if (stadiumBookIdList == null || stadiumBookIdList.size() == 0) {
             logger.warn("StadiumBook 批量删除失败，未指定需要删除的场馆预约！stadiumBookIdList = " + stadiumBookIdList);
@@ -310,19 +298,15 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
     }
 
     @Override
-    public List<StadiumBook> stadiumManagerFindAllByPage(String stadiumManagerUsername, Integer pageIndex, Integer pageSize) throws FindFailedException {
+    public List<StadiumBook> stadiumManagerFindAllByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException {
         // 查询stadiumManager
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查找失败，数据库发生未知异常！stadiumManagerUsername = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查找失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("StadiumManager 查找失败，用户名 stadiumManagerUsername = " + stadiumManagerUsername + " 未查找到账号！");
-            throw new FindFailedException("查询失败，用户名 " + stadiumManagerUsername + " 未注册！");
         }
         // 检查页码是否合法
         if (pageIndex < 1) {
@@ -345,18 +329,14 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
     }
 
     @Override
-    public Integer stadiumManagerGetAllCount(String stadiumManagerUsername) throws FindFailedException {
+    public Integer stadiumManagerGetAllCount(Integer stadiumManagerId) throws FindFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("StadiumManager 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new FindFailedException("查询失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         Integer count = 0;
         try {

@@ -82,9 +82,12 @@
                                     location.href = "index.html";
                                 }
                             });
-                            // 将用户名数据保存到cookies中
-                            $.cookie("username", json.data.username, {
-                                expires : 1
+                            // 将用户名、token数据保存到cookies中
+                            $.cookie("systemManagerUsername", json.data.username, {
+                                expires : 30
+                            });
+                            $.cookie("systemManagerToken", json.data.token, {
+                                expires : 30
                             });
                         } else {
                             // 弹出中间提示框

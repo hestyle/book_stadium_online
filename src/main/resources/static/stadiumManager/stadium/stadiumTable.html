@@ -6,6 +6,7 @@
     <script src="../../js/jquery.min.js"></script>
     <script src="../../layui/layui.all.js"></script>
     <script src="../../js/common.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
     <script src="../../plugins/soulTable/soulTable.js"></script>
     <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
     <link rel="stylesheet" href="../../css/style.css">
@@ -214,6 +215,9 @@
                 ]]
                 , page: true
                 , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
+                , headers: {
+                    token: $.cookie("stadiumManagerToken")
+                }
                 , request: {
                     pageName: 'pageIndex' //页码的参数名称，默认：page
                     ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
@@ -299,6 +303,9 @@
                                     "data" : {"stadiumData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
+                                    "beforeSend": function (request) {
+                                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                    },
                                     "success" : function (json) {
                                         layer.open({
                                             title: "提示信息",
@@ -350,6 +357,9 @@
                                 "data" : {"idListJsonString":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     layer.open({
                                         title: "提示信息",
@@ -415,6 +425,9 @@
                                 ,size: 10240
                                 ,multiple: false
                                 ,number: 1
+                                ,headers: {
+                                    token: $.cookie("stadiumManagerToken")
+                                }
                                 ,done: function(res){
                                     if (res.code === 200) {
                                         // 文件上传成功后修改图片路径
@@ -453,6 +466,9 @@
                                 "data" : {"modifyData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     layer.open({
                                         title: "提示信息",
@@ -508,6 +524,9 @@
                                 "data" : {"modifyData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     layer.open({
                                         title: "提示信息",
@@ -558,6 +577,9 @@
                                 "data" : {"stadiumCategoryIds":data.categoryIds},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     if (json.code === 200) {
                                         // 保存到全局变量
@@ -623,6 +645,9 @@
                                 "data" : {"modifyData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     layer.open({
                                         title: "提示信息",
@@ -765,6 +790,9 @@
                         , page: true
                         , limit: 100
                         , url: "/book_stadium_online/stadiumCategory/findByPage.do"
+                        , headers: {
+                            token: $.cookie("stadiumManagerToken")
+                        }
                         , request: {
                             pageName: 'pageIndex' //页码的参数名称，默认：page
                             ,limitName: 'pageSize' //每页数据量的参数名，默认：limit

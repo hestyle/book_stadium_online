@@ -70,7 +70,7 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
     }
 
     @Override
-    public SystemManager findById(Integer id) throws FindFailedException {
+    public SystemManager systemFindById(Integer id) throws FindFailedException {
         if (id == null) {
             logger.warn("SystemManager 查询失败，未指定SystemManager ID！");
             throw new FindFailedException("查询失败，未指定需要查询的SystemManager ID！");

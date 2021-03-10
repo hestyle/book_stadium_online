@@ -28,9 +28,9 @@ public interface IUserService {
     void register(User user) throws RegisterFailedException;
 
     /**
-     * 通过id查找(controller不能直接调用，会泄露盐值、token)
+     * (系统内部)通过id查找(controller不能直接调用，会泄露盐值、token)
      * @param id    id
      * @return      Stadium
      */
-    User findById(Integer id) throws FindFailedException;
+    User systemFindById(Integer id) throws FindFailedException;
 }

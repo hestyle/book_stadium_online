@@ -26,8 +26,9 @@ public class SystemManagerController extends BaseController {
     public ResponseResult<SystemManager> handleLogin(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
         // 执行业务端的业务
         SystemManager systemManager = systemManagerService.login(username, password);
-        // 将用户名发到session中，保存到服务端
-        session.setAttribute("username", systemManager.getUsername());
+        // 将id role发到session中，保存到服务端
+        session.setAttribute("id", systemManager.getId());
+        session.setAttribute("role", SystemManager.SYSTEM_MANAGER_ROLE);
         return new ResponseResult<>(SUCCESS, "登录成功！", systemManager);
     }
 }

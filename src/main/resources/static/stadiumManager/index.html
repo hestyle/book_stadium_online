@@ -134,6 +134,9 @@
                                 ,size: 10240
                                 ,multiple: false
                                 ,number: 1
+                                ,headers: {
+                                    token: $.cookie("stadiumManagerToken")
+                                }
                                 ,done: function(res){
                                     if (res.code === 200) {
                                         // 文件上传成功后修改图片路径
@@ -161,6 +164,9 @@
                                 "data" : {"modifyData":modifyData},
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     // 弹出中间提示框
                                     layer.open({
@@ -250,6 +256,9 @@
                                 "data" : data,
                                 "type" : "POST",
                                 "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
                                 "success" : function (json) {
                                     // 弹出中间提示框
                                     layer.open({

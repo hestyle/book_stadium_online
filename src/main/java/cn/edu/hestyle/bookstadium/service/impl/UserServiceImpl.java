@@ -152,7 +152,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public User findById(Integer id) throws FindFailedException {
+    public User systemFindById(Integer id) throws FindFailedException {
         if (id == null) {
             logger.warn("User 查询失败，未指定用户ID");
             throw new FindFailedException("查询失败，未指定需要查询的用户ID");
