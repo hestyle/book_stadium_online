@@ -8,6 +8,7 @@ import cn.edu.hestyle.bookstadium.service.IBannerService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -98,6 +99,78 @@ public class BannerServiceImpl implements IBannerService {
             throw new AddFailedException("添加失败，数据库发生未知异常!");
         }
         logger.warn("Banner 添加成功！banner = " + banner);
+    }
+
+    @Override
+    public void modify(Integer systemManagerId, Banner banner) throws ModifyFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        if (banner == null || banner.getId() == null) {
+            logger.warn("Banner 修改失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        Banner modifyBanner = null;
+        try {
+            modifyBanner = bannerMapper.findById(banner.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 查询失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        // 检查各个字段
+        if (banner.getTitle() != null) {
+            if (banner.getTitle().length() == 0) {
+                logger.warn("Banner 修改失败，轮播title不能设置为空！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播title不能设置为空!");
+            }
+            if (banner.getTitle().length() > 15) {
+                logger.warn("Banner 修改失败，轮播title过长，超过15个字符！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播title过长，超过了15个字符!");
+            }
+            modifyBanner.setTitle(banner.getTitle());
+        }
+        if (banner.getContent() != null) {
+            if (banner.getContent().length() == 0) {
+                logger.warn("Banner 修改失败，轮播content不能设置为空！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播content不能设置为空!");
+            }
+            if (banner.getContent().length() > 10000) {
+                logger.warn("Banner 修改失败，轮播content过长，超过10000个字符！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播content过长，超过了10000个字符!");
+            }
+            modifyBanner.setContent(banner.getContent());
+        }
+        if (banner.getImagePath() != null) {
+            boolean isOk = false;
+            try {
+                isOk = this.checkBannerImagePath(banner.getImagePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Banner 修改失败，轮播图片路径非法，资源不在服务器上！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播图片路径非法，资源不在服务器上!");
+            }
+            if (!isOk) {
+                logger.warn("Banner 修改失败，未填写轮播图片路径！banner = " + banner);
+                throw new ModifyFailedException("修改失败，轮播图片不能为空!");
+            }
+            modifyBanner.setImagePath(banner.getImagePath());
+        }
+        modifyBanner.setModifiedUser(systemManager.getUsername());
+        modifyBanner.setModifiedTime(new Date());
+        try {
+            bannerMapper.update(modifyBanner);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 修改失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        logger.warn("Banner 修改成功！modifyBanner = " + modifyBanner);
     }
 
     @Override

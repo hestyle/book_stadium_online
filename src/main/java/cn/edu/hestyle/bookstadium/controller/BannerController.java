@@ -67,6 +67,24 @@ public class BannerController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "添加成功！");
     }
 
+    @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleModify(@RequestParam(name = "bannerData") String bannerData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        Banner banner = null;
+        try {
+            banner = objectMapper.readValue(bannerData, Banner.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 修改失败，数据格式错误！data = " + bannerData);
+            throw new RequestException("Banner 修改失败，数据格式错误！");
+        }
+        bannerService.modify(systemManagerId, banner);
+        return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
     @PostMapping("/deleteByIdList.do")
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
     public ResponseResult<Void> handleDeleteByIdList(@RequestParam(name = "bannerIdListData") String bannerIdListData, HttpSession session) {

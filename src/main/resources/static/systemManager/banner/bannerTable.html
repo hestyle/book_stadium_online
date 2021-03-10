@@ -55,7 +55,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;text-align: left;">图片</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_banner_image_path" type="text" name="imagePath" placeholder="请输入轮播内容" autocomplete="off" class="layui-input" disabled style="display: none;">
+                    <input id="add_banner_image_path" type="text" name="imagePath" autocomplete="off" class="layui-input" disabled style="display: none;">
                     <button type="button" class="layui-btn layui-btn-normal" id="add_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>添加图片</button>
                     <img id="add_banner_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
                 </div>
@@ -64,73 +64,25 @@
     </script>
     <!--每条数据的编辑操作-->
     <script type="text/html" id="editDialog">
-        <form class="layui-form" action="" style="padding: 20px;width: 700px;" lay-filter="editDialogForm">
-            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">体育场馆信息</label>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">体育场馆名称</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
-                        <input id="edit_stadium_name" type="text" name="name" placeholder="体育场馆名称" autocomplete="off" class="layui-input" style="display: inline;" disabled>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">地址</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_stadium_address" type="text" name="stadiumAddress" placeholder="体育场馆地址" autocomplete="off" class="layui-input" disabled>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">描述</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <textarea id="edit_stadium_description" name="stadium_description" placeholder="体育场馆描述" class="layui-textarea" disabled></textarea>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">图片</label>
-                    <div id="edit_stadium_image" class="layui-input-inline" style="width: 75%;">
-                    </div>
+        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="editDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播名称</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="edit_banner_title" type="text" name="title" placeholder="请输入轮播名称" autocomplete="off" class="layui-input">
                 </div>
             </div>
-            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">场馆预约信息</label>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播内容</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <textarea id="edit_banner_content" name="content" placeholder="请输入描述" class="layui-textarea"></textarea>
                 </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约状态</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_book_state_0" type="radio" name="edit_book_state" value="0" title="暂不开始" checked>
-                        <input id="edit_book_state_1" type="radio" name="edit_book_state" value="1" title="开始预约">
-                        <input id="edit_book_state_2" type="radio" name="edit_book_state" value="2" title="结束预约">
-                        <input id="edit_stadiumBook_id" type="text" name="id" autocomplete="off" class="layui-input" style="display: none;" disabled>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约容量</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" value="1" min="1">
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">起始时间</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" readonly>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">终止时间</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" readonly>
-                    </div>
-                </div>
-                <div class="layui-form-item" id="edit_is_delete">
-                    <label class="layui-form-label" style="width: 15%;text-align: left;">删除</label>
-                    <div class="layui-input-inline" style="width: 75%;">
-                        <input id="edit_is_delete_0" type="radio" name="edit_is_delete" value="0" title="未删除" checked>
-                        <input id="edit_is_delete_1" type="radio" name="edit_is_delete" value="1" title="已删除">
-                    </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;text-align: left;">图片</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="edit_banner_image_path" type="text" name="imagePath" autocomplete="off" class="layui-input" disabled style="display: none;">
+                    <button type="button" class="layui-btn layui-btn-normal" id="edit_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>上传图片</button>
+                    <img id="edit_banner_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
                 </div>
             </div>
         </form>
@@ -359,87 +311,60 @@
                 if (layEvent === 'edit') {
                     layer.open({
                         type: 1,
-                        title: '编辑场馆预约',
-                        area:['770px','80%'],
+                        title: '编辑轮播',
+                        area:['460px','80%'],
                         content: $('#editDialog').html(),
                         btn: ['保存', '取消'],
                         success: function (index, layero) {
                             form.render();
-                            if (data.bookState === 0) {
-                                $('#edit_book_state_0').attr("checked", "checked");
-                            } else if (data.bookState === 1) {
-                                $('#edit_book_state_1').attr("checked", "checked");
-                            } else {
-                                $('#edit_book_state_0').attr("disabled", "disabled");
-                                $('#edit_book_state_1').attr("disabled", "disabled");
-                                $('#edit_book_state_2').attr("checked", "checked");
-                            }
-                            if (data.isDelete === 0) {
-                                $('#edit_is_delete_0').attr("checked", "checked");
-                            } else {
-                                $('#edit_is_delete_1').attr("checked", "checked");
-                            }
                             form.val("editDialogForm", data);
-                            // 自定义日期格式
-                            laydate.render({
-                                elem: '#edit_start_time'
-                                ,type: 'datetime'
-                                ,format: 'yyyy-MM-dd HH:mm:ss'
-                            });
-                            laydate.render({
-                                elem: '#edit_end_time'
-                                ,type: 'datetime'
-                                ,format: 'yyyy-MM-dd HH:mm:ss'
-                            });
-                            $.ajax({
-                                "url" : "/book_stadium_online/stadium/findById.do",
-                                "data" : {"stadiumId":data.stadiumId},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    if (json.code === 200) {
-                                        // 展示场馆信息
-                                        $('#edit_stadium_name').val(json.data.name);
-                                        $('#edit_stadium_address').val(json.data.address);
-                                        $('#edit_stadium_description').val(json.data.description);
-                                        if (json.data.imagePaths != null && json.data.imagePaths.length !== 0) {
-                                            var imagePaths = json.data.imagePaths.split(',');
-                                            for (var i in imagePaths) {
-                                                $('#edit_stadium_image').append('<img src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-left: 10px;"/>');
-                                            }
-                                        }
-                                        layer.close(index);
-                                    } else {
-                                        layer.open({
-                                            title: "提示信息",
-                                            content: json.message
-                                        });
+                            if (data.imagePath != null && data.imagePath.length !== 0) {
+                                $('#edit_banner_image').attr("src", data.imagePath);
+                                $('#edit_banner_image').show();
+                            }
+                            upload.render({
+                                elem: '#edit_uploadImageButton'
+                                ,url: '/book_stadium_online/banner/uploadImage.do'
+                                ,accept: 'images'
+                                ,acceptMime: 'image/*'
+                                ,size: 10240
+                                ,multiple: false
+                                ,number: 1
+                                ,headers: {
+                                    "token": $.cookie("systemManagerToken")
+                                }
+                                ,done: function(res){
+                                    if (res.code === 200) {
+                                        // 文件上传成功后修改图片路径
+                                        $('#edit_banner_image_path').val(res.data);
+                                        $('#edit_banner_image').attr("src", res.data);
+                                        $('#edit_banner_image').show();
                                     }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
                                     layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
+                                        title: '提示信息',
+                                        content: res.message
+                                    });
+                                }
+                                ,error: function(){
+                                    layer.open({
+                                        title: '提示信息',
+                                        content: '文件上传失败！'
                                     });
                                 }
                             });
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
-                            var postData = '{"id":'+ $('#edit_stadiumBook_id').val() + ',"bookState":"' + $('input[name=edit_book_state]:checked').val() + '","maxBookCount":"' + $('#edit_max_book_count').val()
-                                + '","startTime":"' + $('#edit_start_time').val() + '","endTime":"' + $('#edit_end_time').val() + '",' + '"isDelete":' + $('input:radio[name=edit_is_delete]:checked').val() + '}';
+                            var url ="/book_stadium_online/banner/modify.do";
+                            var postData = '{"id":'+ data.id + ',"title":"' + $('#edit_banner_title').val() + '","content":"' + $('#edit_banner_content').val()
+                                + '","imagePath":"' + $('#edit_banner_image_path').val() + '"}';
                             $.ajax({
                                 "url" : url,
-                                "data" : {"stadiumBookModifyData":postData},
+                                "data" : {"bannerData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
                                 },
                                 "success" : function (json) {
                                     layer.open({
@@ -447,18 +372,11 @@
                                         content: json.message
                                     });
                                     if (json.code === 200) {
-                                        // 如果改了bookState、isDelete，则刷新整个表格
-                                        if ($('input:radio[name=edit_is_delete]:checked').val() !== data.isDelete || $('input[name=edit_book_state]:checked').val() !== data.bookState) {
-                                            // 成功后，表格重载
-                                            layui.table.reload('bannerTable');
-                                        } else {
-                                            obj.update({
-                                                bookState: $('input[name=edit_book_state]:checked').val()
-                                                ,maxBookCount: $('#edit_max_book_count').val()
-                                                ,startTime: $('#edit_start_time').val()
-                                                ,endTime: $('#edit_end_time').val()
-                                            });
-                                        }
+                                        obj.update({
+                                            title: $('#edit_banner_title').val()
+                                            ,content: $('#edit_banner_content').val()
+                                            ,imagePath: $('#edit_banner_image_path').val()
+                                        });
                                         layer.close(index);
                                     }
                                 },
