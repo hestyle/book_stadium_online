@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.ISystemManagerService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,5 +31,15 @@ public class SystemManagerController extends BaseController {
         session.setAttribute("id", systemManager.getId());
         session.setAttribute("role", SystemManager.SYSTEM_MANAGER_ROLE);
         return new ResponseResult<>(SUCCESS, "登录成功！", systemManager);
+    }
+
+    @PostMapping("/getInfo.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<SystemManager> handleGetInfo(HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        // 执行业务端逻辑
+        SystemManager systemManager = systemManagerService.findById(systemManagerId);
+        return new ResponseResult<>(SUCCESS, "获取成功！", systemManager);
     }
 }

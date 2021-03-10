@@ -70,6 +70,30 @@ public class SystemManagerServiceImpl implements ISystemManagerService {
     }
 
     @Override
+    public SystemManager findById(Integer id) throws FindFailedException {
+        if (id == null) {
+            logger.warn("SystemManager 查询失败，未指定SystemManager ID！");
+            throw new FindFailedException("查询失败，未指定需要查询的SystemManager ID！");
+        }
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！id = " + id);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        if (systemManager == null) {
+            logger.warn("SystemManager 查询失败！不存在 id = " + id + " SystemManager账号！");
+            throw new FindFailedException("查询失败，id = " + id + " SystemManager账号不存在！");
+        }
+        systemManager.setPassword(null);
+        systemManager.setSaltValue(null);
+        logger.warn("SystemManager 查询成功！systemManager = " + systemManager);
+        return systemManager;
+    }
+
+    @Override
     public SystemManager systemFindById(Integer id) throws FindFailedException {
         if (id == null) {
             logger.warn("SystemManager 查询失败，未指定SystemManager ID！");

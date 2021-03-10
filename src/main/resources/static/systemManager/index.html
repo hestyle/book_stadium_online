@@ -60,6 +60,7 @@
             </form>
         </script>
         <script>
+            var systemManagerInfo;
             layuiModules=['layer', 'form', 'element'];
             function mounted() {
                 // 菜单列表数据(通过id、pid设置父、子级关系)
@@ -79,8 +80,8 @@
                 formatMenus();
                 //初始化类vue路由
                 initRouter();
-                // 设置username（登录的账号信息）
-                setUsername();
+                // 设置SystemManagerInfo（登录的账号信息）
+                setSystemManagerInfo();
                 // 显示设置弹框
                 $('.loginNameDiv').click(function () {
                     if ($('.dialogMenu').css('display') === 'block') {
@@ -197,11 +198,48 @@
             }
 
             /**
-             * 设置username
+             * 设置SystemManagerInfo
              */
-            function setUsername() {
-                $('#user-name').text($.cookie("username"));
-                $('#user-type').text("管理员");
+            function setSystemManagerInfo() {
+                var url ="/book_stadium_online/systemManager/getInfo.do";
+                $.ajax({
+                    "url" : url,
+                    "data" : null,
+                    "type" : "POST",
+                    "dataType" : "json",
+                    "beforeSend": function (request) {
+                        request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                    },
+                    "success" : function (json) {
+                        systemManagerInfo = json.data;
+                        if (json.code !== 200) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message,
+                                yes: function (index2, layero) {
+                                    // code==401说明未登录(BaseController.java定义)
+                                    location.href = "login.html";
+                                    layer.close(index2);
+                                }
+                            });
+                        } else {
+                            $('#user-name').text(systemManagerInfo.username);
+                            $('#user-type').text("后台管理员");
+                            if (systemManagerInfo.avatarPath != null) {
+                                $('.loginIcon').attr("src", systemManagerInfo.avatarPath);
+                            }
+                            console.log(systemManagerInfo);
+                        }
+                    },
+                    "error" : function () {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "服务器连接异常！"
+                        });
+                    }
+                });
             }
         </script>
     </body>
