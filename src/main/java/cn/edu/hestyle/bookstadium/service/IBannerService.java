@@ -2,6 +2,7 @@ package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.Banner;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 
 import java.util.List;
@@ -20,6 +21,14 @@ public interface IBannerService {
      * @throws AddFailedException   添加异常
      */
     void add(Integer systemManagerId, Banner banner) throws AddFailedException;
+
+    /**
+     * 批量删除banner
+     * @param systemManagerId           systemManagerId
+     * @param bannerIdList              bannerIdList
+     * @throws DeleteFailedException    删除异常
+     */
+    void deleteByIdList(Integer systemManagerId, List<Integer> bannerIdList) throws DeleteFailedException;
 
     /**
      * 获取所有未删除的Banner

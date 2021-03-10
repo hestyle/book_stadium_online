@@ -12,6 +12,12 @@
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
 </head>
+    <style>
+        .layui-form-checked[lay-skin=primary] i {
+            border-color: #FF0000;
+            background-color: #FF0000;
+        }
+    </style>
     <body>
         <table id="bannerTable" lay-filter="test"></table>
     </body>
@@ -310,14 +316,14 @@
                             return;
                         }
                         layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/stadiumBook/stadiumManagerDeleteByIdList.do";
+                            var url ="/book_stadium_online/banner/deleteByIdList.do";
                             $.ajax({
                                 "url" : url,
-                                "data" : {"idListJsonString":postData},
+                                "data" : {"bannerIdListData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
                                 },
                                 "success" : function (json) {
                                     layer.open({

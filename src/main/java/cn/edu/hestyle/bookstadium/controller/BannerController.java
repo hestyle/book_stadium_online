@@ -7,6 +7,7 @@ import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IBannerService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,24 @@ public class BannerController extends BaseController {
         }
         bannerService.add(systemManagerId, banner);
         return new ResponseResult<Void>(SUCCESS, "添加成功！");
+    }
+
+    @PostMapping("/deleteByIdList.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleDeleteByIdList(@RequestParam(name = "bannerIdListData") String bannerIdListData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Integer> bannerIdList = null;
+        try {
+            bannerIdList = objectMapper.readValue(bannerIdListData, new TypeReference<List<Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 删除失败，数据格式错误！bannerIdListData = " + bannerIdListData);
+            throw new RequestException("删除失败，数据格式错误！");
+        }
+        bannerService.deleteByIdList(systemManagerId, bannerIdList);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
     }
 
     @PostMapping("/findAll.do")

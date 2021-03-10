@@ -26,6 +26,39 @@
         WHERE
             `is_delete`=0
     </select>
+    <!--通过id查找Banner-->
+    <!--Banner findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Banner">
+        SELECT
+            `id` as `id`,
+            `title` as `title`,
+            `content` as `content`,
+            `image_path` as `imagePath`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_banner`
+        WHERE
+            `id`=#{id}
+    </select>
+    <!--更新Banner-->
+    <!--void update(Banner banner);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Banner">
+        UPDATE `t_banner` SET
+            `title` = #{title},
+            `content` = #{content},
+            `image_path` = #{imagePath},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id`=#{id}
+    </update>
     <!--获取当前(未删除)轮播的数量-->
     <!--Integer getAllCount();-->
     <select id="getAllCount" resultType="java.lang.Integer">

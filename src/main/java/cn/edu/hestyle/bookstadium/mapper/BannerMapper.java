@@ -26,6 +26,19 @@ public interface BannerMapper {
     List<Banner> findAll();
 
     /**
+     * 通过id查找Banner
+     * @param id        Banner id
+     * @return          Banner
+     */
+    Banner findById(Integer id);
+
+    /**
+     * 更新Banner
+     * @param banner    Banner
+     */
+    void update(Banner banner);
+
+    /**
      * 获取当前轮播的数量
      * @return          当前所有未删除的banner数量
      */

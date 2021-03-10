@@ -6,10 +6,12 @@ import cn.edu.hestyle.bookstadium.mapper.BannerMapper;
 import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IBannerService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -96,6 +98,52 @@ public class BannerServiceImpl implements IBannerService {
             throw new AddFailedException("添加失败，数据库发生未知异常!");
         }
         logger.warn("Banner 添加成功！banner = " + banner);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByIdList(Integer systemManagerId, List<Integer> bannerIdList) throws DeleteFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+        }
+        if (bannerIdList == null || bannerIdList.size() == 0) {
+            logger.warn("Banner 删除失败，未指定需要删除banner id！bannerIdList = " + bannerIdList);
+            throw new DeleteFailedException("删除失败，未指定需要删除banner id！");
+        }
+        for (Integer bannerId : bannerIdList) {
+            if (bannerId == null) {
+                logger.warn("Banner 删除失败，banner id list 格式错误！bannerIdList = " + bannerIdList);
+                throw new DeleteFailedException("删除失败，banner id list 格式错误！");
+            }
+            Banner banner = null;
+            try {
+                banner = bannerMapper.findById(bannerId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Banner 查询失败，数据库发生未知异常！");
+                throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+            }
+            if (banner == null) {
+                logger.warn("Banner 删除失败，bannerId = " + bannerId + " 不存在！");
+                throw new DeleteFailedException("删除失败，不存在id = " + bannerId + "的轮播项，已撤销删除操作！");
+            }
+            banner.setIsDelete(1);
+            banner.setModifiedUser(systemManager.getUsername());
+            banner.setModifiedTime(new Date());
+            try {
+                bannerMapper.update(banner);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Banner 更新失败，数据库发生未知异常！");
+                throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+            }
+        }
+        logger.info("Banner 删除成功！bannerIdList = " + bannerIdList);
     }
 
     @Override
