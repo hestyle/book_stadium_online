@@ -7,7 +7,8 @@
     <select id="findById" parameterType="java.lang.Integer" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
         SELECT
 		    `id` as `id`,
-			`name` as `name`,
+			`title` as `title`,
+			`image_path` as `imagePath`,
 			`description` as `description`,
 			`is_delete` as `isDelete`,
 			`created_user` as `createdUser`,
@@ -24,7 +25,8 @@
     <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
         SELECT
             `id` as `id`,
-            `name` as `name`,
+            `title` as `title`,
+            `image_path` as `imagePath`,
             `description` as `description`,
             `is_delete` as `isDelete`,
             `created_user` as `createdUser`,
