@@ -73,6 +73,7 @@ public class BannerController extends BaseController {
         // 从session中取出id
         Integer systemManagerId = (Integer) session.getAttribute("id");
         ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         Banner banner = null;
         try {
             banner = objectMapper.readValue(bannerData, Banner.class);
