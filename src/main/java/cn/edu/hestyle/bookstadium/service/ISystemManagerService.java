@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 /**
  * SystemManager service层接口
@@ -31,4 +32,11 @@ public interface ISystemManagerService {
      * @return      Stadium
      */
     SystemManager systemFindById(Integer id) throws FindFailedException;
+
+    /**
+     * 修改systemManager
+     * @param systemManager             systemManager
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modify(Integer systemManagerId, SystemManager systemManager) throws ModifyFailedException;
 }
