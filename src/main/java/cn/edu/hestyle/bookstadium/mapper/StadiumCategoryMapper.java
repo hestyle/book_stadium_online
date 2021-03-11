@@ -13,6 +13,12 @@ import java.util.List;
 @Mapper
 public interface StadiumCategoryMapper {
     /**
+     * 添加stadiumCategory
+     * @param stadiumCategory   stadiumCategory
+     */
+    void add(StadiumCategory stadiumCategory);
+
+    /**
      * 通过id查找StadiumCategory
      * @param id        StadiumCategory id
      * @return          StadiumCategory

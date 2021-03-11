@@ -1,15 +1,21 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumCategory;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.mapper.StadiumCategoryMapper;
+import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumCategoryService;
+import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,6 +30,60 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
 
     @Resource
     private StadiumCategoryMapper stadiumCategoryMapper;
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
+
+    @Override
+    public void add(Integer systemManagerId, StadiumCategory stadiumCategory) throws AddFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new AddFailedException("添加失败，数据库发生未知异常!");
+        }
+        // 检查各个字段
+        if (stadiumCategory.getTitle() == null || stadiumCategory.getTitle().length() == 0) {
+            logger.warn("StadiumCategory 添加失败，未设置场馆分类title！StadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，未设置场馆分类title!");
+        }
+        if (stadiumCategory.getTitle().length() > 6) {
+            logger.warn("StadiumCategory 添加失败，场馆分类title过长，超过15个字符！StadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，场馆分类title过长，超过了6个字符!");
+        }
+        if (stadiumCategory.getDescription() == null || stadiumCategory.getDescription().length() == 0) {
+            logger.warn("StadiumCategory 添加失败，未场馆分类 description ！stadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，未设置场馆分类描述!");
+        }
+        if (stadiumCategory.getDescription().length() > 200) {
+            logger.warn("StadiumCategory 添加失败，场馆分类 description过长，超过200个字符！stadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，场馆分类描述过长，超过200个字符!");
+        }
+        boolean isOk = false;
+        try {
+            isOk = this.checkStadiumCategoryImagePath(stadiumCategory.getImagePath());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 添加失败，场馆分类图片路径非法，资源不在服务器上！stadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，场馆分类图片路径非法，资源不在服务器上!");
+        }
+        if (!isOk) {
+            logger.warn("StadiumCategory 添加失败，未填写场馆分类图片路径！stadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，未上传场馆分类图片资源!");
+        }
+        stadiumCategory.setIsDelete(0);
+        stadiumCategory.setCreatedUser(systemManager.getUsername());
+        stadiumCategory.setCreatedTime(new Date());
+        try {
+            stadiumCategoryMapper.add(stadiumCategory);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 添加失败，数据库发生未知异常！");
+            throw new AddFailedException("添加失败，数据库发生未知异常!");
+        }
+        logger.warn("StadiumCategory 添加成功！stadiumCategory = " + stadiumCategory);
+    }
 
     @Override
     public StadiumCategory findById(Integer id) throws FindFailedException {
@@ -107,5 +167,31 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
         }
         logger.info("StadiumCategory查询成功，pageIndex = " + pageIndex + ", pageSize = " + pageSize + ", data = " + stadiumCategoryList);
         return stadiumCategoryList;
+    }
+
+    /**
+     * 检查BannerImagePath的合法性
+     * @param imagePath             imagePath
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkStadiumCategoryImagePath(String imagePath) throws Exception {
+        if (imagePath == null || imagePath.length() == 0) {
+            return false;
+        }
+        try {
+            String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/stadiumCategory";
+            String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+            String filePath = pathNameTruth + imagePath.substring(imagePath.lastIndexOf('/'));
+            File file = new File(filePath);
+            if (!file.exists()) {
+                throw new Exception(imagePath + "文件不存在！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(imagePath + "文件不存在！");
+        }
+        logger.info("StadiumCategory imagePath = " + imagePath + " 通过检查！");
+        return true;
     }
 }

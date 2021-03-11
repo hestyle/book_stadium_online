@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumCategoryMapper">
+    <!--添加stadiumCategory-->
+    <!--void add(StadiumCategory stadiumCategory);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumCategory" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium_category`(`title`, `description`, `image_path`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{description}, #{imagePath}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
     <!--通过id查找StadiumCategory-->
     <!--StadiumCategory findById(Integer id);-->
     <select id="findById" parameterType="java.lang.Integer" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
