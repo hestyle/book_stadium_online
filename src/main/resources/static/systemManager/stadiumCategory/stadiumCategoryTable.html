@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>APP 轮播</title>
+    <title>场馆分类</title>
     <script src="../../js/jquery.min.js"></script>
     <script src="../../layui/layui.all.js"></script>
     <script src="../../js/common.js"></script>
@@ -102,19 +102,23 @@
                 , defaultToolbar: ['print', 'exports']
                 , method: 'POST'
                 , cols: [[
-                    {title: '<a class="" style="font-size: 20px; color:black;">APP轮播项表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                    {title: '<a class="" style="font-size: 20px; color:black;">体育场馆分类表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
                 ],[ //表头
                     {checkbox: true, LAY_CHECKED: false}
                     , {field: 'id', title: 'id', width: 100, sort: true}
                     , {field: 'title', title: '标题', width: 200, sort: true}
-                    , {field: 'content', title: '内容', width: 200, sort: true}
+                    , {field: 'description', title: '描述', width: 200, sort: true}
                     , {field: 'imagePath', title: '图片路径', width: 200, sort: true}
                     , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                 ]]
                 , page: false
-                , url: "/book_stadium_online/banner/findAll.do"
+                , url: "/book_stadium_online/stadiumCategory/findByPage.do"
                 , headers: {
                     token: $.cookie("systemManagerToken")
+                }
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
                 }
                 , response: {
                     statusName: 'code' //规定数据状态的字段名称，默认：code
