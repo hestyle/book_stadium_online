@@ -76,7 +76,8 @@ public class StadiumCategoryController extends BaseController {
     public ResponseResult<List<StadiumCategory>> handleFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                         @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
         List<StadiumCategory> stadiumCategoryList = stadiumCategoryService.findByPage(pageIndex, pageSize);
-        return new ResponseResult<List<StadiumCategory>>(SUCCESS, "查找成功", stadiumCategoryList);
+        Integer count = stadiumCategoryService.getAllCount();
+        return new ResponseResult<List<StadiumCategory>>(SUCCESS, count, stadiumCategoryList, "查找成功");
     }
 
     @PostMapping("/uploadImage.do")

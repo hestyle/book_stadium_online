@@ -32,4 +32,10 @@ public interface StadiumCategoryMapper {
      * @return              StadiumCategory list
      */
     List<StadiumCategory> findByPage(Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取StadiumCategory个数
+     * @return                          stadium个数
+     */
+    Integer getAllCount();
 }

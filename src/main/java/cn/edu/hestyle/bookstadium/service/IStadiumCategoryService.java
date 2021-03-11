@@ -43,4 +43,10 @@ public interface IStadiumCategoryService {
      * @throws FindFailedException  查询失败异常
      */
     List<StadiumCategory> findByPage(Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * 获取StadiumCategory个数
+     * @return                          stadium个数
+     */
+    Integer getAllCount() throws FindFailedException;
 }

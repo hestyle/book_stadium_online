@@ -169,6 +169,19 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
         return stadiumCategoryList;
     }
 
+    @Override
+    public Integer getAllCount() throws FindFailedException {
+        Integer count = 0;
+        try {
+            count = stadiumCategoryMapper.getAllCount();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("StadiumCategory查询失败，数据库发生未知异常！");
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        return count;
+    }
+
     /**
      * 检查BannerImagePath的合法性
      * @param imagePath             imagePath

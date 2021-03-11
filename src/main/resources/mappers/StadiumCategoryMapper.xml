@@ -46,4 +46,14 @@
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
+    <!--获取StadiumCategory个数-->
+    <!--Integer getAllCount();-->
+    <select id="getAllCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium_category`
+        WHERE
+            `is_delete` = 0
+    </select>
 </mapper>
