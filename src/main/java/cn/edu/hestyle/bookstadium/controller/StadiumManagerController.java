@@ -52,8 +52,9 @@ public class StadiumManagerController extends BaseController {
     public ResponseResult<StadiumManager> handleLogin(@RequestParam("username") String username, @RequestParam("password") String password, HttpSession session) {
         // 执行业务端的业务
         StadiumManager stadiumManager = stadiumManagerService.login(username, password);
-        // 将用户名发到session中，保存到服务端
-        session.setAttribute("stadiumManagerUsername", stadiumManager.getUsername());
+        // 将id role发到session中，保存到服务端
+        session.setAttribute("id", stadiumManager.getId());
+        session.setAttribute("role", StadiumManager.STADIUM_MANAGER_ROLE);
         return new ResponseResult<>(SUCCESS, "登录成功！", stadiumManager);
     }
 
@@ -77,23 +78,18 @@ public class StadiumManagerController extends BaseController {
     @PostMapping("/getInfo.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<StadiumManager> handleGetInfo(HttpSession session) {
-        // 判断是否登录
-        String username = (String) session.getAttribute("stadiumManagerUsername");
-        if (null == username) {
-            throw new NotLoginException("请求失败，请先进行登录！");
-        }
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
         // 执行业务端的业务
-        StadiumManager stadiumManager = stadiumManagerService.findByUsername(username);
+        StadiumManager stadiumManager = stadiumManagerService.findById(stadiumManagerId);
         return new ResponseResult<>(SUCCESS, "获取成功！", stadiumManager);
     }
 
     @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<Void> handleModify(@RequestParam(name = "modifyData") String modifyData, HttpSession session) {
-        // 判断是否登录
-        String username = (String) session.getAttribute("stadiumManagerUsername");
-        if (null == username) {
-            throw new NotLoginException("请求失败，请先进行登录！");
-        }
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
         ObjectMapper objectMapper = new ObjectMapper();
         HashMap<String, Object> modifyDataMap = null;
         // 从stadiumManagerData读取modifyDataMap对象
@@ -105,31 +101,27 @@ public class StadiumManagerController extends BaseController {
             throw new RequestParamException("账号更新保存失败，数据格式错误！");
         }
         // 执行业务端的业务
-        stadiumManagerService.modifyInfo(username, modifyDataMap);
+        stadiumManagerService.modifyInfo(stadiumManagerId, modifyDataMap);
         return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
     }
 
     @PostMapping("/changePassword.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<Void> handleChangePassword(@RequestParam(name = "beforePassword") String beforePassword, @RequestParam(name = "newPassword") String newPassword, HttpSession session) {
-        // 判断是否登录
-        String username = (String) session.getAttribute("stadiumManagerUsername");
-        if (null == username) {
-            throw new NotLoginException("请求失败，请先进行登录！");
-        }
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
         // 执行业务端的业务
-        stadiumManagerService.changePassword(username, beforePassword, newPassword);
+        stadiumManagerService.changePassword(stadiumManagerId, beforePassword, newPassword);
         return new ResponseResult<>(SUCCESS, "密码修改成功！");
     }
 
     @PostMapping("/uploadAvatar.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<String> handleUploadAvatar(@RequestParam("file") MultipartFile file, HttpSession session) {
-        // 判断是否已经登录过
-        String username = (String) session.getAttribute("stadiumManagerUsername");
-        if (null == username) {
-            throw new NotLoginException("请求失败，请先进行登录！");
-        }
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
         String filePath = FileUploadProcessUtil.saveFile(file, UPLOAD_DIR_NAME,  FILE_MAX_SIZE, FILE_CONTENT_TYPES);
-        logger.warn("StadiumManager username = " + username + "上传文件 url = " + filePath + "成功！");
+        logger.warn("StadiumManager stadiumManagerId = " + stadiumManagerId + "上传文件 url = " + filePath + "成功！");
         return new ResponseResult<String>(SUCCESS, "上传成功", filePath);
     }
 }

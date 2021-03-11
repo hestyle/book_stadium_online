@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.LogoutFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
 
 /**
@@ -21,6 +22,13 @@ public interface IUserService {
     User login(String username, String password) throws LoginFailedException;
 
     /**
+     * user注销登录
+     * @param id                        user id
+     * @throws LogoutFailedException    注销失败异常
+     */
+    void logout(Integer id) throws LogoutFailedException;
+
+    /**
      * user 注册
      * @param user                      user
      * @throws RegisterFailedException  注册失败异常
@@ -28,9 +36,9 @@ public interface IUserService {
     void register(User user) throws RegisterFailedException;
 
     /**
-     * 通过id查找(controller不能直接调用，会泄露盐值、token)
+     * (系统内部)通过id查找(controller不能直接调用，会泄露盐值、token)
      * @param id    id
      * @return      Stadium
      */
-    User findById(Integer id) throws FindFailedException;
+    User systemFindById(Integer id) throws FindFailedException;
 }

@@ -17,10 +17,11 @@ import java.util.List;
 public interface IStadiumService {
     /**
      * 添加stadium
+     * @param stadiumManagerId      stadiumManagerId
      * @param stadium               体育场馆
      * @throws AddFailedException   添加失败异常
      */
-    void add(String stadiumManagerUsername, Stadium stadium) throws AddFailedException;
+    void add(Integer stadiumManagerId, Stadium stadium) throws AddFailedException;
 
     /**
      * 通过stadiumId查找stadium
@@ -32,34 +33,34 @@ public interface IStadiumService {
 
     /**
      * 修改stadium
-     * @param stadiumManagerUsername    stadiumManager用户名
+     * @param stadiumManagerId          stadiumManagerId
      * @param modifyDataMap             key value
      * @throws ModifyFailedException    修改异常
      */
-    void stadiumManagerModify(String stadiumManagerUsername, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
+    void stadiumManagerModify(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
 
     /**
      * 删除stadium（只能删除自己的）
-     * @param stadiumManagerUsername    stadiumManager用户名
+     * @param stadiumManagerId          stadiumManagerId
      * @param stadiumIds                id list
      * @throws DeleteFailedException    删除异常
      */
-    void stadiumManagerDeleteByIds(String stadiumManagerUsername, List<Integer> stadiumIds) throws DeleteFailedException;
+    void stadiumManagerDeleteByIds(Integer stadiumManagerId, List<Integer> stadiumIds) throws DeleteFailedException;
 
     /**
      * Stadium分页查询
-     * @param stadiumManagerUsername 场馆管理员username
+     * @param stadiumManagerId      stadiumManagerId
      * @param pageIndex             页下标
      * @param pageSize              一页大小
      * @return                      Stadium list
      * @throws FindFailedException  查询失败异常
      */
-    List<Stadium> stadiumManagerFindByPage(String stadiumManagerUsername, Integer pageIndex, Integer pageSize) throws FindFailedException;
+    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException;
 
     /**
      * 获取某stadiumManager的stadium个数
-     * @param stadiumManagerUsername    stadiumManager
+     * @param stadiumManagerId          stadiumManagerId
      * @return                          stadium个数
      */
-    Integer stadiumManagerGetCount(String stadiumManagerUsername) throws FindFailedException;
+    Integer stadiumManagerGetCount(Integer stadiumManagerId) throws FindFailedException;
 }

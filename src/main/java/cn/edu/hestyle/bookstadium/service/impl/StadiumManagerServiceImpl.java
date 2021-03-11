@@ -182,7 +182,34 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
     }
 
     @Override
-    public StadiumManager findById(Integer id) throws FindFailedException {
+    public StadiumManager findById(Integer stadiumManagerId) throws FindFailedException {
+        if (stadiumManagerId == null) {
+            logger.info("StadiumManager id=" + stadiumManagerId + " 账号查找失败，未输入stadiumManagerId！");
+            throw new FindFailedException("账号查找失败，未输入用户id！");
+        }
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("StadiumManager id=" + stadiumManagerId + ",  账号查找失败，数据库发生未知异常！");
+            throw new FindFailedException("账号查找失败，数据库发生未知异常！");
+        }
+        // 判断username是否注册
+        if (stadiumManager == null) {
+            logger.info("StadiumManager id=" + stadiumManagerId + ", 账号查找失败，用户名 id=" + stadiumManagerId + " 未注册！");
+            throw new FindFailedException("账号查找失败，用户名 id=" + stadiumManagerId + " 未注册！");
+        } else {
+            // 将password、saltValue剔除
+            stadiumManager.setPassword(null);
+            stadiumManager.setSaltValue(null);
+            logger.info("StadiumManager id=" + stadiumManagerId + ", 查找账号信息成功！stadiumManager=" + stadiumManager);
+            return stadiumManager;
+        }
+    }
+
+    @Override
+    public StadiumManager systemFindById(Integer id) throws FindFailedException {
         if (id == null) {
             logger.warn("StadiumManager 查询失败，StadiumManager ID！");
             throw new FindFailedException("查询失败，未指定需要查询的StadiumManager ID！");
@@ -200,18 +227,14 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
     }
 
     @Override
-    public void modifyInfo(String username, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
+    public void modifyInfo(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(username);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("StadiumManager username=" + username + ",  账号查找失败，数据库发生未知异常！");
+            logger.error("StadiumManager id=" + stadiumManagerId + ",  账号查找失败，数据库发生未知异常！");
             throw new ModifyFailedException("更新保存失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.error("StadiumManager 账号更新保存失败，username=" + username + ",  账号查找失败！data = " + modifyDataMap);
-            throw new ModifyFailedException("更新保存失败，用户名 " + username + "未注册！");
         }
         if (modifyDataMap.containsKey("gender")) {
             String gender = (String)modifyDataMap.get("gender");
@@ -263,18 +286,14 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
     }
 
     @Override
-    public void changePassword(String username, String beforePassword, String newPassword) throws ModifyFailedException {
+    public void changePassword(Integer stadiumManagerId, String beforePassword, String newPassword) throws ModifyFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(username);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.error("StadiumManager username=" + username + ",  账号查找失败，数据库发生未知异常！");
-            throw new ModifyFailedException("密码修改失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.info("StadiumManager 账号更新保存失败，username=" + username + ",  账号查找失败！");
-            throw new ModifyFailedException("更新保存失败，用户名 " + username + "未注册！");
+            logger.error("StadiumManager id=" + stadiumManagerId + ",  账号查找失败，数据库发生未知异常！");
+            throw new ModifyFailedException("更新保存失败，数据库发生未知异常！");
         }
         // 检查原密码是否正确
         if (!stadiumManager.getPassword().equals(EncryptUtil.encryptPassword(beforePassword, stadiumManager.getSaltValue()))) {

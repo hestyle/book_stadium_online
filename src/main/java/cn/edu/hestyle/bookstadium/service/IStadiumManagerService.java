@@ -36,26 +36,34 @@ public interface IStadiumManagerService {
     StadiumManager findByUsername(String username) throws AccountNotFoundException;
 
     /**
-     * 通过id查找(controller不能直接调用，会泄露盐值、token)
+     * 通过id查找
+     * @param stadiumManagerId          stadiumManagerId
+     * @return                          stadiumManager
+     * @throws FindFailedException      查找失败异常
+     */
+    StadiumManager findById(Integer stadiumManagerId) throws FindFailedException;
+
+    /**
+     * （系统）通过id查找(controller不能直接调用，会泄露盐值、token)
      * @param id    id
      * @return      Stadium
      */
-    StadiumManager findById(Integer id) throws FindFailedException;
+    StadiumManager systemFindById(Integer id) throws FindFailedException;
 
     /**
      * 更新StadiumManager账号信息
-     * @param username                  用户名
+     * @param stadiumManagerId          StadiumManager id
      * @param modifyDataMap             key value
      * @throws ModifyFailedException    更新字段数字非法
      */
-    void modifyInfo(String username, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
+    void modifyInfo(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
 
     /**
      * 修改StadiumManager账号密码
-     * @param username                  用户名
+     * @param stadiumManagerId          stadiumManagerId
      * @param beforePassword            原密码
      * @param newPassword               新密码
      * @throws ModifyFailedException    更新错误
      */
-    void changePassword(String username, String beforePassword, String newPassword) throws ModifyFailedException;
+    void changePassword(Integer stadiumManagerId, String beforePassword, String newPassword) throws ModifyFailedException;
 }

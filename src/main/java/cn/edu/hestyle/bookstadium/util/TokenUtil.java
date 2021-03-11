@@ -16,8 +16,8 @@ import java.util.Date;
  * @date 2021/3/9 3:39 下午
  */
 public class TokenUtil {
-    /** token 有效时长 */
-    public static final int TOKEN_EXPIRES = 60 * 60 * 24 * 30;
+    /** token 有效时长1个月（单位是毫秒） */
+    public static final long TOKEN_EXPIRES = 1000L * 60 * 60 * 24 * 30;
 
     private static final Logger logger = LoggerFactory.getLogger(TokenUtil.class);
 
@@ -28,9 +28,8 @@ public class TokenUtil {
      */
     public static String getToken(User user) {
         String token = "";
-        Date now = new Date();
         token = JWT.create().withAudience(user.getId() + "", User.USER_ROLE)
-                .withExpiresAt(new Date(now.getTime() + TOKEN_EXPIRES))
+                .withExpiresAt(new Date(System.currentTimeMillis() + TOKEN_EXPIRES))
                 .sign(Algorithm.HMAC256(user.getPassword()));
         logger.info("User userId = " + user.getId() + " 成功生成 Token = " + token);
         return token;
@@ -43,9 +42,8 @@ public class TokenUtil {
      */
     public static String getToken(StadiumManager stadiumManager) {
         String token = "";
-        Date now = new Date();
         token = JWT.create().withAudience(stadiumManager.getId() + "", StadiumManager.STADIUM_MANAGER_ROLE)
-                .withExpiresAt(new Date(now.getTime() + TOKEN_EXPIRES))
+                .withExpiresAt(new Date(System.currentTimeMillis() + TOKEN_EXPIRES))
                 .sign(Algorithm.HMAC256(stadiumManager.getPassword()));
         logger.info("StadiumManager stadiumManagerId = " + stadiumManager.getId() + " 成功生成 Token = " + token);
         return token;
@@ -58,9 +56,8 @@ public class TokenUtil {
      */
     public static String getToken(SystemManager systemManager) {
         String token = "";
-        Date now = new Date();
         token = JWT.create().withAudience(systemManager.getId() + "", SystemManager.SYSTEM_MANAGER_ROLE)
-                .withExpiresAt(new Date(now.getTime() + TOKEN_EXPIRES))
+                .withExpiresAt(new Date(System.currentTimeMillis() + TOKEN_EXPIRES))
                 .sign(Algorithm.HMAC256(systemManager.getPassword()));
         logger.info("SystemManager systemManagerId = " + systemManager.getId() + " 成功生成 Token = " + token);
         return token;

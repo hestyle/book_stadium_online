@@ -41,18 +41,14 @@ public class StadiumServiceImpl implements IStadiumService {
     private StadiumManagerMapper stadiumManagerMapper;
 
     @Override
-    public void add(String stadiumManagerUsername, Stadium stadium) throws AddFailedException {
+    public void add(Integer stadiumManagerId, Stadium stadium) throws AddFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new AddFailedException("添加失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("Stadium 添加失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new AddFailedException("添加失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         stadium.setManagerId(stadiumManager.getId());
         // 检查categoryIds
@@ -71,7 +67,7 @@ public class StadiumServiceImpl implements IStadiumService {
             logger.warn("Stadium 添加失败，image path列表格式错误！data = " + stadium);
             throw new AddFailedException("添加失败，场馆图片格式错误！");
         }
-        stadium.setCreatedUser(stadiumManagerUsername);
+        stadium.setCreatedUser(stadiumManager.getUsername());
         stadium.setCreatedTime(new Date());
         try {
             stadiumMapper.add(stadium);
@@ -102,18 +98,14 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public void stadiumManagerModify(String stadiumManagerUsername, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
+    public void stadiumManagerModify(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new ModifyFailedException("添加失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("Stadium 修改失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new ModifyFailedException("修改失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         if (!modifyDataMap.containsKey("id")) {
             logger.warn("Stadium 修改失败，场馆id未填写！data = " + modifyDataMap);
@@ -140,7 +132,7 @@ public class StadiumServiceImpl implements IStadiumService {
         // 检查该stadiumManager是否有权限修改stadium
         if (!stadiumManager.getId().equals(stadium.getManagerId())) {
             logger.warn("Stadium 修改失败，stadiumManagerId = " + stadiumManager.getId() + "没有体育场馆 data = " + stadium + " 修改权限！");
-            throw new ModifyFailedException("修改失败，" + stadiumManagerUsername + " 无权限修改 id = " + id + "的体育场馆！");
+            throw new ModifyFailedException("修改失败，" + stadiumManager.getUsername() + " 无权限修改 id = " + id + "的体育场馆！");
         }
         // name
         if (modifyDataMap.containsKey("name")) {
@@ -210,7 +202,7 @@ public class StadiumServiceImpl implements IStadiumService {
             }
             stadium.setImagePaths(imagePaths);
         }
-        stadium.setModifiedUser(stadiumManagerUsername);
+        stadium.setModifiedUser(stadiumManager.getUsername());
         stadium.setModifiedTime(new Date());
         try {
             stadiumMapper.update(stadium);
@@ -224,18 +216,14 @@ public class StadiumServiceImpl implements IStadiumService {
 
     @Override
     @Transactional
-    public void stadiumManagerDeleteByIds(String stadiumManagerUsername, List<Integer> stadiumIds) throws DeleteFailedException {
+    public void stadiumManagerDeleteByIds(Integer stadiumManagerId, List<Integer> stadiumIds) throws DeleteFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new DeleteFailedException("删除失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("Stadium 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new DeleteFailedException("删除失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         if (stadiumIds == null || stadiumIds.size() == 0) {
             logger.warn("Stadium 删除失败，data = " + stadiumIds + " 未指定需要删除的Stadium id！");
@@ -263,7 +251,7 @@ public class StadiumServiceImpl implements IStadiumService {
                 throw new DeleteFailedException("删除失败，不存在id = " + stadiumId + " 的体育场馆！");
             }
             stadium.setIsDelete(1);
-            stadium.setModifiedUser(stadiumManagerUsername);
+            stadium.setModifiedUser(stadiumManager.getUsername());
             stadium.setModifiedTime(new Date());
             try {
                 stadiumMapper.update(stadium);
@@ -280,18 +268,14 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public List<Stadium> stadiumManagerFindByPage(String stadiumManagerUsername, Integer pageIndex, Integer pageSize) throws FindFailedException {
+    public List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("Stadium 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new FindFailedException("查询失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         // 检查页码是否合法
         if (pageIndex < 1) {
@@ -314,18 +298,14 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public Integer stadiumManagerGetCount(String stadiumManagerUsername) throws FindFailedException {
+    public Integer stadiumManagerGetCount(Integer stadiumManagerId) throws FindFailedException {
         StadiumManager stadiumManager = null;
         try {
-            stadiumManager = stadiumManagerMapper.findByUsername(stadiumManagerUsername);
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("StadiumManager 查询失败，数据库发生未知异常！username = " + stadiumManagerUsername);
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
-        }
-        if (stadiumManager == null) {
-            logger.warn("Stadium 查询失败，username = " + stadiumManagerUsername + "用户未注册！");
-            throw new FindFailedException("查询失败，username = " + stadiumManagerUsername + "用户未注册！");
         }
         Integer count = 0;
         try {

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.BannerMapper">
+    <!--添加banner-->
+    <!--void add(Banner banner);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Banner" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_banner`(`title`, `content`, `image_path`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{content}, #{imagePath}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--获取所有banner-->
+    <!--List<Banner> findAll();-->
+    <select id="findAll" resultType="cn.edu.hestyle.bookstadium.entity.Banner">
+        SELECT
+            `id` as `id`,
+            `title` as `title`,
+            `content` as `content`,
+            `image_path` as `imagePath`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_banner`
+        WHERE
+            `is_delete`=0
+    </select>
+    <!--通过id查找Banner-->
+    <!--Banner findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Banner">
+        SELECT
+            `id` as `id`,
+            `title` as `title`,
+            `content` as `content`,
+            `image_path` as `imagePath`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_banner`
+        WHERE
+            `id`=#{id}
+    </select>
+    <!--更新Banner-->
+    <!--void update(Banner banner);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Banner">
+        UPDATE `t_banner` SET
+            `title` = #{title},
+            `content` = #{content},
+            `image_path` = #{imagePath},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id`=#{id}
+    </update>
+    <!--获取当前(未删除)轮播的数量-->
+    <!--Integer getAllCount();-->
+    <select id="getAllCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_banner`
+        WHERE
+            `is_delete`=0
+    </select>
+</mapper>

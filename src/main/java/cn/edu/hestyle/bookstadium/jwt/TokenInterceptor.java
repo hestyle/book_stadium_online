@@ -89,7 +89,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             // User角色的token验证
             User user = null;
             try {
-                user = userService.findById(accountId);
+                user = userService.systemFindById(accountId);
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Token验证失败！token = " + token);
@@ -104,7 +104,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             // StadiumManager角色的token验证
             StadiumManager stadiumManager = null;
             try {
-                stadiumManager = stadiumManagerService.findById(accountId);
+                stadiumManager = stadiumManagerService.systemFindById(accountId);
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Token验证失败！token = " + token);
@@ -119,7 +119,7 @@ public class TokenInterceptor implements HandlerInterceptor {
             // SystemManager角色的token验证
             SystemManager systemManager = null;
             try {
-                systemManager = systemManagerService.findById(accountId);
+                systemManager = systemManagerService.systemFindById(accountId);
             } catch (Exception e) {
                 e.printStackTrace();
                 logger.warn("Token验证失败！token = " + token);
@@ -134,6 +134,9 @@ public class TokenInterceptor implements HandlerInterceptor {
             logger.warn("Token验证失败！token = " + token);
             throw new TokenVerificationFailedException("Token无效，请重新登录！");
         }
+        // 然后将accountId、accountRole写入session
+        request.getSession().setAttribute("id", accountId);
+        request.getSession().setAttribute("role", accountRole);
         return true;
     }
 
