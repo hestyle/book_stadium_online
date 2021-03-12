@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.StadiumCategory;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 import java.util.List;
 
@@ -20,6 +21,14 @@ public interface IStadiumCategoryService {
      * @throws AddFailedException   添加失败异常
      */
     void add(Integer systemManagerId, StadiumCategory stadiumCategory) throws AddFailedException;
+
+    /**
+     * 修改stadiumCategory
+     * @param systemManagerId           systemManagerId
+     * @param stadiumCategory           stadiumCategory
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modify(Integer systemManagerId, StadiumCategory stadiumCategory) throws ModifyFailedException;
 
     /**
      * 通过id查找StadiumCategory

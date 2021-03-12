@@ -26,6 +26,21 @@
 		WHERE
 		    `id`=#{id}
     </select>
+    <!--更新stadiumCategory-->
+    <!--void update(StadiumCategory stadiumCategory);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
+        UPDATE `t_stadium_category` SET
+            `title` = #{title},
+            `description` = #{description},
+            `image_path` = #{imagePath},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id`=#{id}
+    </update>
     <!--分页查询-->
     <!--List<StadiumCategory> findByPage(Integer beginIndex, Integer pageSize);-->
     <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">

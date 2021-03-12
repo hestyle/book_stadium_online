@@ -7,6 +7,7 @@ import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumCategoryService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,10 @@ import java.util.List;
  */
 @Service
 public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
+    /** 场馆分类title最大长度 */
+    private static final Integer STADIUM_CATEGORY_TITLE_MAX_LENGTH = 6;
+    /** 场馆分类description最大长度 */
+    private static final Integer STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH = 200;
 
     private static final Logger logger = LoggerFactory.getLogger(StadiumCategoryServiceImpl.class);
 
@@ -48,17 +53,17 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
             logger.warn("StadiumCategory 添加失败，未设置场馆分类title！StadiumCategory = " + stadiumCategory);
             throw new AddFailedException("添加失败，未设置场馆分类title!");
         }
-        if (stadiumCategory.getTitle().length() > 6) {
-            logger.warn("StadiumCategory 添加失败，场馆分类title过长，超过15个字符！StadiumCategory = " + stadiumCategory);
-            throw new AddFailedException("添加失败，场馆分类title过长，超过了6个字符!");
+        if (stadiumCategory.getTitle().length() > STADIUM_CATEGORY_TITLE_MAX_LENGTH) {
+            logger.warn("StadiumCategory 添加失败，场馆分类title过长，超过" + STADIUM_CATEGORY_TITLE_MAX_LENGTH + "个字符！StadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，场馆分类title过长，超过了" + STADIUM_CATEGORY_TITLE_MAX_LENGTH + "个字符!");
         }
         if (stadiumCategory.getDescription() == null || stadiumCategory.getDescription().length() == 0) {
             logger.warn("StadiumCategory 添加失败，未场馆分类 description ！stadiumCategory = " + stadiumCategory);
             throw new AddFailedException("添加失败，未设置场馆分类描述!");
         }
-        if (stadiumCategory.getDescription().length() > 200) {
-            logger.warn("StadiumCategory 添加失败，场馆分类 description过长，超过200个字符！stadiumCategory = " + stadiumCategory);
-            throw new AddFailedException("添加失败，场馆分类描述过长，超过200个字符!");
+        if (stadiumCategory.getDescription().length() > STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH) {
+            logger.warn("StadiumCategory 添加失败，场馆分类 description过长，超过" + STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH + "个字符！stadiumCategory = " + stadiumCategory);
+            throw new AddFailedException("添加失败，场馆分类描述过长，超过" + STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH + "个字符!");
         }
         boolean isOk = false;
         try {
@@ -83,6 +88,78 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
             throw new AddFailedException("添加失败，数据库发生未知异常!");
         }
         logger.warn("StadiumCategory 添加成功！stadiumCategory = " + stadiumCategory);
+    }
+
+    @Override
+    public void modify(Integer systemManagerId, StadiumCategory stadiumCategory) throws ModifyFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        if (stadiumCategory == null || stadiumCategory.getId() == null) {
+            logger.warn("StadiumCategory 修改失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        StadiumCategory modifyStadiumCategory = null;
+        try {
+            modifyStadiumCategory = stadiumCategoryMapper.findById(stadiumCategory.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 查询失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        // 检查各个字段
+        if (stadiumCategory.getTitle() != null) {
+            if (stadiumCategory.getTitle().length() == 0) {
+                logger.warn("StadiumCategory 修改失败，场馆分类title不能设置为空！stadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类title不能设置为空!");
+            }
+            if (stadiumCategory.getTitle().length() > STADIUM_CATEGORY_TITLE_MAX_LENGTH) {
+                logger.warn("StadiumCategory 修改失败，场馆分类title过长，超过" + STADIUM_CATEGORY_TITLE_MAX_LENGTH + "个字符！stadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类title过长，超过了" + STADIUM_CATEGORY_TITLE_MAX_LENGTH + "个字符!");
+            }
+            modifyStadiumCategory.setTitle(stadiumCategory.getTitle());
+        }
+        if (stadiumCategory.getDescription() != null) {
+            if (stadiumCategory.getDescription().length() == 0) {
+                logger.warn("StadiumCategory 修改失败，场馆分类description不能设置为空！StadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类description不能设置为空!");
+            }
+            if (stadiumCategory.getDescription().length() > STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH) {
+                logger.warn("StadiumCategory 修改失败，场馆分类描述过长，超过" + STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH + "个字符！StadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类描述过长，超过了" + STADIUM_CATEGORY_DESCRIPTION_MAX_LENGTH + "个字符!");
+            }
+            modifyStadiumCategory.setDescription(stadiumCategory.getDescription());
+        }
+        if (stadiumCategory.getImagePath() != null) {
+            boolean isOk = false;
+            try {
+                isOk = this.checkStadiumCategoryImagePath(stadiumCategory.getImagePath());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumCategory 修改失败，场馆分类图片路径非法，资源不在服务器上！stadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类图片路径非法，资源不在服务器上!");
+            }
+            if (!isOk) {
+                logger.warn("StadiumCategory 修改失败，未填写场馆分类图片路径！stadiumCategory = " + stadiumCategory);
+                throw new ModifyFailedException("修改失败，场馆分类图片不能为空!");
+            }
+            modifyStadiumCategory.setImagePath(stadiumCategory.getImagePath());
+        }
+        stadiumCategory.setModifiedUser(systemManager.getUsername());
+        stadiumCategory.setModifiedTime(new Date());
+        try {
+            stadiumCategoryMapper.update(modifyStadiumCategory);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 修改失败，数据库发生未知异常！");
+            throw new ModifyFailedException("修改失败，数据库发生未知异常!");
+        }
+        logger.warn("StadiumCategory 修改成功！modifyStadiumCategory = " + modifyStadiumCategory);
     }
 
     @Override

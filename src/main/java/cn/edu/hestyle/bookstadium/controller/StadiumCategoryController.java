@@ -66,6 +66,25 @@ public class StadiumCategoryController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "添加成功！");
     }
 
+    @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleModify(@RequestParam(name = "stadiumCategoryData") String stadiumCategoryData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        StadiumCategory stadiumCategory = null;
+        try {
+            stadiumCategory = objectMapper.readValue(stadiumCategoryData, StadiumCategory.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 修改失败，数据格式错误！data = " + stadiumCategoryData);
+            throw new RequestException("StadiumCategory 修改失败，数据格式错误！");
+        }
+        stadiumCategoryService.modify(systemManagerId, stadiumCategory);
+        return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
     @PostMapping("/findByIds.do")
     public ResponseResult<List<StadiumCategory>> handleFindByIds(@RequestParam("stadiumCategoryIds") String stadiumCategoryIds, HttpSession session) {
         List<StadiumCategory> stadiumCategoryList = stadiumCategoryService.findByIds(stadiumCategoryIds);

@@ -17,6 +17,9 @@
             border-color: #FF0000;
             background-color: #FF0000;
         }
+        .layui-laypage .layui-laypage-curr .layui-laypage-em {
+            background-color: #0090FF;
+        }
     </style>
     <body>
         <table id="stadiumCategoryTable" lay-filter="test"></table>
@@ -49,7 +52,7 @@
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 25%;text-align: left;">场馆分类描述</label>
                 <div class="layui-input-inline" style="width: 65%;">
-                    <textarea id="add_stadium_category_content" name="description" placeholder="请输入描述" class="layui-textarea" maxlength="200"></textarea>
+                    <textarea id="add_stadium_category_description" name="description" placeholder="请输入描述" class="layui-textarea" maxlength="200"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -66,23 +69,23 @@
     <script type="text/html" id="editDialog">
         <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="editDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播名称</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="edit_banner_title" type="text" name="title" placeholder="请输入轮播名称" autocomplete="off" class="layui-input">
+                <label class="layui-form-label" style="width: 25%;text-align: left;">场馆分类名称</label>
+                <div class="layui-input-inline" style="width: 65%;">
+                    <input id="edit_stadium_category_title" type="text" name="title" placeholder="请输入场馆分类名称" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播内容</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <textarea id="edit_banner_content" name="content" placeholder="请输入描述" class="layui-textarea"></textarea>
+                <label class="layui-form-label" style="width: 25%;text-align: left;">场馆分类描述</label>
+                <div class="layui-input-inline" style="width: 65%;">
+                    <textarea id="edit_stadium_category_description" name="description" placeholder="请输入描述" class="layui-textarea" maxlength="200"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">图片</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="edit_banner_image_path" type="text" name="imagePath" autocomplete="off" class="layui-input" disabled style="display: none;">
-                    <button type="button" class="layui-btn layui-btn-normal" id="edit_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>上传图片</button>
-                    <img id="edit_banner_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
+                <label class="layui-form-label" style="width: 25%;text-align: left;">图片</label>
+                <div class="layui-input-inline" style="width: 65%;">
+                    <input id="edit_stadium_category_image_path" type="text" name="imagePath" autocomplete="off" class="layui-input" disabled style="display: none;">
+                    <button type="button" class="layui-btn layui-btn-normal" id="edit_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>修改图片</button>
+                    <img id="edit_stadium_category_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
                 </div>
             </div>
         </form>
@@ -186,7 +189,7 @@
                                     return false;
                                 }
                                 var url ="/book_stadium_online/stadiumCategory/add.do";
-                                var postData = '{"title":"' + $('#add_stadium_category_title').val() + '","description":"' + $('#add_stadium_category_content').val()
+                                var postData = '{"title":"' + $('#add_stadium_category_title').val() + '","description":"' + $('#add_stadium_category_description').val()
                                     + '","imagePath":"' + $('#add_stadium_category_image_path').val() + '"}';
                                 $.ajax({
                                     "url" : url,
@@ -284,7 +287,7 @@
                 if (layEvent === 'edit') {
                     layer.open({
                         type: 1,
-                        title: '编辑轮播',
+                        title: '编辑场馆分类',
                         area:['460px','80%'],
                         content: $('#editDialog').html(),
                         btn: ['保存', '取消'],
@@ -292,12 +295,12 @@
                             form.render();
                             form.val("editDialogForm", data);
                             if (data.imagePath != null && data.imagePath.length !== 0) {
-                                $('#edit_banner_image').attr("src", data.imagePath);
-                                $('#edit_banner_image').show();
+                                $('#edit_stadium_category_image').attr("src", data.imagePath);
+                                $('#edit_stadium_category_image').show();
                             }
                             upload.render({
                                 elem: '#edit_uploadImageButton'
-                                ,url: '/book_stadium_online/banner/uploadImage.do'
+                                ,url: '/book_stadium_online/stadiumCategory/uploadImage.do'
                                 ,accept: 'images'
                                 ,acceptMime: 'image/*'
                                 ,size: 10240
@@ -309,9 +312,9 @@
                                 ,done: function(res){
                                     if (res.code === 200) {
                                         // 文件上传成功后修改图片路径
-                                        $('#edit_banner_image_path').val(res.data);
-                                        $('#edit_banner_image').attr("src", res.data);
-                                        $('#edit_banner_image').show();
+                                        $('#edit_stadium_category_image_path').val(res.data);
+                                        $('#edit_stadium_category_image').attr("src", res.data);
+                                        $('#edit_stadium_category_image').show();
                                     }
                                     layer.open({
                                         title: '提示信息',
@@ -328,12 +331,12 @@
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/banner/modify.do";
-                            var postData = '{"id":'+ data.id + ',"title":"' + $('#edit_banner_title').val() + '","content":"' + $('#edit_banner_content').val()
-                                + '","imagePath":"' + $('#edit_banner_image_path').val() + '"}';
+                            var url ="/book_stadium_online/stadiumCategory/modify.do";
+                            var postData = '{"id":'+ data.id + ',"title":"' + $('#edit_stadium_category_title').val() + '","description":"' + $('#edit_stadium_category_description').val()
+                                + '","imagePath":"' + $('#edit_stadium_category_image_path').val() + '"}';
                             $.ajax({
                                 "url" : url,
-                                "data" : {"bannerData":postData},
+                                "data" : {"stadiumCategoryData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
@@ -346,9 +349,9 @@
                                     });
                                     if (json.code === 200) {
                                         obj.update({
-                                            title: $('#edit_banner_title').val()
-                                            ,content: $('#edit_banner_content').val()
-                                            ,imagePath: $('#edit_banner_image_path').val()
+                                            title: $('#edit_stadium_category_title').val()
+                                            ,description: $('#edit_stadium_category_description').val()
+                                            ,imagePath: $('#edit_stadium_category_image_path').val()
                                         });
                                         layer.close(index);
                                     }
@@ -410,7 +413,7 @@
                 });
                 return false;
             }
-            if ($('#add_stadium_category_content').val().length === 0) {
+            if ($('#add_stadium_category_description').val().length === 0) {
                 layer.open({
                     title: "提示信息",
                     content: "请输入场馆分类描述！"

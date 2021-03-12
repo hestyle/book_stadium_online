@@ -26,6 +26,12 @@ public interface StadiumCategoryMapper {
     StadiumCategory findById(Integer id);
 
     /**
+     * 更新stadiumCategory
+     * @param stadiumCategory   stadiumCategory
+     */
+    void update(StadiumCategory stadiumCategory);
+
+    /**
      * 分页查询
      * @param beginIndex    起始下标
      * @param pageSize      查询数量
