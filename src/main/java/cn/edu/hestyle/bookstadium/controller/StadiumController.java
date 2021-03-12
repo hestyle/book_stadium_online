@@ -91,7 +91,7 @@ public class StadiumController extends BaseController {
         }
         // 执行业务端的业务
         stadiumService.stadiumManagerModify(stadiumManagerId, stadium);
-        return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
+        return new ResponseResult<>(SUCCESS, "更新保存成功！");
     }
 
     @PostMapping("/stadiumManagerDeleteByIdList.do")

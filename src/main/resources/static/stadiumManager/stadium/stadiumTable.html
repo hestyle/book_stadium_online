@@ -556,8 +556,8 @@
                             // 获取stadiumCategoryId对应的title
                             if (data.stadiumCategoryId != null) {
                                 $.ajax({
-                                    "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
-                                    "data" : {"stadiumCategoryIds":data.stadiumCategoryId + ""},
+                                    "url" : '/book_stadium_online/stadiumCategory/findById.do',
+                                    "data" : {"stadiumCategoryId":data.stadiumCategoryId},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
@@ -566,7 +566,7 @@
                                     "success" : function (json) {
                                         if (json.code === 200) {
                                             // 保存到全局变量
-                                            var stadiumCategory = json.data[0];
+                                            var stadiumCategory = json.data;
                                             $('#change_stadiumCategoryId').val(stadiumCategory.id);
                                             $('#change_stadiumCategoryId_name').val(stadiumCategory.title);
                                         } else {

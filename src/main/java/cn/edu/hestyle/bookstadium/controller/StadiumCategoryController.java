@@ -104,10 +104,10 @@ public class StadiumCategoryController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "删除成功！");
     }
 
-    @PostMapping("/findByIds.do")
-    public ResponseResult<List<StadiumCategory>> handleFindByIds(@RequestParam("stadiumCategoryIds") String stadiumCategoryIds, HttpSession session) {
-        List<StadiumCategory> stadiumCategoryList = stadiumCategoryService.findByIds(stadiumCategoryIds);
-        return new ResponseResult<List<StadiumCategory>>(SUCCESS, "查找成功", stadiumCategoryList);
+    @PostMapping("/findById.do")
+    public ResponseResult<StadiumCategory> handleFindByIds(@RequestParam("stadiumCategoryId") Integer stadiumCategoryId, HttpSession session) {
+        StadiumCategory stadiumCategory = stadiumCategoryService.findById(stadiumCategoryId);
+        return new ResponseResult<StadiumCategory>(SUCCESS, "查找成功", stadiumCategory);
     }
 
     @PostMapping("/findByPage.do")
