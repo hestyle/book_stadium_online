@@ -15,7 +15,9 @@ public class StadiumCategory {
     /**id*/
     private Integer id;
     /**名称*/
-    private String name;
+    private String title;
+    /**图片url*/
+    private String imagePath;
     /**描述*/
     private String description;
     /**是否删除，0未删除，1已删除*/
@@ -39,12 +41,20 @@ public class StadiumCategory {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 
     public String getDescription() {
@@ -99,7 +109,8 @@ public class StadiumCategory {
     public String toString() {
         return "StadiumCategory{" +
                 "id=" + id +
-                ", name='" + name + '\'' +
+                ", title='" + title + '\'' +
+                ", imagePath='" + imagePath + '\'' +
                 ", description='" + description + '\'' +
                 ", isDelete=" + isDelete +
                 ", createdUser='" + createdUser + '\'' +

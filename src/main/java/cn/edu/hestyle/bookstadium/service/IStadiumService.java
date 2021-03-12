@@ -32,12 +32,22 @@ public interface IStadiumService {
     Stadium findById(Integer stadiumId) throws FindFailedException;
 
     /**
+     * 分页查询stadiumCategoryId对应的Stadium
+     * @param stadiumCategoryId     stadiumCategoryId
+     * @param pageIndex             页下标
+     * @param pageSize              一页大小
+     * @return                      List Stadium
+     * @throws FindFailedException  查询失败异常
+     */
+    List<Stadium> findByStadiumCategoryId(Integer stadiumCategoryId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
      * 修改stadium
      * @param stadiumManagerId          stadiumManagerId
-     * @param modifyDataMap             key value
+     * @param stadium                   stadium
      * @throws ModifyFailedException    修改异常
      */
-    void stadiumManagerModify(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
+    void stadiumManagerModify(Integer stadiumManagerId, Stadium stadium) throws ModifyFailedException;
 
     /**
      * 删除stadium（只能删除自己的）

@@ -5,14 +5,14 @@
     <!--添加Stadium-->
     <!--void add(Stadium stadium);-->
     <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO `t_stadium`(`manager_id`, `category_ids`, `name`, `address`, `description`, `image_paths`, `created_time`, `created_user`)
-        VALUES (#{managerId}, #{categoryIds}, #{name}, #{address}, #{description}, #{imagePaths}, #{createdTime}, #{createdUser})
+        INSERT INTO `t_stadium`(`stadium_manager_id`, `stadium_category_id`, `name`, `address`, `description`, `image_paths`, `created_time`, `created_user`)
+        VALUES (#{stadiumManagerId}, #{stadiumCategoryId}, #{name}, #{address}, #{description}, #{imagePaths}, #{createdTime}, #{createdUser})
     </insert>
     <!--更新stadium-->
     <!--void update(Stadium stadium);-->
     <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Stadium">
         UPDATE `t_stadium` SET
-           `category_ids` = #{categoryIds}, `name` = #{name}, `address` = #{address}, `description` = #{description}, `image_paths` = #{imagePaths},
+           `stadium_category_id` = #{stadiumCategoryId}, `name` = #{name}, `address` = #{address}, `description` = #{description}, `image_paths` = #{imagePaths},
            `is_delete` = #{isDelete}, `is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
         WHERE
             `id` = #{id}
@@ -29,8 +29,8 @@
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
         SELECT
             `id` as `id`,
-            `manager_id` as `managerId`,
-            `category_ids` as `categoryIds`,
+            `stadium_manager_id` as `stadiumManagerId`,
+            `stadium_category_id` as `stadiumCategoryId`,
             `name` as `name`,
             `address` as `address`,
             `description` as `description`,
@@ -46,13 +46,13 @@
         WHERE
             `id` = #{id}
     </select>
-    <!--分页查询某stadiumManager的Stadium-->
-    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
-    <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+    <!--分页查询stadiumCategoryId对应的Stadium-->
+    <!--List<Stadium> findByStadiumCategoryId(Integer stadiumCategoryId, Integer beginIndex, Integer pageSize);-->
+    <select id="findByStadiumCategoryId" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
         SELECT
             `id` as `id`,
-            `manager_id` as `managerId`,
-            `category_ids` as `categoryIds`,
+            `stadium_manager_id` as `stadiumManagerId`,
+            `stadium_category_id` as `stadiumCategoryId`,
             `name` as `name`,
             `address` as `address`,
             `description` as `description`,
@@ -66,7 +66,31 @@
         FROM
             `t_stadium`
         WHERE
-            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+            `stadium_category_id` = #{stadiumCategoryId} AND `is_delete` = 0
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+    <!--分页查询某stadiumManager的Stadium-->
+    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
+    <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        SELECT
+            `id` as `id`,
+            `stadium_manager_id` as `stadiumManagerId`,
+            `stadium_category_id` as `stadiumCategoryId`,
+            `name` as `name`,
+            `address` as `address`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium`
+        WHERE
+            `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
@@ -78,6 +102,6 @@
         FROM
             `t_stadium`
         WHERE
-            `manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+            `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
     </select>
 </mapper>

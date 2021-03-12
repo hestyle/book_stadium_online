@@ -2,12 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumCategoryMapper">
+    <!--添加stadiumCategory-->
+    <!--void add(StadiumCategory stadiumCategory);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumCategory" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium_category`(`title`, `description`, `image_path`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{description}, #{imagePath}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
     <!--通过id查找StadiumCategory-->
     <!--StadiumCategory findById(Integer id);-->
     <select id="findById" parameterType="java.lang.Integer" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
         SELECT
 		    `id` as `id`,
-			`name` as `name`,
+			`title` as `title`,
+			`image_path` as `imagePath`,
 			`description` as `description`,
 			`is_delete` as `isDelete`,
 			`created_user` as `createdUser`,
@@ -19,12 +26,28 @@
 		WHERE
 		    `id`=#{id}
     </select>
+    <!--更新stadiumCategory-->
+    <!--void update(StadiumCategory stadiumCategory);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
+        UPDATE `t_stadium_category` SET
+            `title` = #{title},
+            `description` = #{description},
+            `image_path` = #{imagePath},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id`=#{id}
+    </update>
     <!--分页查询-->
     <!--List<StadiumCategory> findByPage(Integer beginIndex, Integer pageSize);-->
     <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumCategory">
         SELECT
             `id` as `id`,
-            `name` as `name`,
+            `title` as `title`,
+            `image_path` as `imagePath`,
             `description` as `description`,
             `is_delete` as `isDelete`,
             `created_user` as `createdUser`,
@@ -37,5 +60,15 @@
             `is_delete` = 0
         LIMIT
             #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取StadiumCategory个数-->
+    <!--Integer getAllCount();-->
+    <select id="getAllCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium_category`
+        WHERE
+            `is_delete` = 0
     </select>
 </mapper>

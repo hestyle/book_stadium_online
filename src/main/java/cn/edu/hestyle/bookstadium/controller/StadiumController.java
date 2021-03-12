@@ -1,6 +1,5 @@
 package cn.edu.hestyle.bookstadium.controller;
 
-import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -58,6 +56,13 @@ public class StadiumController extends BaseController {
         return new ResponseResult<Stadium>(SUCCESS, "查询成功！", stadium);
     }
 
+    @PostMapping("/findByStadiumCategoryId.do")
+    public ResponseResult<List<Stadium>> handleFindByStadiumCategoryId(Integer stadiumCategoryId, @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
+        List<Stadium> stadiumList = stadiumService.findByStadiumCategoryId(stadiumCategoryId, pageIndex, pageSize);
+        return new ResponseResult<List<Stadium>>(SUCCESS, "查询成功！", stadiumList);
+    }
+
     @PostMapping("/stadiumManagerAdd.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<Void> handleStadiumManagerAdd(@RequestParam(name = "stadiumData") String stadiumData, HttpSession session) {
@@ -82,18 +87,18 @@ public class StadiumController extends BaseController {
         // 从session中取出id
         Integer stadiumManagerId = (Integer) session.getAttribute("id");
         ObjectMapper objectMapper = new ObjectMapper();
-        HashMap<String, Object> modifyDataMap = null;
+        Stadium stadium = null;
         // 从stadiumManagerData读取modifyDataMap对象
         try {
-            modifyDataMap = objectMapper.readValue(modifyData, new TypeReference<HashMap<String, Object>>() {});
+            stadium = objectMapper.readValue(modifyData, Stadium.class);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Stadium 修改失败，数据格式错误！data = " + modifyData);
             throw new RequestParamException("更新保存失败，数据格式错误！");
         }
         // 执行业务端的业务
-        stadiumService.stadiumManagerModify(stadiumManagerId, modifyDataMap);
-        return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
+        stadiumService.stadiumManagerModify(stadiumManagerId, stadium);
+        return new ResponseResult<>(SUCCESS, "更新保存成功！");
     }
 
     @PostMapping("/stadiumManagerDeleteByIdList.do")

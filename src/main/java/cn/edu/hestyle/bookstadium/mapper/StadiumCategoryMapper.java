@@ -13,11 +13,23 @@ import java.util.List;
 @Mapper
 public interface StadiumCategoryMapper {
     /**
+     * 添加stadiumCategory
+     * @param stadiumCategory   stadiumCategory
+     */
+    void add(StadiumCategory stadiumCategory);
+
+    /**
      * 通过id查找StadiumCategory
      * @param id        StadiumCategory id
      * @return          StadiumCategory
      */
     StadiumCategory findById(Integer id);
+
+    /**
+     * 更新stadiumCategory
+     * @param stadiumCategory   stadiumCategory
+     */
+    void update(StadiumCategory stadiumCategory);
 
     /**
      * 分页查询
@@ -26,4 +38,10 @@ public interface StadiumCategoryMapper {
      * @return              StadiumCategory list
      */
     List<StadiumCategory> findByPage(Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取StadiumCategory个数
+     * @return                          stadium个数
+     */
+    Integer getAllCount();
 }

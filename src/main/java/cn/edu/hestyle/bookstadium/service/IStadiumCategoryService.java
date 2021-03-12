@@ -1,7 +1,10 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumCategory;
+import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 import java.util.List;
 
@@ -11,6 +14,31 @@ import java.util.List;
  * @date 2021/3/4 3:02 下午
  */
 public interface IStadiumCategoryService {
+
+    /**
+     * 添加StadiumCategory
+     * @param systemManagerId       systemManagerId
+     * @param stadiumCategory       stadiumCategory
+     * @throws AddFailedException   添加失败异常
+     */
+    void add(Integer systemManagerId, StadiumCategory stadiumCategory) throws AddFailedException;
+
+    /**
+     * 修改stadiumCategory
+     * @param systemManagerId           systemManagerId
+     * @param stadiumCategory           stadiumCategory
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modify(Integer systemManagerId, StadiumCategory stadiumCategory) throws ModifyFailedException;
+
+    /**
+     * 批量删除stadiumCategory
+     * @param systemManagerId           systemManagerId
+     * @param stadiumCategoryIdList     stadiumCategoryIdList
+     * @throws DeleteFailedException    删除异常
+     */
+    void deleteByIdList(Integer systemManagerId, List<Integer> stadiumCategoryIdList) throws DeleteFailedException;
+
     /**
      * 通过id查找StadiumCategory
      * @param id        StadiumCategory id
@@ -33,4 +61,10 @@ public interface IStadiumCategoryService {
      * @throws FindFailedException  查询失败异常
      */
     List<StadiumCategory> findByPage(Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * 获取StadiumCategory个数
+     * @return                          stadium个数
+     */
+    Integer getAllCount() throws FindFailedException;
 }
