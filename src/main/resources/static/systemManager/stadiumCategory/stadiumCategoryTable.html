@@ -244,10 +244,10 @@
                             return;
                         }
                         layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/banner/deleteByIdList.do";
+                            var url ="/book_stadium_online/stadiumCategory/deleteByIdList.do";
                             $.ajax({
                                 "url" : url,
-                                "data" : {"bannerIdListData":postData},
+                                "data" : {"stadiumCategoryIdListData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {

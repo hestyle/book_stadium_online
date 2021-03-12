@@ -6,11 +6,13 @@ import cn.edu.hestyle.bookstadium.mapper.StadiumCategoryMapper;
 import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumCategoryService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -160,6 +162,52 @@ public class StadiumCategoryServiceImpl implements IStadiumCategoryService {
             throw new ModifyFailedException("修改失败，数据库发生未知异常!");
         }
         logger.warn("StadiumCategory 修改成功！modifyStadiumCategory = " + modifyStadiumCategory);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByIdList(Integer systemManagerId, List<Integer> stadiumCategoryIdList) throws DeleteFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+        }
+        if (stadiumCategoryIdList == null || stadiumCategoryIdList.size() == 0) {
+            logger.warn("StadiumCategory 删除失败，未指定需要删除stadiumCategory id！stadiumCategoryIdList = " + stadiumCategoryIdList);
+            throw new DeleteFailedException("删除失败，未指定需要删除stadiumCategory id！");
+        }
+        for (Integer stadiumCategoryId : stadiumCategoryIdList) {
+            if (stadiumCategoryId == null) {
+                logger.warn("StadiumCategory 删除失败，stadiumCategory id list 格式错误！stadiumCategoryIdList = " + stadiumCategoryIdList);
+                throw new DeleteFailedException("删除失败，stadiumCategory id list 格式错误！");
+            }
+            StadiumCategory stadiumCategory = null;
+            try {
+                stadiumCategory = stadiumCategoryMapper.findById(stadiumCategoryId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumCategory 查询失败，数据库发生未知异常！");
+                throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+            }
+            if (stadiumCategory == null) {
+                logger.warn("StadiumCategory 删除失败，stadiumCategoryId = " + stadiumCategoryId + " 不存在！");
+                throw new DeleteFailedException("删除失败，不存在id = " + stadiumCategoryId + "的场馆分类，已撤销删除操作！");
+            }
+            stadiumCategory.setIsDelete(1);
+            stadiumCategory.setModifiedUser(systemManager.getUsername());
+            stadiumCategory.setModifiedTime(new Date());
+            try {
+                stadiumCategoryMapper.update(stadiumCategory);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumCategory 更新失败，数据库发生未知异常！");
+                throw new DeleteFailedException("删除失败，数据库发生未知异常!");
+            }
+        }
+        logger.info("StadiumCategory 删除成功！stadiumCategoryIdList = " + stadiumCategoryIdList);
     }
 
     @Override

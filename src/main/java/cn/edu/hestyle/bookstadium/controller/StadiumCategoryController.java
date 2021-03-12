@@ -7,6 +7,7 @@ import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumCategoryService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,6 +84,24 @@ public class StadiumCategoryController extends BaseController {
         }
         stadiumCategoryService.modify(systemManagerId, stadiumCategory);
         return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
+    @PostMapping("/deleteByIdList.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleDeleteByIdList(@RequestParam(name = "stadiumCategoryIdListData") String stadiumCategoryIdListData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Integer> stadiumCategoryIdList = null;
+        try {
+            stadiumCategoryIdList = objectMapper.readValue(stadiumCategoryIdListData, new TypeReference<List<Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumCategory 删除失败，数据格式错误！stadiumCategoryIdListData = " + stadiumCategoryIdListData);
+            throw new RequestException("删除失败，数据格式错误！");
+        }
+        stadiumCategoryService.deleteByIdList(systemManagerId, stadiumCategoryIdList);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
     }
 
     @PostMapping("/findByIds.do")
