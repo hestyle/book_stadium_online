@@ -56,6 +56,13 @@ public class StadiumController extends BaseController {
         return new ResponseResult<Stadium>(SUCCESS, "查询成功！", stadium);
     }
 
+    @PostMapping("/findByStadiumCategoryId.do")
+    public ResponseResult<List<Stadium>> handleFindByStadiumCategoryId(Integer stadiumCategoryId, @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
+        List<Stadium> stadiumList = stadiumService.findByStadiumCategoryId(stadiumCategoryId, pageIndex, pageSize);
+        return new ResponseResult<List<Stadium>>(SUCCESS, "查询成功！", stadiumList);
+    }
+
     @PostMapping("/stadiumManagerAdd.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<Void> handleStadiumManagerAdd(@RequestParam(name = "stadiumData") String stadiumData, HttpSession session) {
