@@ -26,11 +26,7 @@
     <script type="text/html" id="barDemo">
         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
-        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改分类ID列表</a>
-    </script>
-    <!--(修改分类id列表弹窗中的table)每条数据的操作栏-->
-    <script type="text/html" id="changeStadiumCategoryIdsBar">
-        <a class="layui-btn layui-btn-xs" lay-event="delete">删除</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改场馆分类</a>
     </script>
     <!--每条数据的编辑操作-->
     <script type="text/html" id="editDialog">
@@ -38,25 +34,25 @@
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">id</label>
                 <div class="layui-input-inline">
-                    <input id="id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="edit_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">名称</label>
                 <div class="layui-input-inline">
-                    <input id="name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                    <input id="edit_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">地址</label>
                 <div class="layui-input-inline">
-                    <input id="address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
+                    <input id="edit_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">描述</label>
                 <div class="layui-input-inline">
-                    <textarea id="description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                    <textarea id="edit_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
@@ -65,16 +61,9 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">场馆分类ID列表</label>
+                <label class="layui-form-label" style="width: 15%;">场馆分类ID</label>
                 <div class="layui-input-inline">
-                    <input id="stadiumCategoryIds" type="text" name="categoryIds" placeholder="请输入场馆分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">是否删除</label>
-                <div class="layui-input-inline">
-                    <input type="radio" name="isDelete" value="0" title="未删除" checked>
-                    <input id="is_del_true" type="radio" name="isDelete" value="1" title="已删除">
+                    <input id="edit_stadiumCategoryId" type="text" name="stadiumCategoryId" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
         </form>
@@ -114,9 +103,10 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">场馆分类ID列表</label>
+                <label class="layui-form-label" style="width: 20%;">场馆分类</label>
                 <div class="layui-input-inline">
-                    <input id="add_stadiumCategoryIds" type="text" name="stadiumCategoryIds" placeholder="请选择场馆分类ID！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="add_stadiumCategoryId_name" type="text" name="stadiumCategoryId_name" placeholder="请选择场馆分类！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="add_stadiumCategoryId" type="text" name="stadiumCategoryId" placeholder="请选择场馆分类！" autocomplete="off" class="layui-input" style="width: 140%;display: none;" disabled>
                     <button id="select_stadiumCategory" type="button" class="layui-btn" onclick="selectStadiumCategory(1)">选择场馆分类</button>
                 </div>
             </div>
@@ -153,7 +143,7 @@
             </div>
         </form>
     </script>
-    <!--单条数据修改分类ID列表-->
+    <!--单条数据修改分类-->
     <script type="text/html" id="changeCategoryIdsDialog">
         <form id="change_categoryIds_form" class="layui-form" action="" style="padding: 20px;" lay-filter="changeCategoryIdsDialogForm">
             <div class="layui-form-item">
@@ -169,13 +159,13 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">分类ID列表</label>
+                <label class="layui-form-label" style="width: 20%;">场馆分类</label>
                 <div class="layui-input-inline">
-                    <input id="change_categoryIds_categoryIds" type="text" name="categoryIds" placeholder="请输入分类ID列表" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
-                    <button type="button" class="layui-btn" id="change_categoryId_Button" onclick="selectStadiumCategory(2)">添加场馆分类</button>
+                    <input id="change_stadiumCategoryId_name" type="text" name="stadiumCategoryId_name" placeholder="请选择场馆分类！" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="change_stadiumCategoryId" type="text" name="stadiumCategoryId" placeholder="请选择场馆分类！" autocomplete="off" class="layui-input" style="width: 140%;display: none;" disabled>
+                    <button id="change_stadiumCategory" type="button" class="layui-btn" onclick="selectStadiumCategory(2)">选择场馆分类</button>
                 </div>
             </div>
-            <table id="change_categoryIds_table" lay-filter="changeCategoryIdsTable"></table>
         </form>
     </script>
     <!--场馆分类page列表-->
@@ -190,8 +180,6 @@
             soulTable: 'soulTable/soulTable.slim'
         });
         layuiModules=['table', 'layer', 'form', 'upload', 'soulTable'];
-        // stadiumCategoryIds对应的分类
-        var stadiumCategoryData = [];
         // 上传图片
         var haveUploadCount = 0;
         function mounted() {
@@ -209,7 +197,7 @@
                     , {field: 'name', title: '名称', width: 200, sort: true}
                     , {field: 'address', title: '地址', width: 200, sort: true}
                     , {field: 'description', title: '描述', width: 200, sort: true}
-                    , {field: 'categoryIds', title: '分类', width: 150, sort: true}
+                    , {field: 'stadiumCategoryId', title: '分类', width: 150, sort: true}
                     , {field: 'imagePaths', title: '图片', width: 150, sort: true}
                     , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                 ]]
@@ -251,7 +239,6 @@
                             btn: ['确定', '取消'],
                             success: function (index, layero) {
                                 // 清空缓存
-                                stadiumCategoryData = [];
                                 haveUploadCount = 0;
                                 form.render();
                                 upload.render({
@@ -300,7 +287,7 @@
                                 }
                                 var url ="/book_stadium_online/stadium/stadiumManagerAdd.do";
                                 var postData = '{"name":"' + $('#add_name').val() + '","address":"' + $('#add_address').val() + '","description":"' +
-                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","categoryIds":"' + $('#add_stadiumCategoryIds').val() + '"}';
+                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","stadiumCategoryId":"' + $('#add_stadiumCategoryId').val() + '"}';
                                 $.ajax({
                                     "url" : url,
                                     "data" : {"stadiumData":postData},
@@ -507,8 +494,6 @@
                         btn: ['确定', '取消'],
                         success: function (index, layero) {
                             form.render();
-                            // 对于radio单选框，int型数据转成string才能正确check
-                            data.isDelete = data.isDelete + '';
                             if (data.imagePaths != null && data.imagePaths.length !== 0) {
                                 var imagePaths = data.imagePaths.split(',');
                                 for (var i in imagePaths) {
@@ -520,8 +505,7 @@
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
                             var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ $('#id').val() + ',"name":"' + $('#name').val() + '","address":"' + $('#address').val() +  '","description":"' + $('#description').val() + '",' +
-                                '"isDelete":' + $('input:radio[name="isDelete"]:checked').val() + '}';
+                            var postData = '{"id":'+ $('#edit_id').val() + ',"name":"' + $('#edit_name').val() + '","address":"' + $('#edit_address').val() +  '","description":"' + $('#edit_description').val() + '"}';
                             $.ajax({
                                 "url" : url,
                                 "data" : {"modifyData":postData},
@@ -536,17 +520,12 @@
                                         content: json.message
                                     });
                                     if (json.code === 200) {
-                                        // 如果删除了，则不显示
-                                        if ($('input:radio[name="isDelete"]:checked').val() === '1') {
-                                            // 成功后，表格重载
-                                            layui.table.reload('stadiumTable');
-                                        } else {
-                                            obj.update({
-                                                name: $('#name').val()
-                                                ,address: $('#address').val()
-                                                ,description: $('#description').val()
-                                            });
-                                        }
+                                        // 更新表格
+                                        obj.update({
+                                            name: $('#edit_name').val()
+                                            ,address: $('#edit_address').val()
+                                            ,description: $('#edit_description').val()
+                                        });
                                         layer.close(index);
                                     }
                                 },
@@ -574,39 +553,11 @@
                             // 填充行数据
                             form.render();
                             form.val("changeCategoryIdsDialogForm", data);
-                            // 填充change_categoryIds_table表格
-                            table.render({
-                                elem: '#change_categoryIds_table'
-                                , data: null
-                                , width: 730
-                                , cols: [[
-                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
-                                ],[ //表头
-                                    {type: 'numbers', title: '序号', width: 60}
-                                    , {field: 'id', title: 'id', width: 60}
-                                    , {field: 'title', title: '名称', width: 250}
-                                    , {field: 'description', title: '描述', width: 250}
-                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
-                                ]]
-                                , rowDrag: {
-                                    done: function(obj) {
-                                        // 完成时（松开时）触发(soulTable插件，移动行
-                                        stadiumCategoryData = obj.cache;
-                                        var categoryIds = [];
-                                        for (var row of obj.cache) {
-                                            categoryIds.push(row.id);
-                                        }
-                                        $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
-                                    }
-                                }
-                                , done: function () {
-                                    soulTable.render(this)
-                                }
-                            });
-                            if (data.categoryIds != null && data.categoryIds.length !== 0) {
+                            // 获取stadiumCategoryId对应的title
+                            if (data.stadiumCategoryId != null) {
                                 $.ajax({
                                     "url" : '/book_stadium_online/stadiumCategory/findByIds.do',
-                                    "data" : {"stadiumCategoryIds":data.categoryIds},
+                                    "data" : {"stadiumCategoryIds":data.stadiumCategoryId + ""},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
@@ -615,11 +566,9 @@
                                     "success" : function (json) {
                                         if (json.code === 200) {
                                             // 保存到全局变量
-                                            stadiumCategoryData = json.data;
-                                            layui.table.reload('change_categoryIds_table', {
-                                                url: null,
-                                                data: stadiumCategoryData
-                                            });
+                                            var stadiumCategory = json.data[0];
+                                            $('#change_stadiumCategoryId').val(stadiumCategory.id);
+                                            $('#change_stadiumCategoryId_name').val(stadiumCategory.title);
                                         } else {
                                             // 弹出中间提示框
                                             layer.open({
@@ -648,7 +597,7 @@
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
                             var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ data.id + ',"categoryIds":"' + $('#change_categoryIds_categoryIds').val() + '"}';
+                            var postData = '{"id":'+ data.id + ',"stadiumCategoryId":"' + $('#change_stadiumCategoryId').val() + '"}';
                             $.ajax({
                                 "url" : url,
                                 "data" : {"modifyData":postData},
@@ -665,7 +614,7 @@
                                     if (json.code === 200) {
                                         // 更新成功，则关闭重置窗口
                                         obj.update({
-                                            categoryIds: $('#change_categoryIds_categoryIds').val()
+                                            stadiumCategoryId: $('#change_stadiumCategoryId').val()
                                         });
                                         layer.close(index);
                                     }
@@ -682,64 +631,6 @@
                         btn2: function (index, layero) {
                             //return false 开启该代码可禁止点击该按钮关闭
                         }
-                    });
-                }
-            });
-
-            // 监听changeCategoryIdsTable中的工具条
-            table.on('tool(changeCategoryIdsTable)', function (obj) {
-                var data = obj.data; //获得当前行数据
-                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
-                var tr = obj.tr; //获得当前行 tr 的DOM对象
-                if (layEvent === 'delete') {
-                    layer.confirm('真的删除这个分类吗？', function(index){
-                        // 获取行所在的行index
-                        var objIndex = $(tr).attr("data-index");
-                        // 然后把change_categoryIds_categoryIds输入框中的内容更新
-                        var categoryIds = $('#change_categoryIds_categoryIds').val().split(',');
-                        categoryIds.splice(objIndex, 1);
-                        if (categoryIds.length > 1) {
-                            $('#change_categoryIds_categoryIds').val(categoryIds.join(','));
-                        } else if (categoryIds.length === 1) {
-                            $('#change_categoryIds_categoryIds').val(categoryIds);
-                        } else {
-                            $('#change_categoryIds_categoryIds').val('');
-                        }
-                        stadiumCategoryData.splice(objIndex, 1);
-                        layui.table.reload('change_categoryIds_table', {
-                            url: null,
-                            data: stadiumCategoryData
-                        });
-                        layer.close(index);
-                    });
-                }
-            });
-
-            // 监听addStadiumCategoryIdsTable中的工具条
-            table.on('tool(addStadiumCategoryIdsTable)', function (obj) {
-                var data = obj.data; //获得当前行数据
-                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
-                var tr = obj.tr; //获得当前行 tr 的DOM对象
-                if (layEvent === 'delete') {
-                    layer.confirm('真的删除这个分类吗？', function(index){
-                        // 获取行所在的行index
-                        var objIndex = $(tr).attr("data-index");
-                        // 然后把add_stadiumCategoryIds输入框中的内容更新
-                        var stadiumCategoryIds = $('#add_stadiumCategoryIds').val().split(',');
-                        stadiumCategoryIds.splice(objIndex, 1);
-                        if (stadiumCategoryIds.length > 1) {
-                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
-                        } else if (stadiumCategoryIds.length === 1) {
-                            $('#add_stadiumCategoryIds').val(stadiumCategoryIds);
-                        } else {
-                            $('#add_stadiumCategoryIds').val('');
-                        }
-                        stadiumCategoryData.splice(objIndex, 1);
-                        layui.table.reload('add_stadiumCategoryIds_table', {
-                            url: null,
-                            data: stadiumCategoryData
-                        });
-                        layer.close(index);
                     });
                 }
             });
@@ -767,6 +658,13 @@
                 });
                 return false;
             }
+            if ($('#add_stadiumCategoryId').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请设置场馆所属分类！"
+                });
+                return false;
+            }
             return true;
         }
 
@@ -780,7 +678,7 @@
                 title: '选择场馆分类',
                 area:['760px','80%'],
                 content: $('#stadiumCategoryPageDialog').html(),
-                btn: ['添加', '取消'],
+                btn: ['确定', '取消'],
                 success: function (index, layero) {
                     // 填充change_categoryIds_table表格
                     table.render({
@@ -791,7 +689,7 @@
                         , cols: [[
                             {title: '<a class="" style="font-size: 20px; color:black;">场馆分类表</a>',align: 'center', colspan: 4} //rowspan即纵向跨越的单元格数
                         ],[ //表头
-                            {checkbox: true, LAY_CHECKED: false}
+                            {type:'radio'}
                             , {field: 'id', title: 'id', width: 70, sort: true}
                             , {field: 'title', title: '名称', width: 300, sort: true}
                             , {field: 'description', title: '描述', width: 300, sort: true}
@@ -833,59 +731,15 @@
                         });
                         return false;
                     }
-                    var stadiumCategoryIds = [];
-                    stadiumCategoryData = [];
-                    for (var value of checkStatus.data) {
-                        stadiumCategoryIds.push(value.id);
-                        stadiumCategoryData.push(value);
-                    }
+                    var stadiumCategory = checkStatus.data[0];
                     layer.close(index);
                     // 再分别更新add_stadiumCategoryIds_table、change_categoryIds_table表
                     if (dialogIndex === 1) {
-                        if ($('#add_stadiumCategoryIds').val().length === 0) {
-                            // $('#add_stadiumCategoryIds').val()为空，说明是刚打开添加页面，初始化表格
-                            table.render({
-                                elem: '#add_stadiumCategoryIds_table'
-                                , data: stadiumCategoryData
-                                , width: 760
-                                , cols: [[
-                                    {title: '场馆所属分类（<a class="" style="font-size: 18px; color:red;">拖动行可排序</a>）',align: 'center', colspan: 5} //rowspan即纵向跨越的单元格数
-                                ],[ //表头
-                                    {type: 'numbers', title: '序号', width: 60}
-                                    , {field: 'id', title: 'id', width: 60}
-                                    , {field: 'title', title: '名称', width: 300}
-                                    , {field: 'description', title: '描述', width: 250}
-                                    , {fixed: 'right', width: 80, align: 'center', toolbar: '#changeStadiumCategoryIdsBar'} //这里的toolbar值是模板元素的选择器
-                                ]]
-                                , rowDrag: {
-                                    done: function(obj) {
-                                        // 完成时（松开时）触发(soulTable插件，移动行
-                                        stadiumCategoryData = obj.cache;
-                                        var stadiumCategoryIds = [];
-                                        for (var row of obj.cache) {
-                                            stadiumCategoryIds.push(row.id);
-                                        }
-                                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
-                                    }
-                                }
-                                , done: function () {
-                                    soulTable.render(this)
-                                }
-                            });
-                        } else {
-                            // 否则reload
-                            layui.table.reload('add_stadiumCategoryIds_table', {
-                                url: null,
-                                data: stadiumCategoryData
-                            });
-                        }
-                        $('#add_stadiumCategoryIds').val(stadiumCategoryIds.join(','));
+                        $('#add_stadiumCategoryId_name').val(stadiumCategory.title);
+                        $('#add_stadiumCategoryId').val(stadiumCategory.id);
                     } else if (dialogIndex === 2) {
-                        $('#change_categoryIds_categoryIds').val(stadiumCategoryIds.join(','));
-                        layui.table.reload('change_categoryIds_table', {
-                            url: null,
-                            data: stadiumCategoryData
-                        });
+                        $('#change_stadiumCategoryId_name').val(stadiumCategory.title);
+                        $('#change_stadiumCategoryId').val(stadiumCategory.id);
                     }
                 },
                 btn2: function (index, layero) {

@@ -1,6 +1,5 @@
 package cn.edu.hestyle.bookstadium.controller;
 
-import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
@@ -22,7 +21,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -82,17 +80,17 @@ public class StadiumController extends BaseController {
         // 从session中取出id
         Integer stadiumManagerId = (Integer) session.getAttribute("id");
         ObjectMapper objectMapper = new ObjectMapper();
-        HashMap<String, Object> modifyDataMap = null;
+        Stadium stadium = null;
         // 从stadiumManagerData读取modifyDataMap对象
         try {
-            modifyDataMap = objectMapper.readValue(modifyData, new TypeReference<HashMap<String, Object>>() {});
+            stadium = objectMapper.readValue(modifyData, Stadium.class);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Stadium 修改失败，数据格式错误！data = " + modifyData);
             throw new RequestParamException("更新保存失败，数据格式错误！");
         }
         // 执行业务端的业务
-        stadiumService.stadiumManagerModify(stadiumManagerId, modifyDataMap);
+        stadiumService.stadiumManagerModify(stadiumManagerId, stadium);
         return new ResponseResult<>(SUCCESS, "账号更新保存成功！");
     }
 

@@ -68,7 +68,7 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
             throw new AddFailedException("添加失败，指体育场馆id = " + stadiumBook.getStadiumId() + "不存在！");
         }
         // 检查StadiumManager是否有权限添加Stadium的预约
-        if (!stadiumManager.getId().equals(stadium.getManagerId())) {
+        if (!stadiumManager.getId().equals(stadium.getStadiumManagerId())) {
             logger.warn("StadiumBook 添加失败，stadiumManager = " + stadiumManager + "，无权限添加体育场馆 Stadium = " + stadium + "的预约！");
             throw new AddFailedException("添加失败，体育场馆 " + stadium.getName() + " 不是您的账户创建的！");
         }
@@ -150,7 +150,7 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
             logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumBookModify.getStadiumId());
             throw new ModifyFailedException("修改失败，数据库发生未知异常！");
         }
-        if (!stadiumManager.getId().equals(stadium.getManagerId())) {
+        if (!stadiumManager.getId().equals(stadium.getStadiumManagerId())) {
             logger.warn("StadiumBook 修改失败，stadiumManager = " + stadiumManager + "，无权限修改体育场馆 Stadium = " + stadium + "的预约！");
             throw new ModifyFailedException("修改失败，体育场馆 " + stadium.getName() + " 不是您的账户创建的，无法修改其场馆预约！");
         }
@@ -271,11 +271,11 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
                     logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumBook.getStadiumId());
                     throw new DeleteFailedException("StadiumBook 批量删除失败，数据库发生未知异常！");
                 }
-                if (!stadiumManager.getId().equals(stadium.getManagerId())) {
+                if (!stadiumManager.getId().equals(stadium.getStadiumManagerId())) {
                     logger.warn("StadiumBook 修改失败，stadiumManager = " + stadiumManager + "，无权限修改体育场馆 Stadium = " + stadium + "的预约！");
                     throw new DeleteFailedException("修改失败，体育场馆 " + stadium.getName() + " 不是您的账户创建的，无法修改其场馆预约！");
                 }
-                stadiumIdSet.add(stadium.getManagerId());
+                stadiumIdSet.add(stadium.getStadiumManagerId());
             }
             // 检查该stadiumBook是否可以删除
             if (stadiumBook.getBookState() == 1) {

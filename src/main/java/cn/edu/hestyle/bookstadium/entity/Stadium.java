@@ -15,9 +15,9 @@ public class Stadium {
     /**id*/
     private Integer id;
     /**manager id*/
-    private Integer managerId;
+    private Integer stadiumManagerId;
     /**category id*/
-    private String categoryIds;
+    private Integer stadiumCategoryId;
     /**场馆名*/
     private String name;
     /**地址*/
@@ -49,20 +49,20 @@ public class Stadium {
         this.id = id;
     }
 
-    public Integer getManagerId() {
-        return managerId;
+    public Integer getStadiumManagerId() {
+        return stadiumManagerId;
     }
 
-    public void setManagerId(Integer managerId) {
-        this.managerId = managerId;
+    public void setStadiumManagerId(Integer stadiumManagerId) {
+        this.stadiumManagerId = stadiumManagerId;
     }
 
-    public String getCategoryIds() {
-        return categoryIds;
+    public Integer getStadiumCategoryId() {
+        return stadiumCategoryId;
     }
 
-    public void setCategoryIds(String categoryIds) {
-        this.categoryIds = categoryIds;
+    public void setStadiumCategoryId(Integer stadiumCategoryId) {
+        this.stadiumCategoryId = stadiumCategoryId;
     }
 
     public String getName() {
@@ -149,8 +149,8 @@ public class Stadium {
     public String toString() {
         return "Stadium{" +
                 "id=" + id +
-                ", managerId=" + managerId +
-                ", categoryIds='" + categoryIds + '\'' +
+                ", stadiumManagerId=" + stadiumManagerId +
+                ", stadiumCategoryId=" + stadiumCategoryId +
                 ", name='" + name + '\'' +
                 ", address='" + address + '\'' +
                 ", description='" + description + '\'' +

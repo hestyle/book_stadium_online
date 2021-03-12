@@ -34,10 +34,10 @@ public interface IStadiumService {
     /**
      * 修改stadium
      * @param stadiumManagerId          stadiumManagerId
-     * @param modifyDataMap             key value
+     * @param stadium                   stadium
      * @throws ModifyFailedException    修改异常
      */
-    void stadiumManagerModify(Integer stadiumManagerId, HashMap<String, Object> modifyDataMap) throws ModifyFailedException;
+    void stadiumManagerModify(Integer stadiumManagerId, Stadium stadium) throws ModifyFailedException;
 
     /**
      * 删除stadium（只能删除自己的）
