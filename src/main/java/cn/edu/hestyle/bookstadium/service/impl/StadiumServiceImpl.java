@@ -139,6 +139,35 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
+    public List<Stadium> findByName(String name, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        if (name == null || name.length() == 0) {
+            logger.warn("Stadium 查询失败，未指定需要查询的场馆name！");
+            throw new FindFailedException("查询失败，未指定需要查询的体育场馆名称！");
+        }
+        // 去除name中的特殊字符
+        name = name.replaceAll("%", "");
+        name = name.replaceAll("'", "");
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<Stadium> stadiumList = null;
+        try {
+            stadiumList = stadiumMapper.findByName(name, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败，数据库发生未知异常！name = " + name);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("Stadium 查询成功！name = " + name + ", stadiumList = " + stadiumList);
+        return stadiumList;
+    }
+
+    @Override
     public List<Stadium> findByPage(Integer pageIndex, Integer pageSize) throws FindFailedException {
         // 检查页码是否合法
         if (pageIndex < 1) {

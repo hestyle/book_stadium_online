@@ -32,6 +32,14 @@ public interface IStadiumService {
     Stadium findById(Integer stadiumId) throws FindFailedException;
 
     /**
+     * 通过name进行模糊查询
+     * @param name                  name
+     * @return                      List Stadium
+     * @throws FindFailedException  查找失败异常
+     */
+    List<Stadium> findByName(String name, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
      * 分页查询未删除的Stadium
      * @param pageIndex             页下标
      * @param pageSize              一页大小
