@@ -46,6 +46,30 @@
         WHERE
             `id` = #{id}
     </select>
+    <!--分页查询未删除的Stadium-->
+    <!--List<Stadium> findByPage(Integer beginIndex, Integer pageSize);-->
+    <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+        SELECT
+            `id` as `id`,
+            `stadium_manager_id` as `stadiumManagerId`,
+            `stadium_category_id` as `stadiumCategoryId`,
+            `name` as `name`,
+            `address` as `address`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium`
+        WHERE
+            `is_delete` = 0
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
     <!--分页查询stadiumCategoryId对应的Stadium-->
     <!--List<Stadium> findByStadiumCategoryId(Integer stadiumCategoryId, Integer beginIndex, Integer pageSize);-->
     <select id="findByStadiumCategoryId" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">

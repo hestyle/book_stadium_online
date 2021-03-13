@@ -32,6 +32,14 @@ public interface StadiumMapper {
     Stadium findById(Integer id);
 
     /**
+     * 分页查询未删除的Stadium
+     * @param beginIndex            id升序排列
+     * @param pageSize              一页大小
+     * @return                      List Stadium
+     */
+    List<Stadium> findByPage(Integer beginIndex, Integer pageSize);
+
+    /**
      * 分页查询stadiumCategoryId对应的Stadium
      * @param stadiumCategoryId     stadiumCategoryId
      * @param beginIndex            id升序排列
