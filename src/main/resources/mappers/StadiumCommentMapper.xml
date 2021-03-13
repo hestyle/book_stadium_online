@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumCommentMapper">
+    <!--分页查询某个stadium的评论-->
+    <!--List<StadiumComment> findByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);-->
+    <select id="findByStadiumIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumComment">
+        SELECT
+            `id` as `id`,
+            `stadium_id` as `stadiumId`,
+            `user_id` as `userId`,
+            `content` as `content`,
+            `star_count` as `starCount`,
+            `commented_time` as `commentedTime`,
+            `manager_reply` as `managerReply`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_stadium_comment`
+        WHERE
+            `stadium_id` = #{stadiumId} AND `is_delete` = 0
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+</mapper>
