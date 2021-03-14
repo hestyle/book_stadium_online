@@ -12,6 +12,21 @@ import java.util.List;
  */
 @Mapper
 public interface StadiumBookItemMapper {
+
+    /**
+     * 添加stadiumBookItem
+     * @param stadiumBookItem       stadiumBookItem
+     */
+    void add(StadiumBookItem stadiumBookItem);
+
+    /**
+     * 通过stadiumBookId、userId查找
+     * @param stadiumBookId         stadiumBookId
+     * @param userId                userId
+     * @return                      StadiumBookItem
+     */
+    StadiumBookItem findByStadiumBookIdAndUserId(Integer stadiumBookId, Integer userId);
+
     /**
      * 通过stadiumBookId进行分页查询
      * @param stadiumBookId         stadiumBookId

@@ -2,6 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumBookItemMapper">
+    <!--添加stadiumBookItem-->
+    <!--void add(StadiumBookItem stadiumBookItem);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium_book_item`(`stadium_book_id`, `user_id`, `booked_time`, `stadium_comment_id`, `is_delete`)
+        VALUES (#{stadiumBookId}, #{userId}, #{bookedTime}, #{stadiumCommentId}, #{isDelete})
+    </insert>
+    <!--通过stadiumBookId、userId查找-->
+    <!--StadiumBookItem findByStadiumBookIdAndUserId(Integer stadiumBookId, Integer userId);-->
+    <select id="findByStadiumBookIdAndUserId" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem">
+        SELECT
+            `id` as `id`,
+            `stadium_book_id` as `stadiumBookId`,
+            `user_id` as `userId`,
+            `booked_time` as `bookedTime`,
+            `stadium_comment_id` as `stadiumCommentId`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_stadium_book_item`
+        WHERE
+            `stadium_book_id` = #{stadiumBookId} AND `user_id` = #{userId} AND `is_delete` = 0
+    </select>
     <!--通过stadiumBookId进行分页查询-->
     <!--List<StadiumBookItem> findByStadiumBookIdAndPage(Integer stadiumBookId, Integer beginIndex, Integer pageSize);-->
     <select id="findByStadiumBookIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem">

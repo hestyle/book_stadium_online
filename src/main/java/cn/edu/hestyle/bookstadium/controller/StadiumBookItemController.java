@@ -1,6 +1,8 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumBookItem;
+import cn.edu.hestyle.bookstadium.entity.User;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookItemService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,15 @@ public class StadiumBookItemController extends BaseController {
     @Autowired
     private IStadiumBookItemService stadiumBookItemService;
 
+    @PostMapping("/add.do")
+    @JwtToken(required = true, authorizedRoles = User.USER_ROLE)
+    public ResponseResult<Void> handleAdd(@RequestParam(name = "stadiumBookId") Integer stadiumBookId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        stadiumBookItemService.userAdd(userId, stadiumBookId);
+        return new ResponseResult<Void>(SUCCESS, "预约成功！");
+    }
+
     @PostMapping("/findByStadiumBookIdAndPage.do")
     public ResponseResult<List<StadiumBookItem>> handleUserFindByStadiumBookIdAndPage(@RequestParam(name = "stadiumBookId") Integer stadiumBookId,
                                                                                       @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
@@ -32,5 +43,4 @@ public class StadiumBookItemController extends BaseController {
         List<StadiumBookItem> stadiumBookItemList = stadiumBookItemService.findByStadiumBookIdAndPage(stadiumBookId, pageIndex, pageSize);
         return new ResponseResult<List<StadiumBookItem>>(SUCCESS, "查询成功！", stadiumBookItemList);
     }
-
 }
