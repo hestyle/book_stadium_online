@@ -97,4 +97,13 @@ public class StadiumBookController extends BaseController {
         Integer count = stadiumBookService.stadiumManagerGetAllCount(stadiumManagerId);
         return new ResponseResult<List<StadiumBook>>(SUCCESS, count, stadiumBookList,"查询成功！");
     }
+
+    @PostMapping("/userFindByStadiumIdAndPage.do")
+    public ResponseResult<List<StadiumBook>> handleUserFindByStadiumIdAndPage(@RequestParam(name = "stadiumId") Integer stadiumId,
+                                                                              @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                              @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                              HttpSession session) {
+        List<StadiumBook> stadiumBookList = stadiumBookService.userFindByStadiumIdAndPage(stadiumId, pageIndex, pageSize);
+        return new ResponseResult<List<StadiumBook>>(SUCCESS, "查询成功！", stadiumBookList);
+    }
 }

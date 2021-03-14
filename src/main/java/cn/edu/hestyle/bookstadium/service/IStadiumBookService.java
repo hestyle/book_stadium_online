@@ -54,4 +54,14 @@ public interface IStadiumBookService {
      * @return                          stadiumBook个数
      */
     Integer stadiumManagerGetAllCount(Integer stadiumManagerId) throws FindFailedException;
+
+    /**
+     * user通过stadiumId分页查询场馆预约（未删除，且now < startTime, 正在进行预约）
+     * @param stadiumId                 stadiumId
+     * @param pageIndex                 pageIndex
+     * @param pageSize                  pageSize
+     * @return                          List StadiumBook
+     * @throws FindFailedException      查询失败异常
+     */
+    List<StadiumBook> userFindByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException;
 }

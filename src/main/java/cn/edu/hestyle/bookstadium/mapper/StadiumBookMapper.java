@@ -32,6 +32,15 @@ public interface StadiumBookMapper {
     StadiumBook findById(Integer id);
 
     /**
+     * user通过stadiumId分页查询场馆预约（未删除，且now < startTime, 正在进行预约）
+     * @param stadiumId             stadiumId
+     * @param beginIndex            beginIndex
+     * @param pageSize              pageSize
+     * @return                      List StadiumBook
+     */
+    List<StadiumBook> userFindByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);
+
+    /**
      * 通过id删除StadiumBook
      * @param id        StadiumBook id
      */

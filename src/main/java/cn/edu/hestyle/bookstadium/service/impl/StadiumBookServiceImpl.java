@@ -349,4 +349,30 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         logger.warn("StadiumBook 查询成功， stadiumManagerId= " + stadiumManager.getId() + "，count = " + count);
         return count;
     }
+
+    @Override
+    public List<StadiumBook> userFindByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        if (stadiumId == null) {
+            logger.warn("StadiumBook 查找失败，未指定stadiumId！");
+            throw new FindFailedException("查询失败，未指定需要查找的体育场馆ID！");
+        }
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<StadiumBook> stadiumBookList = null;
+        try {
+            stadiumBookList = stadiumBookMapper.userFindByStadiumIdAndPage(stadiumId, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 查找失败，数据库发生未知异常！stadiumId = " + stadiumId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumBook 查找成功！stadiumBookList = " + stadiumBookList);
+        return stadiumBookList;
+    }
 }
