@@ -38,6 +38,31 @@
         WHERE
             `id` = #{id}
     </select>
+    <!--user通过stadiumId分页查询场馆预约（未删除，且now < startTime, 正在进行预约）-->
+    <!--List<StadiumBook> userFindByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);-->
+    <select id="userFindByStadiumIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">
+        SELECT
+            `id` as `id`,
+            `stadium_id` as `stadiumId`,
+            `start_time` as `startTime`,
+            `end_time` as `endTime`,
+            `book_state` as `bookState`,
+            `max_book_count` as `maxBookCount`,
+            `now_book_count` as `nowBookCount`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium_book`
+        WHERE
+            `stadium_id` = #{stadiumId} AND `book_state` = 1 AND `is_delete` = 0 AND `start_time` > now()
+        ORDER BY
+            `start_time`
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
     <!--通过id删除StadiumBook-->
     <!--void deleteById(Integer id);-->
     <update id="deleteById">
@@ -65,7 +90,7 @@
         FROM
             `t_stadium_book`
         WHERE
-            `is_delete` = 0 AND `stadium_id` IN (SELECT id FROM `t_stadium` WHERE `is_delete` = 0 AND `manager_id` = #{stadiumManagerId})
+            `is_delete` = 0 AND `stadium_id` IN (SELECT id FROM `t_stadium` WHERE `is_delete` = 0 AND `stadium_manager_id` = #{stadiumManagerId})
         ORDER BY
             `stadium_id`
         LIMIT
@@ -79,6 +104,6 @@
         FROM
             `t_stadium_book`
         WHERE
-            `is_delete` = 0 AND `stadium_id` IN (SELECT id FROM `t_stadium` WHERE `is_delete` = 0 AND `manager_id` = #{stadiumManagerId})
+            `is_delete` = 0 AND `stadium_id` IN (SELECT id FROM `t_stadium` AS stadium WHERE `is_delete` = 0 AND `stadium_manager_id` = #{stadiumManagerId})
     </select>
 </mapper>
