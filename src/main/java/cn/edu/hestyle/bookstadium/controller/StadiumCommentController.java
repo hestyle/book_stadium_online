@@ -24,6 +24,12 @@ public class StadiumCommentController extends BaseController {
     @Autowired
     private IStadiumCommentService stadiumCommentService;
 
+    @PostMapping("/findByStadiumCommentId.do")
+    public ResponseResult<StadiumComment> handleFindByStadiumCommentId(@RequestParam(name = "stadiumCommentId") Integer stadiumCommentId, HttpSession session) {
+        StadiumComment stadiumComment = stadiumCommentService.findByStadiumCommentId(stadiumCommentId);
+        return new ResponseResult<StadiumComment>(SUCCESS, "查询成功！", stadiumComment);
+    }
+
     @PostMapping("/findByStadiumIdAndPage.do")
     public ResponseResult<List<StadiumComment>> handleFindByStadiumIdAndPage(@RequestParam(name = "stadiumId") Integer stadiumId,
                                                                              @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,

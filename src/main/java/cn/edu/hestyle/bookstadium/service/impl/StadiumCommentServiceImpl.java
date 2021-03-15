@@ -20,6 +20,10 @@ import java.util.List;
  */
 @Service
 public class StadiumCommentServiceImpl implements IStadiumCommentService {
+    /** 评论被删除 */
+    private static final Integer STADIUM_COMMENT_DELETE = 1;
+    /** 评论被屏蔽 */
+    private static final Integer STADIUM_COMMENT_BLACK = 2;
     private static final Logger logger = LoggerFactory.getLogger(StadiumCategoryServiceImpl.class);
 
     @Resource
@@ -27,6 +31,31 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
 
     @Resource
     private StadiumCommentMapper stadiumCommentMapper;
+
+    @Override
+    public StadiumComment findByStadiumCommentId(Integer stadiumCommentId) throws FindFailedException {
+        if (stadiumCommentId == null) {
+            logger.warn("StadiumComment 查询失败！未指定stadiumCommentId！");
+            throw new FindFailedException("查询失败，未指定体育评论id！");
+        }
+        StadiumComment stadiumComment = null;
+        try {
+            stadiumComment = stadiumCommentMapper.findByStadiumCommentId(stadiumCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 查询失败！数据库发生未知错误！stadiumCommentId = " + stadiumCommentId);
+            throw new FindFailedException("查询失败，数据库发生未知错误！");
+        }
+        if (stadiumComment != null && stadiumComment.getIsDelete() != null) {
+            if (stadiumComment.getIsDelete().equals(STADIUM_COMMENT_DELETE)) {
+                stadiumComment.setContent("已删除！");
+            } else if (stadiumComment.getIsDelete().equals(STADIUM_COMMENT_BLACK)) {
+                stadiumComment.setContent("已被系统屏蔽！");
+            }
+        }
+        logger.warn("StadiumComment 查询成功！stadiumComment = " + stadiumComment);
+        return stadiumComment;
+    }
 
     @Override
     public List<StadiumComment> findByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException {

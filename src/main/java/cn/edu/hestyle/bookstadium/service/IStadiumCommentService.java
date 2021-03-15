@@ -13,6 +13,14 @@ import java.util.List;
 public interface IStadiumCommentService {
 
     /**
+     * 通过stadiumCommentId查找
+     * @param stadiumCommentId      stadiumCommentId
+     * @return                      StadiumComment
+     * @throws FindFailedException  查询失败异常
+     */
+    StadiumComment findByStadiumCommentId(Integer stadiumCommentId) throws FindFailedException;
+
+    /**
      * 分页查询某Stadium的评论
      * @param stadiumId             stadiumId
      * @param pageIndex             pageIndex
