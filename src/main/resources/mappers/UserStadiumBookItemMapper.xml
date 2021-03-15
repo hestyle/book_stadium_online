@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.UserStadiumBookItemMapper">
+    <!--分页查询user的StadiumBookItem-->
+    <!--List<UserStadiumBookItem> findByUserIdAndPage(Integer userId, Integer beginIndex, Integer pageSize);-->
+    <select id="findByUserIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.UserStadiumBookItem">
+        SELECT
+            `t_stadium_book_item`.`user_id` as `userId`,
+            `t_stadium_book`.`stadium_id` as `stadiumId`,
+            `t_stadium_book_item`.`stadium_book_id` as `stadiumBookId`,
+            `t_stadium_book`.`start_time` as `stadiumBookStartTime`,
+            `t_stadium_book`.`end_time` as `stadiumBookEndTime`,
+            `t_stadium_book_item`.`id` as `stadiumBookItemId`,
+            `t_stadium_book_item`.`booked_time` as `stadiumBookedTime`,
+            `t_stadium_book_item`.`stadium_comment_id` as `stadiumCommentId`
+        FROM
+            `t_stadium_book_item`
+        LEFT JOIN
+            `t_stadium_book`
+        ON
+            `t_stadium_book_item`.`stadium_book_id` = `t_stadium_book`.`id`
+        WHERE
+            `t_stadium_book_item`.`is_delete` = 0 AND `t_stadium_book_item`.`user_id` = #{userId}
+        ORDER BY
+            `t_stadium_book_item`.`booked_time`
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+</mapper>
