@@ -20,6 +20,19 @@ public interface StadiumBookItemMapper {
     void add(StadiumBookItem stadiumBookItem);
 
     /**
+     * 更新stadiumBookItem
+     * @param stadiumBookItem       stadiumBookItem
+     */
+    void update(StadiumBookItem stadiumBookItem);
+
+    /**
+     * 通过stadiumBookItemId查找
+     * @param stadiumBookItemId     stadiumBookItemId
+     * @return                      StadiumBookItem
+     */
+    StadiumBookItem findById(Integer stadiumBookItemId);
+
+    /**
      * 通过stadiumBookId、userId查找
      * @param stadiumBookId         stadiumBookId
      * @param userId                userId

@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.StadiumCommentMapper">
+    <!--增加stadiumComment-->
+    <!--void add(StadiumComment stadiumComment);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_stadium_comment`(`stadium_id`, `user_id`, `content`, `star_count`, `commented_time`, `manager_reply`, `is_delete`)
+        VALUES (#{stadiumId}, #{userId}, #{content}, #{starCount}, #{commentedTime}, #{managerReply}, #{isDelete})
+    </insert>
     <!--通过stadiumCommentId查找-->
     <!--StadiumComment findByStadiumCommentId(Integer stadiumCommentId);-->
     <select id="findByStadiumCommentId" resultType="cn.edu.hestyle.bookstadium.entity.StadiumComment">

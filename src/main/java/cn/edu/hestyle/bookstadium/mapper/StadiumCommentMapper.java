@@ -13,6 +13,12 @@ import java.util.List;
 @Mapper
 public interface StadiumCommentMapper {
     /**
+     * 增加stadiumComment
+     * @param stadiumComment    stadiumComment
+     */
+    void add(StadiumComment stadiumComment);
+
+    /**
      * 通过stadiumCommentId查找
      * @param stadiumCommentId  stadiumCommentId
      * @return                  StadiumComment

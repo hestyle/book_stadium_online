@@ -8,6 +8,29 @@
         INSERT INTO `t_stadium_book_item`(`stadium_book_id`, `user_id`, `booked_time`, `stadium_comment_id`, `is_delete`)
         VALUES (#{stadiumBookId}, #{userId}, #{bookedTime}, #{stadiumCommentId}, #{isDelete})
     </insert>
+    <!--更新stadiumBookItem-->
+    <!--void update(StadiumBookItem stadiumBookItem);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem">
+        UPDATE `t_stadium_book_item` SET
+            `stadium_comment_id` = #{stadiumCommentId}, `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过stadiumBookItemId查找-->
+    <!--StadiumBookItem findById(Integer stadiumBookItemId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem">
+        SELECT
+            `id` as `id`,
+            `stadium_book_id` as `stadiumBookId`,
+            `user_id` as `userId`,
+            `booked_time` as `bookedTime`,
+            `stadium_comment_id` as `stadiumCommentId`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_stadium_book_item`
+        WHERE
+            `id` = #{stadiumBookItemId} AND `is_delete` = 0
+    </select>
     <!--通过stadiumBookId、userId查找-->
     <!--StadiumBookItem findByStadiumBookIdAndUserId(Integer stadiumBookId, Integer userId);-->
     <select id="findByStadiumBookIdAndUserId" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBookItem">
