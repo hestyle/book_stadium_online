@@ -20,3 +20,7 @@ spring:
     url: jdbc:mysql://localhost:3306/book_stadium_online?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 100MB

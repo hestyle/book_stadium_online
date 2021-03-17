@@ -49,6 +49,15 @@ public class UserController extends BaseController {
         return new ResponseResult<>(SUCCESS, "登录注销成功！");
     }
 
+    @PostMapping("/getInfo.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<User> handleGetInfo(HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        User user = userService.findById(userId);
+        return new ResponseResult<User>(SUCCESS, "查找成功！", user);
+    }
+
     @PostMapping("/register.do")
     public ResponseResult<Void> handleRegister(@RequestParam(name = "userData") String userData, HttpSession session) {
         ObjectMapper objectMapper = new ObjectMapper();

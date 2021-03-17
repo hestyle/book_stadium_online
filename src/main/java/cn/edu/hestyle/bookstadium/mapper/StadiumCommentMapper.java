@@ -13,6 +13,19 @@ import java.util.List;
 @Mapper
 public interface StadiumCommentMapper {
     /**
+     * 增加stadiumComment
+     * @param stadiumComment    stadiumComment
+     */
+    void add(StadiumComment stadiumComment);
+
+    /**
+     * 通过stadiumCommentId查找
+     * @param stadiumCommentId  stadiumCommentId
+     * @return                  StadiumComment
+     */
+    StadiumComment findByStadiumCommentId(Integer stadiumCommentId);
+
+    /**
      * 分页查询某个stadium的评论
      * @param stadiumId         stadiumId
      * @param beginIndex        beginIndex
