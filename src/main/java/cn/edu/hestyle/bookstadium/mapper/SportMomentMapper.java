@@ -12,6 +12,11 @@ import java.util.List;
  */
 @Mapper
 public interface SportMomentMapper {
+    /**
+     * 添加sportMoment
+     * @param sportMoment       sportMoment
+     */
+    void add(SportMoment sportMoment);
 
     /**
      * 分页查询
