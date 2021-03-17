@@ -36,6 +36,14 @@ public interface IUserService {
     void register(User user) throws RegisterFailedException;
 
     /**
+     * 通过id查找（擦除盐值、密码字段）
+     * @param id                    id
+     * @return                      User
+     * @throws FindFailedException  查找失败异常
+     */
+    User findById(Integer id) throws FindFailedException;
+
+    /**
      * (系统内部)通过id查找(controller不能直接调用，会泄露盐值、token)
      * @param id    id
      * @return      Stadium

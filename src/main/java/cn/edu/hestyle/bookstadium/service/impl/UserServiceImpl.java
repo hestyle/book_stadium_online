@@ -180,6 +180,22 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public User findById(Integer id) throws FindFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + id);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        user.setPassword(null);
+        user.setSaltValue(null);
+        logger.warn("User 查询成功！user = " + user);
+        return user;
+    }
+
+    @Override
     public User systemFindById(Integer id) throws FindFailedException {
         if (id == null) {
             logger.warn("User 查询失败，未指定用户ID");
