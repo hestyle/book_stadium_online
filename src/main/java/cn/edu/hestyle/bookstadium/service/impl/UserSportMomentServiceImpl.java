@@ -75,6 +75,39 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public List<UserSportMoment> findByContentKeyPage(String contentKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        if (contentKey == null || contentKey.length() == 0) {
+            logger.warn("SportMoment 查找失败，contentKey为空！");
+            throw new FindFailedException("查询失败，内容关键字为空！");
+        }
+        if (contentKey.length() > SPORT_MOMENT_CONTENT_MAX_LENGTH / 2) {
+            logger.warn("SportMoment 查找失败，contentKey字符串过长，超过了 " + SPORT_MOMENT_CONTENT_MAX_LENGTH / 2 + " 个字符！");
+            throw new FindFailedException("查询失败，内容关键字为空！");
+        }
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        // 去除特殊字符
+        contentKey = contentKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        List<SportMoment> sportMomentList = null;
+        try {
+            sportMomentList = sportMomentMapper.findByContentKeyAndPage(contentKey, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
+    }
+
+    @Override
     public List<UserSportMoment> findByPage(Integer pageIndex, Integer pageSize) throws FindFailedException {
         // 检查页码是否合法
         if (pageIndex < 1) {
@@ -92,10 +125,21 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
         }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
+    }
+
+    /**
+     * sportMomentList to userSportMomentList
+     * @param sportMomentList       sportMomentList
+     * @return                      List UserSportMoment
+     */
+    private List<UserSportMoment> toUserSportMomentList(List<SportMoment> sportMomentList) {
         List<UserSportMoment> userSportMomentList = new ArrayList<>();
         if (sportMomentList != null && sportMomentList.size() != 0) {
             for (SportMoment sportMoment : sportMomentList) {
-                UserSportMoment userSportMoment = UserSportMomentServiceImpl.toUserSportMoment(sportMoment);
+                UserSportMoment userSportMoment = sportMoment.toUserSportMoment();
                 Integer userId = userSportMoment.getUserId();
                 if (userId != null) {
                     User user = null;
@@ -114,30 +158,7 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
                 userSportMomentList.add(userSportMoment);
             }
         }
-        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
         return userSportMomentList;
-    }
-
-    /**
-     * SportMoment to UserSportMoment
-     * @param sportMoment       sportMoment
-     * @return                  userSportMoment
-     */
-    public static UserSportMoment toUserSportMoment(SportMoment sportMoment) {
-        UserSportMoment userSportMoment = new UserSportMoment();
-        if (sportMoment != null) {
-            userSportMoment.setSportMomentId(sportMoment.getId());
-            userSportMoment.setUserId(sportMoment.getUserId());
-            userSportMoment.setContent(sportMoment.getContent());
-            userSportMoment.setImagePaths(sportMoment.getImagePaths());
-            userSportMoment.setLikeCount(sportMoment.getLikeCount());
-            userSportMoment.setCommentCount(sportMoment.getCommentCount());
-            userSportMoment.setSentTime(sportMoment.getSentTime());
-            userSportMoment.setIsDelete(sportMoment.getIsDelete());
-            userSportMoment.setModifiedUser(sportMoment.getModifiedUser());
-            userSportMoment.setModifiedTime(sportMoment.getModifiedTime());
-        }
-        return userSportMoment;
     }
 
     /**

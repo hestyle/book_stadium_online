@@ -19,6 +19,14 @@ public interface SportMomentMapper {
     void add(SportMoment sportMoment);
 
     /**
+     * 通过contentKey分页查询
+     * @param beginIndex        beginIndex
+     * @param pageSize          pageSize
+     * @return                  List SportMoment
+     */
+    List<SportMoment> findByContentKeyAndPage(String contentKey, Integer beginIndex, Integer pageSize);
+
+    /**
      * 分页查询
      * @param beginIndex        beginIndex
      * @param pageSize          pageSize

@@ -68,10 +68,19 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "保存成功！");
     }
 
+    @PostMapping("/findByContentKeyPage.do")
+    public ResponseResult<List<UserSportMoment>> handleFindByContentKeyPage(@RequestParam(value = "contentKey") String contentKey,
+                                                                            @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                            HttpSession session) {
+        List<UserSportMoment> userSportMomentList = userSportMomentService.findByContentKeyPage(contentKey, pageIndex, pageSize);
+        return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
+    }
+
     @PostMapping("/findByPage.do")
     public ResponseResult<List<UserSportMoment>> handleFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-                                                                      HttpSession session) {
+                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                  HttpSession session) {
         List<UserSportMoment> userSportMomentList = userSportMomentService.findByPage(pageIndex, pageSize);
         return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
     }

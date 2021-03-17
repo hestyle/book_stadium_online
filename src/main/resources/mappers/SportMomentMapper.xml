@@ -8,6 +8,29 @@
         INSERT INTO `t_sport_moment`(`user_id`, `content`, `image_paths`, `like_count`, `comment_count`, `sent_time`, `is_delete`, `modified_user`, `modified_time`)
         VALUES (#{userId}, #{content}, #{imagePaths}, #{likeCount}, #{commentCount}, #{sentTime}, #{isDelete}, #{modifiedUser}, #{modifiedTime})
     </insert>
+    <!--通过contentKey分页查询-->
+    <!--List<SportMoment> findByContentKeyAndPage(String contentKey, Integer beginIndex, Integer pageSize);-->
+    <select id="findByContentKeyAndPage" resultType="cn.edu.hestyle.bookstadium.entity.SportMoment">
+        SELECT
+            `id` AS `id`,
+            `user_id` AS `userId`,
+            `content` AS `content`,
+            `image_paths` AS `imagePaths`,
+            `like_count` AS `likeCount`,
+            `comment_count` AS `commentCount`,
+            `sent_time` AS `sentTime`,
+            `is_delete` AS `isDelete`,
+            `modified_user` AS `modifiedUser`,
+            `modified_time` AS `modifiedTime`
+        FROM
+            `t_sport_moment`
+        WHERE
+            `is_delete` = 0 AND `content` LIKE CONCAT('%', #{contentKey}, '%')
+        ORDER BY
+            `sent_time` DESC
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
     <!--分页查询-->
     <!--List<SportMoment> findByPage(Integer beginIndex, Integer pageSize);-->
     <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.SportMoment">
