@@ -28,6 +28,15 @@ public interface IUserSportMomentService {
     void like(Integer userId, Integer sportMomentId) throws AddFailedException;
 
     /**
+     * 判断是否user是否已点赞该sportMoment
+     * @param userId                userId
+     * @param sportMomentId         sportMomentId
+     * @return                      true false
+     * @throws FindFailedException  查询失败异常
+     */
+    boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException;
+
+    /**
      * 通过contentKey分页查询
      * @param pageIndex             pageIndex
      * @param pageSize              pageSize

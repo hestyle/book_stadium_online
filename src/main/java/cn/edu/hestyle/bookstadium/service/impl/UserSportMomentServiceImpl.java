@@ -140,6 +140,20 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException {
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        return sportMomentLike != null;
+    }
+
+    @Override
     public List<UserSportMoment> findByContentKeyPage(String contentKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
         if (contentKey == null || contentKey.length() == 0) {
             logger.warn("SportMoment 查找失败，contentKey为空！");
