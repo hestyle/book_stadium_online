@@ -19,6 +19,19 @@ public interface SportMomentMapper {
     void add(SportMoment sportMoment);
 
     /**
+     * 更新sportMoment
+     * @param sportMoment       sportMoment
+     */
+    void update(SportMoment sportMoment);
+
+    /**
+     * 通过sportMomentId进行查找
+     * @param sportMomentId     sportMomentId
+     * @return                  SportMoment
+     */
+    SportMoment findById(Integer sportMomentId);
+
+    /**
      * 通过contentKey分页查询
      * @param beginIndex        beginIndex
      * @param pageSize          pageSize

@@ -8,6 +8,34 @@
         INSERT INTO `t_sport_moment`(`user_id`, `content`, `image_paths`, `like_count`, `comment_count`, `sent_time`, `is_delete`, `modified_user`, `modified_time`)
         VALUES (#{userId}, #{content}, #{imagePaths}, #{likeCount}, #{commentCount}, #{sentTime}, #{isDelete}, #{modifiedUser}, #{modifiedTime})
     </insert>
+    <!--更新sportMoment-->
+    <!--void update(SportMoment sportMoment);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportMoment">
+        UPDATE `t_sport_moment` SET
+            `content` = #{content}, `image_paths` = #{imagePaths}, `like_count` = #{likeCount},
+            `comment_count` = #{commentCount}, `is_delete` = #{isDelete}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过sportMomentId进行查找-->
+    <!--SportMoment findById(Integer sportMomentId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SportMoment">
+        SELECT
+            `id` AS `id`,
+            `user_id` AS `userId`,
+            `content` AS `content`,
+            `image_paths` AS `imagePaths`,
+            `like_count` AS `likeCount`,
+            `comment_count` AS `commentCount`,
+            `sent_time` AS `sentTime`,
+            `is_delete` AS `isDelete`,
+            `modified_user` AS `modifiedUser`,
+            `modified_time` AS `modifiedTime`
+        FROM
+            `t_sport_moment`
+        WHERE
+            `is_delete` = 0 AND `id` = #{sportMomentId}
+    </select>
     <!--通过contentKey分页查询-->
     <!--List<SportMoment> findByContentKeyAndPage(String contentKey, Integer beginIndex, Integer pageSize);-->
     <select id="findByContentKeyAndPage" resultType="cn.edu.hestyle.bookstadium.entity.SportMoment">

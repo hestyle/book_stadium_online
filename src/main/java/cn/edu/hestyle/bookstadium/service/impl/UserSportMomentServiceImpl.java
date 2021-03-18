@@ -1,8 +1,10 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.SportMoment;
+import cn.edu.hestyle.bookstadium.entity.SportMomentLike;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
+import cn.edu.hestyle.bookstadium.mapper.SportMomentLikeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentService;
@@ -11,6 +13,7 @@ import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -36,6 +39,8 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     private UserMapper userMapper;
     @Resource
     private SportMomentMapper sportMomentMapper;
+    @Resource
+    private SportMomentLikeMapper sportMomentLikeMapper;
 
     @Override
     public void add(UserSportMoment userSportMoment) throws AddFailedException {
@@ -72,6 +77,66 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             throw new AddFailedException("保存失败，数据库发生未知错误！");
         }
         logger.warn("UserSportMoment 添加成功！sportMoment = " + sportMoment);
+    }
+
+    @Override
+    @Transactional
+    public void like(Integer userId, Integer sportMomentId) throws AddFailedException {
+        // 检查sportMoment是否存在
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 点赞失败，未指定需要点赞的sportMomentId！");
+            throw new FindFailedException("点赞失败，未指定需要点赞的sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 点赞失败，不存在该运动动态！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("点赞失败，不存在该运动动态！");
+        }
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMomentLike != null) {
+            logger.warn("SportMomentLike 点赞失败，重复点赞！sportMomentLike = " + sportMomentLike);
+            throw new FindFailedException("点赞失败，您已经点赞过了！");
+        }
+        sportMomentLike = new SportMomentLike();
+        sportMomentLike.setUserId(userId);
+        sportMomentLike.setSportMomentId(sportMomentId);
+        sportMomentLike.setLikedTime(new Date());
+        sportMomentLike.setIsDelete(0);
+        try {
+            sportMomentLikeMapper.add(sportMomentLike);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 添加失败，数据库发生未知错误！sportMomentLike = " + sportMomentLike);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentLike 增加成功！sportMomentLike = " + sportMomentLike);
+        // 然后修改sportMoment的点赞数量
+        sportMoment.setLikeCount(sportMoment.getLikeCount() + 1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！sportMoment = " + sportMoment);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
     }
 
     @Override

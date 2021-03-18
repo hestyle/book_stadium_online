@@ -20,6 +20,14 @@ public interface IUserSportMomentService {
     void add(UserSportMoment userSportMoment) throws AddFailedException;
 
     /**
+     * 点赞sportMoment
+     * @param userId                userId
+     * @param sportMomentId         sportMomentId
+     * @throws AddFailedException   添加失败异常
+     */
+    void like(Integer userId, Integer sportMomentId) throws AddFailedException;
+
+    /**
      * 通过contentKey分页查询
      * @param pageIndex             pageIndex
      * @param pageSize              pageSize

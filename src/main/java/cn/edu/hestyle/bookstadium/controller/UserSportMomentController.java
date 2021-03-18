@@ -1,8 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
-import cn.edu.hestyle.bookstadium.entity.StadiumComment;
-import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
@@ -66,6 +64,15 @@ public class UserSportMomentController extends BaseController {
         }
         userSportMomentService.add(userSportMoment);
         return new ResponseResult<Void>(SUCCESS, "保存成功！");
+    }
+
+    @PostMapping("/like.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleLike(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.like(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞成功！");
     }
 
     @PostMapping("/findByContentKeyPage.do")
