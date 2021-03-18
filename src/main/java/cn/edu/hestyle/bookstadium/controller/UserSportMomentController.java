@@ -84,6 +84,15 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<Boolean>(SUCCESS, "查找成功！", flag);
     }
 
+    @PostMapping("/dislike.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleDislike(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.dislike(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞取消成功！");
+    }
+
     @PostMapping("/findByContentKeyPage.do")
     public ResponseResult<List<UserSportMoment>> handleFindByContentKeyPage(@RequestParam(value = "contentKey") String contentKey,
                                                                             @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,

@@ -28,6 +28,14 @@ public interface IUserSportMomentService {
     void like(Integer userId, Integer sportMomentId) throws AddFailedException;
 
     /**
+     * 取消点赞sportMoment
+     * @param userId                userId
+     * @param sportMomentId         sportMomentId
+     * @throws AddFailedException   添加失败异常
+     */
+    void dislike(Integer userId, Integer sportMomentId) throws AddFailedException;
+
+    /**
      * 判断是否user是否已点赞该sportMoment
      * @param userId                userId
      * @param sportMomentId         sportMomentId

@@ -140,6 +140,60 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public void dislike(Integer userId, Integer sportMomentId) throws AddFailedException {
+        // 检查sportMoment是否存在
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 点赞取消失败，未指定需要点赞的sportMomentId！");
+            throw new FindFailedException("点赞取消失败，未指定需要取消点赞的sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 点赞取消失败，不存在该运动动态！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("点赞取消失败，不存在该运动动态！");
+        }
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMomentLike == null) {
+            logger.warn("SportMomentLike 点赞取消失败，未点赞！sportMomentLike = " + sportMomentLike);
+            throw new FindFailedException("点赞取消失败，您还未点赞该动态！");
+        }
+        try {
+            sportMomentLikeMapper.delete(sportMomentLike.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 删除失败，数据库发生未知错误！sportMomentLike = " + sportMomentLike);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentLike 删除成功！sportMomentLike = " + sportMomentLike);
+        // 然后修改sportMoment的点赞数量
+        sportMoment.setLikeCount(sportMoment.getLikeCount() - 1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！sportMoment = " + sportMoment);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
+    }
+
+    @Override
     public boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException {
         // 检查是否点过赞
         SportMomentLike sportMomentLike = null;

@@ -17,6 +17,12 @@ public interface SportMomentLikeMapper {
     void add(SportMomentLike sportMomentLike);
 
     /**
+     * 通过sportMomentLikeId删除
+     * @param sportMomentLikeId sportMomentLikeId
+     */
+    void delete(Integer sportMomentLikeId);
+
+    /**
      * 通过userId、sportMomentId进行查找
      * @param userId            userId
      * @param sportMomentId     sportMomentId
