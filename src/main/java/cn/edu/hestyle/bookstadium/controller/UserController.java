@@ -59,6 +59,16 @@ public class UserController extends BaseController {
         return new ResponseResult<>(SUCCESS, "密码修改成功！");
     }
 
+    @PostMapping("/modifyGender.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleModifyGender(@RequestParam("gender") String gender,
+                                                   HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userService.modifyGender(userId, gender);
+        return new ResponseResult<>(SUCCESS, "性别修改成功！");
+    }
+
     @PostMapping("/getInfo.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<User> handleGetInfo(HttpSession session) {

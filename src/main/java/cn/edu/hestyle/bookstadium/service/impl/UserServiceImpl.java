@@ -25,7 +25,12 @@ import java.util.regex.Pattern;
 public class UserServiceImpl implements IUserService {
     /** 密码的最大长度 */
     private static final Integer USER_PASSWORD_MAX_LENGTH = 20;
-
+    /** 性别：男 */
+    private static final String USER_GENDER_MAN = "男";
+    /** 性别：女 */
+    private static final String USER_GENDER_WOMAN = "女";
+    /** 性别：保密 */
+    private static final String USER_GENDER_SECRECY = "保密";
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Resource
@@ -220,6 +225,42 @@ public class UserServiceImpl implements IUserService {
             throw new ModifyFailedException("修改失败，数据库发生未知异常！");
         }
         logger.warn("User 修改成功！user = " + user);
+    }
+
+    @Override
+    public void modifyGender(Integer userId, String gender) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (USER_GENDER_MAN.equals(gender)) {
+            user.setGender(USER_GENDER_MAN);
+        } else if (USER_GENDER_WOMAN.equals(gender)) {
+            user.setGender(USER_GENDER_WOMAN);
+        } else if (USER_GENDER_SECRECY.equals(gender)) {
+            user.setGender(USER_GENDER_SECRECY);
+        } else {
+            logger.warn("User 性别修改非法！gender = " + gender);
+            throw new ModifyFailedException("修改失败，性别设置非法！");
+        }
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 性别修改成功！user = " + user);
     }
 
     @Override

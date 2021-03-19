@@ -42,6 +42,14 @@ public interface IUserService {
     void modifyPassword(Integer userId, String password, String newPassword) throws ModifyFailedException;
 
     /**
+     * 修改性别
+     * @param userId                    userId
+     * @param gender                    gender
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyGender(Integer userId, String gender) throws ModifyFailedException;
+
+    /**
      * 通过id查找（擦除盐值、密码字段）
      * @param id                    id
      * @return                      User
