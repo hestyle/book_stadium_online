@@ -69,6 +69,16 @@ public class UserController extends BaseController {
         return new ResponseResult<>(SUCCESS, "性别修改成功！");
     }
 
+    @PostMapping("/modifyPhoneNumber.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleModifyPhoneNumber(@RequestParam("phoneNumber") String phoneNumber,
+                                                        HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userService.modifyPhoneNumber(userId, phoneNumber);
+        return new ResponseResult<>(SUCCESS, "电话号码修改成功！");
+    }
+
     @PostMapping("/getInfo.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<User> handleGetInfo(HttpSession session) {

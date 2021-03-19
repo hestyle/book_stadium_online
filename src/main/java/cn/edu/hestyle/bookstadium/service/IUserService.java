@@ -50,6 +50,14 @@ public interface IUserService {
     void modifyGender(Integer userId, String gender) throws ModifyFailedException;
 
     /**
+     * 修改密码
+     * @param userId                    userId
+     * @param phoneNumber               phoneNumber
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyPhoneNumber(Integer userId, String phoneNumber) throws ModifyFailedException;
+
+    /**
      * 通过id查找（擦除盐值、密码字段）
      * @param id                    id
      * @return                      User

@@ -264,6 +264,44 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public void modifyPhoneNumber(Integer userId, String phoneNumber) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        // 检查电话号码
+        if (phoneNumber == null || phoneNumber.length() == 0) {
+            logger.info("User 电话号码修改失败，未输入电话号码！");
+            throw new ModifyFailedException("修改失败，未输入新电话号码！");
+        }
+        Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+        Matcher matcher = pattern.matcher(phoneNumber);
+        if (!matcher.matches()) {
+            logger.info("User 电话号码修改失败，电话号码非法！phoneNumber = " + phoneNumber);
+            throw new ModifyFailedException("修改失败，电话号码非法！");
+        }
+        user.setPhoneNumber(phoneNumber);
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 电话号码修改成功！user = " + user);
+    }
+
+    @Override
     public User findById(Integer id) throws FindFailedException {
         User user = null;
         try {
