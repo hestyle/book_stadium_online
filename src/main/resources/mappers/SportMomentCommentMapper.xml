@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.SportMomentCommentMapper">
+    <!--添加sportMomentComment-->
+    <!--void add(SportMomentComment sportMomentComment);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_sport_moment_comment`(`user_id`, `sport_moment_id`, `parentId`, `content`, `commented_time`, `like_count`, `is_delete`)
+        VALUES (#{userId}, #{sportMomentId}, #{parentId}, #{content}, #{commentedTime}, #{likeCount}, #{isDelete})
+    </insert>
+    <!--更新sportMomentComment-->
+    <!--void update(SportMomentComment sportMomentComment);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
+        UPDATE `t_sport_moment_comment` SET
+            `content` = #{content}, `like_count` = #{likeCount}, `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过sportMomentCommentId查找-->
+    <!--SportMomentComment findById(Integer sportMomentCommentId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
+        SELECT
+            `id` AS `id`,
+            `user_id` AS `userId`,
+            `sport_moment_id` AS `sportMomentId`,
+            `parentId` AS `parentId`,
+            `content` AS `content`,
+            `commented_time` AS `commentedTime`,
+            `like_count` AS `likeCount`,
+            `is_delete` AS `isDelete`
+        FROM
+            `t_sport_moment_comment`
+        WHERE
+            `id` = #{sportMomentCommentId}
+    </select>
+    <!--通过sportMomentId进行分页查找-->
+    <!--List<SportMomentComment> findBySportMomentIdAndPage(Integer sportMomentId, Integer beginIndex, Integer pageSize);-->
+    <select id="findBySportMomentIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
+        SELECT
+            `id` AS `id`,
+            `user_id` AS `userId`,
+            `sport_moment_id` AS `sportMomentId`,
+            `parentId` AS `parentId`,
+            `content` AS `content`,
+            `commented_time` AS `commentedTime`,
+            `like_count` AS `likeCount`,
+            `is_delete` AS `isDelete`
+        FROM
+            `t_sport_moment_comment`
+        WHERE
+            `sport_moment_id` = #{sportMomentId} AND `is_delete` = 0
+        ORDER BY
+            `like_count` DESC, `commented_time` DESC
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+</mapper>

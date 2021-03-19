@@ -1,8 +1,10 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.SportMoment;
+import cn.edu.hestyle.bookstadium.entity.SportMomentLike;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
+import cn.edu.hestyle.bookstadium.mapper.SportMomentLikeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentService;
@@ -11,6 +13,7 @@ import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
@@ -36,6 +39,8 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     private UserMapper userMapper;
     @Resource
     private SportMomentMapper sportMomentMapper;
+    @Resource
+    private SportMomentLikeMapper sportMomentLikeMapper;
 
     @Override
     public void add(UserSportMoment userSportMoment) throws AddFailedException {
@@ -75,6 +80,206 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    @Transactional
+    public void like(Integer userId, Integer sportMomentId) throws AddFailedException {
+        // 检查sportMoment是否存在
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 点赞失败，未指定需要点赞的sportMomentId！");
+            throw new FindFailedException("点赞失败，未指定需要点赞的sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 点赞失败，不存在该运动动态！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("点赞失败，不存在该运动动态！");
+        }
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMomentLike != null) {
+            logger.warn("SportMomentLike 点赞失败，重复点赞！sportMomentLike = " + sportMomentLike);
+            throw new FindFailedException("点赞失败，您已经点赞过了！");
+        }
+        sportMomentLike = new SportMomentLike();
+        sportMomentLike.setUserId(userId);
+        sportMomentLike.setSportMomentId(sportMomentId);
+        sportMomentLike.setLikedTime(new Date());
+        sportMomentLike.setIsDelete(0);
+        try {
+            sportMomentLikeMapper.add(sportMomentLike);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 添加失败，数据库发生未知错误！sportMomentLike = " + sportMomentLike);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentLike 增加成功！sportMomentLike = " + sportMomentLike);
+        // 然后修改sportMoment的点赞数量
+        sportMoment.setLikeCount(sportMoment.getLikeCount() + 1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！sportMoment = " + sportMoment);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
+    }
+
+    @Override
+    @Transactional
+    public void dislike(Integer userId, Integer sportMomentId) throws AddFailedException {
+        // 检查sportMoment是否存在
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 点赞取消失败，未指定需要点赞的sportMomentId！");
+            throw new FindFailedException("点赞取消失败，未指定需要取消点赞的sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 点赞取消失败，不存在该运动动态！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("点赞取消失败，不存在该运动动态！");
+        }
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMomentLike == null) {
+            logger.warn("SportMomentLike 点赞取消失败，未点赞！sportMomentLike = " + sportMomentLike);
+            throw new FindFailedException("点赞取消失败，您还未点赞该动态！");
+        }
+        try {
+            sportMomentLikeMapper.delete(sportMomentLike.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 删除失败，数据库发生未知错误！sportMomentLike = " + sportMomentLike);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentLike 删除成功！sportMomentLike = " + sportMomentLike);
+        // 然后修改sportMoment的点赞数量
+        sportMoment.setLikeCount(sportMoment.getLikeCount() - 1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！sportMoment = " + sportMoment);
+            throw new AddFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
+    }
+
+    @Override
+    public boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException {
+        // 检查是否点过赞
+        SportMomentLike sportMomentLike = null;
+        try {
+            sportMomentLike = sportMomentLikeMapper.findByUserIdAndSportMomentId(userId, sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        return sportMomentLike != null;
+    }
+
+    @Override
+    public UserSportMoment findById(Integer sportMomentId) throws FindFailedException {
+        if (sportMomentId == null) {
+            logger.warn("UserSportMoment 查找失败，未指定sportMomentId！");
+            throw new FindFailedException("查找失败，未指定sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 查找失败，不存在该SportMoment！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查找失败，不存在该运动动态！");
+        }
+        UserSportMoment userSportMoment = sportMoment.toUserSportMoment();
+        if (userSportMoment.getUserId() != null) {
+            // 拼接username、avatarPath字段
+            User user = null;
+            try {
+                user = userMapper.findById(userSportMoment.getUserId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查找失败，数据库发生未知异常！userId = " + userSportMoment.getUserId());
+                throw new FindFailedException("查询失败，数据库发生未知异常！");
+            }
+            if (user != null) {
+                userSportMoment.setUsername(user.getUsername());
+                userSportMoment.setUserAvatarPath(user.getAvatarPath());
+            }
+        }
+        logger.info("UserSportMoment 查找成功！userSportMoment = " + userSportMoment);
+        return userSportMoment;
+    }
+
+    @Override
+    public List<UserSportMoment> findByContentKeyPage(String contentKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        if (contentKey == null || contentKey.length() == 0) {
+            logger.warn("SportMoment 查找失败，contentKey为空！");
+            throw new FindFailedException("查询失败，内容关键字为空！");
+        }
+        if (contentKey.length() > SPORT_MOMENT_CONTENT_MAX_LENGTH / 2) {
+            logger.warn("SportMoment 查找失败，contentKey字符串过长，超过了 " + SPORT_MOMENT_CONTENT_MAX_LENGTH / 2 + " 个字符！");
+            throw new FindFailedException("查询失败，内容关键字为空！");
+        }
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        // 去除特殊字符
+        contentKey = contentKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        List<SportMoment> sportMomentList = null;
+        try {
+            sportMomentList = sportMomentMapper.findByContentKeyAndPage(contentKey, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
+    }
+
+    @Override
     public List<UserSportMoment> findByPage(Integer pageIndex, Integer pageSize) throws FindFailedException {
         // 检查页码是否合法
         if (pageIndex < 1) {
@@ -92,10 +297,21 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
         }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
+    }
+
+    /**
+     * sportMomentList to userSportMomentList
+     * @param sportMomentList       sportMomentList
+     * @return                      List UserSportMoment
+     */
+    private List<UserSportMoment> toUserSportMomentList(List<SportMoment> sportMomentList) {
         List<UserSportMoment> userSportMomentList = new ArrayList<>();
         if (sportMomentList != null && sportMomentList.size() != 0) {
             for (SportMoment sportMoment : sportMomentList) {
-                UserSportMoment userSportMoment = UserSportMomentServiceImpl.toUserSportMoment(sportMoment);
+                UserSportMoment userSportMoment = sportMoment.toUserSportMoment();
                 Integer userId = userSportMoment.getUserId();
                 if (userId != null) {
                     User user = null;
@@ -114,30 +330,7 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
                 userSportMomentList.add(userSportMoment);
             }
         }
-        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
         return userSportMomentList;
-    }
-
-    /**
-     * SportMoment to UserSportMoment
-     * @param sportMoment       sportMoment
-     * @return                  userSportMoment
-     */
-    public static UserSportMoment toUserSportMoment(SportMoment sportMoment) {
-        UserSportMoment userSportMoment = new UserSportMoment();
-        if (sportMoment != null) {
-            userSportMoment.setSportMomentId(sportMoment.getId());
-            userSportMoment.setUserId(sportMoment.getUserId());
-            userSportMoment.setContent(sportMoment.getContent());
-            userSportMoment.setImagePaths(sportMoment.getImagePaths());
-            userSportMoment.setLikeCount(sportMoment.getLikeCount());
-            userSportMoment.setCommentCount(sportMoment.getCommentCount());
-            userSportMoment.setSentTime(sportMoment.getSentTime());
-            userSportMoment.setIsDelete(sportMoment.getIsDelete());
-            userSportMoment.setModifiedUser(sportMoment.getModifiedUser());
-            userSportMoment.setModifiedTime(sportMoment.getModifiedTime());
-        }
-        return userSportMoment;
     }
 
     /**

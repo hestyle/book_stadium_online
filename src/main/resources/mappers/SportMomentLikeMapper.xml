@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.SportMomentLikeMapper">
+    <!--添加sportMomentLike-->
+    <!--void add(SportMomentLike sportMomentLike);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentLike" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_sport_moment_like`(`user_id`, `sport_moment_id`, `liked_time`, `is_delete`)
+        VALUES (#{userId}, #{sportMomentId}, #{likedTime}, #{isDelete})
+    </insert>
+    <!--通过sportMomentLikeId删除-->
+    <!--void delete(Integer sportMomentLikeId);-->
+    <delete id="delete">
+        DELETE FROM
+            `t_sport_moment_like`
+        WHERE
+            `id` = #{sportMomentLikeId}
+    </delete>
+    <!--通过userId、sportMomentId进行查找-->
+    <!--SportMomentLike findByUserIdAndSportMomentId(Integer userId, Integer sportMomentId);-->
+    <select id="findByUserIdAndSportMomentId" resultType="cn.edu.hestyle.bookstadium.entity.SportMomentLike">
+        SELECT
+            `id` AS `id`,
+            `user_id` AS `userId`,
+            `sport_moment_id` AS `sportMomentId`,
+            `liked_time` AS `likedTime`,
+            `is_delete` AS `isDelete`
+        FROM
+            `t_sport_moment_like`
+        WHERE
+            `user_id` = #{userId} AND `sport_moment_id` = #{sportMomentId} AND `is_delete` = 0
+    </select>
+</mapper>

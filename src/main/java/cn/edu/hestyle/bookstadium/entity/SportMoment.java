@@ -129,4 +129,23 @@ public class SportMoment {
                 ", modifiedTime=" + modifiedTime +
                 '}';
     }
+
+    /**
+     * 转成UserSportMoment
+     * @return  UserSportMoment
+     */
+    public UserSportMoment toUserSportMoment() {
+        UserSportMoment userSportMoment = new UserSportMoment();
+        userSportMoment.setSportMomentId(this.id);
+        userSportMoment.setUserId(this.userId);
+        userSportMoment.setContent(this.content);
+        userSportMoment.setImagePaths(this.imagePaths);
+        userSportMoment.setLikeCount(this.likeCount);
+        userSportMoment.setCommentCount(this.commentCount);
+        userSportMoment.setSentTime(this.sentTime);
+        userSportMoment.setIsDelete(this.isDelete);
+        userSportMoment.setModifiedUser(this.modifiedUser);
+        userSportMoment.setModifiedTime(this.modifiedTime);
+        return userSportMoment;
+    }
 }

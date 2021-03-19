@@ -1,8 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
-import cn.edu.hestyle.bookstadium.entity.StadiumComment;
-import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
@@ -68,10 +66,53 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "保存成功！");
     }
 
+    @PostMapping("/like.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleLike(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.like(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞成功！");
+    }
+
+    @PostMapping("/hasLiked.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Boolean> handleHasLike(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        Boolean flag = userSportMomentService.hasLiked(userId, sportMomentId);
+        return new ResponseResult<Boolean>(SUCCESS, "查找成功！", flag);
+    }
+
+    @PostMapping("/dislike.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleDislike(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.dislike(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞取消成功！");
+    }
+
+    @PostMapping("/findBySportMomentId.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<UserSportMoment> handleFindBySportMomentId(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        UserSportMoment userSportMoment = userSportMomentService.findById(sportMomentId);
+        return new ResponseResult<UserSportMoment>(SUCCESS, "查找成功！", userSportMoment);
+    }
+
+    @PostMapping("/findByContentKeyPage.do")
+    public ResponseResult<List<UserSportMoment>> handleFindByContentKeyPage(@RequestParam(value = "contentKey") String contentKey,
+                                                                            @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                            HttpSession session) {
+        List<UserSportMoment> userSportMomentList = userSportMomentService.findByContentKeyPage(contentKey, pageIndex, pageSize);
+        return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
+    }
+
     @PostMapping("/findByPage.do")
     public ResponseResult<List<UserSportMoment>> handleFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-                                                                      HttpSession session) {
+                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                  HttpSession session) {
         List<UserSportMoment> userSportMomentList = userSportMomentService.findByPage(pageIndex, pageSize);
         return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
     }
