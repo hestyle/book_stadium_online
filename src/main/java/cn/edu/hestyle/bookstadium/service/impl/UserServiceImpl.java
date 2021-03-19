@@ -3,10 +3,7 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
-import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LogoutFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
 import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
@@ -26,6 +23,8 @@ import java.util.regex.Pattern;
  */
 @Service
 public class UserServiceImpl implements IUserService {
+    /** 密码的最大长度 */
+    private static final Integer USER_PASSWORD_MAX_LENGTH = 20;
 
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
@@ -177,6 +176,50 @@ public class UserServiceImpl implements IUserService {
             throw new RegisterFailedException("账号注册失败，数据库发生未知异常！");
         }
         logger.info("User 账号注册成功！data = " + user);
+    }
+
+    @Override
+    public void modifyPassword(Integer userId, String password, String newPassword) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (password == null || password.length() == 0) {
+            logger.warn("User 密码修改失败，原密码错误！user = " + user);
+            throw new ModifyFailedException("修改失败，原密码错误！");
+        }
+        String passwordEncrypt = EncryptUtil.encryptPassword(password, user.getSaltValue());
+        if (!user.getPassword().equals(passwordEncrypt)) {
+            logger.warn("User 密码修改失败，原密码错误！user = " + user);
+            throw new ModifyFailedException("修改失败，原密码错误！");
+        }
+        if (newPassword == null || newPassword.length() == 0) {
+            logger.warn("User 密码修改失败，未设置新密码！user = " + user);
+            throw new ModifyFailedException("修改失败，未设置新密码！");
+        }
+        if (newPassword.length() > USER_PASSWORD_MAX_LENGTH) {
+            logger.warn("User 密码修改失败，新密码长度超过了 " + USER_PASSWORD_MAX_LENGTH + " 个字符！user = " + user);
+            throw new ModifyFailedException("修改失败，新密码长度超过了 " + USER_PASSWORD_MAX_LENGTH + " 个字符");
+        }
+        user.setPassword(EncryptUtil.encryptPassword(newPassword, user.getSaltValue()));
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！user = " + user);
     }
 
     @Override

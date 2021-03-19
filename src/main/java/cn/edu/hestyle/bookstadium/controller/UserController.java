@@ -1,7 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
-import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IUserService;
@@ -47,6 +46,17 @@ public class UserController extends BaseController {
         Integer userId = (Integer) session.getAttribute("id");
         userService.logout(userId);
         return new ResponseResult<>(SUCCESS, "登录注销成功！");
+    }
+
+    @PostMapping("/modifyPassword.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleModifyPassword(@RequestParam("password") String password,
+                                                     @RequestParam("newPassword") String newPassword,
+                                                     HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userService.modifyPassword(userId, password, newPassword);
+        return new ResponseResult<>(SUCCESS, "密码修改成功！");
     }
 
     @PostMapping("/getInfo.do")
