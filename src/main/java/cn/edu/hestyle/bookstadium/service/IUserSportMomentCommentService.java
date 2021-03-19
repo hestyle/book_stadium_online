@@ -13,6 +13,13 @@ import java.util.List;
  * @date 2021/3/18 4:18 下午
  */
 public interface IUserSportMomentCommentService {
+    /**
+     * 添加userSportMomentComment
+     * @param userId                    userId
+     * @param userSportMomentComment    userSportMomentComment
+     * @throws AddFailedException       添加失败异常
+     */
+    void add(Integer userId, UserSportMomentComment userSportMomentComment) throws AddFailedException;
 
     /**
      * 点赞sportMomentComment

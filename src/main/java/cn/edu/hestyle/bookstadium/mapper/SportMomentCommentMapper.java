@@ -12,6 +12,11 @@ import java.util.List;
  */
 @Mapper
 public interface SportMomentCommentMapper {
+    /**
+     * 添加sportMomentComment
+     * @param sportMomentComment
+     */
+    void add(SportMomentComment sportMomentComment);
 
     /**
      * 更新sportMomentComment

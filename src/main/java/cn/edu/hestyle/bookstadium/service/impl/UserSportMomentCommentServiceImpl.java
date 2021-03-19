@@ -30,6 +30,8 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     private static final Integer USER_SPORT_MOMENT_COMMENT_DELETE_STATE = 1;
     /** 评论被屏蔽 */
     private static final Integer USER_SPORT_MOMENT_COMMENT_BLANK_STATE = 2;
+    /** 评论内容最大长度 */
+    private static final Integer USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH = 200;
 
     private static final Logger logger = LoggerFactory.getLogger(UserSportMomentCommentServiceImpl.class);
 
@@ -41,6 +43,83 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     private SportMomentCommentMapper sportMomentCommentMapper;
     @Resource
     private SportMomentCommentLikeMapper sportMomentCommentLikeMapper;
+
+    @Override
+    @Transactional
+    public void add(Integer userId, UserSportMomentComment userSportMomentComment) throws AddFailedException {
+        // 检查各个字段合法性
+        if (userSportMomentComment == null || userSportMomentComment.getSportMomentId() == null) {
+            logger.warn("SportMomentComment 添加失败，未指定需要评论的SportMomentId！");
+            throw new AddFailedException("评论失败，未指定需要评论的SportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(userSportMomentComment.getSportMomentId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + userSportMomentComment.getSportMomentId());
+            throw new AddFailedException("评论失败，数据库发生未知错误！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMomentComment 添加失败，不存在该SportMoment！sportMomentId = " + userSportMomentComment.getSportMomentId());
+            throw new AddFailedException("评论失败，不存在该SportMoment！");
+        }
+        // 检查Content
+        if (userSportMomentComment.getContent() == null || userSportMomentComment.getContent().length() == 0) {
+            logger.warn("SportMomentComment 添加失败，未填写评论内容！userSportMomentComment = " + userSportMomentComment);
+            throw new AddFailedException("评论失败，未填写评论内容！");
+        }
+        if (userSportMomentComment.getContent().length() > USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH) {
+            logger.warn("SportMomentComment 添加失败，评论内容超过了 " + USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH  + " 个字符！userSportMomentComment = " + userSportMomentComment);
+            throw new AddFailedException("评论失败，评论内容超过了 " + USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH  + " 个字符");
+        }
+        // 追评需要检查原评论是否存在
+        if (userSportMomentComment.getParentId() != null) {
+            SportMomentComment sportMomentComment = null;
+            try {
+                sportMomentComment = sportMomentCommentMapper.findById(userSportMomentComment.getParentId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("SportMomentComment 查找失败，数据库发生未知错误！sportMomentCommentId = " + userSportMomentComment.getParentId());
+                throw new AddFailedException("评论失败，数据库发生未知错误！");
+            }
+            if (sportMomentComment == null) {
+                logger.warn("SportMomentComment 添加失败，回复的原评论不存在！sportMomentCommentId = " + userSportMomentComment.getParentId());
+                throw new AddFailedException("回复失败，原评论不存在，或已删除、屏蔽！");
+            }
+        }
+        SportMomentComment additionSportMomentComment = new SportMomentComment();
+        additionSportMomentComment.setUserId(userId);
+        additionSportMomentComment.setSportMomentId(userSportMomentComment.getSportMomentId());
+        additionSportMomentComment.setParentId(userSportMomentComment.getParentId());
+        additionSportMomentComment.setContent(userSportMomentComment.getContent());
+        additionSportMomentComment.setCommentedTime(new Date());
+        additionSportMomentComment.setLikeCount(0);
+        additionSportMomentComment.setIsDelete(0);
+        logger.info("SportMomentComment 评论添加事务开启----");
+        // 插入additionSportMomentComment
+        try {
+            sportMomentCommentMapper.add(additionSportMomentComment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentComment 添加失败，数据库发生未知错误！事务回滚！additionSportMomentComment = " + additionSportMomentComment);
+            throw new AddFailedException("评论失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentComment 添加成功！additionSportMomentComment = " + additionSportMomentComment);
+        // 修改SportMoment的评论数量
+        sportMoment.setCommentCount(sportMoment.getCommentCount() + 1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！事务回滚！sportMoment = " + sportMoment);
+            throw new AddFailedException("评论失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
+        logger.warn("SportMomentComment 添加成功！事务提交");
+    }
 
     @Override
     @Transactional

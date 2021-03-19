@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.SportMomentCommentMapper">
+    <!--添加sportMomentComment-->
+    <!--void add(SportMomentComment sportMomentComment);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_sport_moment_comment`(`user_id`, `sport_moment_id`, `parentId`, `content`, `commented_time`, `like_count`, `is_delete`)
+        VALUES (#{userId}, #{sportMomentId}, #{parentId}, #{content}, #{commentedTime}, #{likeCount}, #{isDelete})
+    </insert>
     <!--更新sportMomentComment-->
     <!--void update(SportMomentComment sportMomentComment);-->
     <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
