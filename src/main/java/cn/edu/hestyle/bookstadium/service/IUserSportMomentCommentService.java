@@ -22,6 +22,15 @@ public interface IUserSportMomentCommentService {
     void like(Integer userId, Integer sportMomentCommentId) throws AddFailedException;
 
     /**
+     * 判断user是否点赞了sportMomentComment
+     * @param userId                userId
+     * @param sportMomentCommentId  sportMomentCommentId
+     * @return                      true or false
+     * @throws FindFailedException  查找失败异常
+     */
+    boolean hasLiked(Integer userId, Integer sportMomentCommentId) throws FindFailedException;
+
+    /**
      * 通过sportMomentId进行分页查找
      * @param sportMomentId         sportMomentId
      * @param pageIndex             pageIndex

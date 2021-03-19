@@ -101,6 +101,21 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     }
 
     @Override
+    public boolean hasLiked(Integer userId, Integer sportMomentCommentId) throws FindFailedException {
+        // 判断是否点过赞
+        SportMomentCommentLike sportMomentCommentLike = null;
+        try {
+            sportMomentCommentLike = sportMomentCommentLikeMapper.findByUserIdAndSportMomentCommentId(userId, sportMomentCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentCommentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentCommentId = " + sportMomentCommentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        return sportMomentCommentLike != null;
+    }
+
+
+    @Override
     public List<UserSportMomentComment> findBySportMomentIdAndPage(Integer sportMomentId, Integer pageIndex, Integer pageSize) throws FindFailedException {
         if (sportMomentId == null) {
             logger.warn("UserSportMomentComment 查找失败，未指定sportMomentId！");
