@@ -140,6 +140,7 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    @Transactional
     public void dislike(Integer userId, Integer sportMomentId) throws AddFailedException {
         // 检查sportMoment是否存在
         if (sportMomentId == null) {
