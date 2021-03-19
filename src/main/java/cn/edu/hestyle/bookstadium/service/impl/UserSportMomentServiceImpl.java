@@ -208,6 +208,44 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public UserSportMoment findById(Integer sportMomentId) throws FindFailedException {
+        if (sportMomentId == null) {
+            logger.warn("UserSportMoment 查找失败，未指定sportMomentId！");
+            throw new FindFailedException("查找失败，未指定sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 查找失败，不存在该SportMoment！sportMomentId = " + sportMomentId);
+            throw new FindFailedException("查找失败，不存在该运动动态！");
+        }
+        UserSportMoment userSportMoment = sportMoment.toUserSportMoment();
+        if (userSportMoment.getUserId() != null) {
+            // 拼接username、avatarPath字段
+            User user = null;
+            try {
+                user = userMapper.findById(userSportMoment.getUserId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查找失败，数据库发生未知异常！userId = " + userSportMoment.getUserId());
+                throw new FindFailedException("查询失败，数据库发生未知异常！");
+            }
+            if (user != null) {
+                userSportMoment.setUsername(user.getUsername());
+                userSportMoment.setUserAvatarPath(user.getAvatarPath());
+            }
+        }
+        logger.info("UserSportMoment 查找成功！userSportMoment = " + userSportMoment);
+        return userSportMoment;
+    }
+
+    @Override
     public List<UserSportMoment> findByContentKeyPage(String contentKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
         if (contentKey == null || contentKey.length() == 0) {
             logger.warn("SportMoment 查找失败，contentKey为空！");

@@ -45,6 +45,14 @@ public interface IUserSportMomentService {
     boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException;
 
     /**
+     * 通过sportMomentId进行查找
+     * @param sportMomentId         sportMomentId
+     * @return                      UserSportMoment
+     * @throws FindFailedException  查询失败异常
+     */
+    UserSportMoment findById(Integer sportMomentId) throws FindFailedException;
+
+    /**
      * 通过contentKey分页查询
      * @param pageIndex             pageIndex
      * @param pageSize              pageSize

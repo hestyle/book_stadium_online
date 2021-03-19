@@ -14,11 +14,11 @@ public interface IUserSportMomentCommentService {
 
     /**
      * 通过sportMomentId进行分页查找
-     * @param sportMomentId
-     * @param pageIndex
-     * @param pageSize
-     * @return
-     * @throws FindFailedException
+     * @param sportMomentId         sportMomentId
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List UserSportMomentComment
+     * @throws FindFailedException  查找失败异常
      */
     List<UserSportMomentComment> findBySportMomentIdAndPage(Integer sportMomentId, Integer pageIndex, Integer pageSize) throws FindFailedException;
 }
