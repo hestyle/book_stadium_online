@@ -12,6 +12,13 @@ import java.util.List;
  */
 @Mapper
 public interface SportMomentCommentMapper {
+
+    /**
+     * 更新sportMomentComment
+     * @param sportMomentComment    sportMomentComment
+     */
+    void update(SportMomentComment sportMomentComment);
+
     /**
      * 通过sportMomentCommentId查找
      * @param sportMomentCommentId      sportMomentCommentId

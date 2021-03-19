@@ -1,20 +1,21 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
-import cn.edu.hestyle.bookstadium.entity.SportMoment;
-import cn.edu.hestyle.bookstadium.entity.SportMomentComment;
-import cn.edu.hestyle.bookstadium.entity.User;
-import cn.edu.hestyle.bookstadium.entity.UserSportMomentComment;
+import cn.edu.hestyle.bookstadium.entity.*;
+import cn.edu.hestyle.bookstadium.mapper.SportMomentCommentLikeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentCommentMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentCommentService;
+import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,6 +38,67 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     private SportMomentMapper sportMomentMapper;
     @Resource
     private SportMomentCommentMapper sportMomentCommentMapper;
+    @Resource
+    private SportMomentCommentLikeMapper sportMomentCommentLikeMapper;
+
+    @Override
+    @Transactional
+    public void like(Integer userId, Integer sportMomentCommentId) throws AddFailedException {
+        if (sportMomentCommentId == null) {
+            logger.warn("SportMomentComment 点赞失败，未指定需要点赞的SportMomentCommentId！");
+            throw new AddFailedException("点赞失败，未指定需要点赞的SportMomentCommentId！");
+        }
+        // 判断sportMomentComment是否存在
+        SportMomentComment sportMomentComment = null;
+        try {
+            sportMomentComment = sportMomentCommentMapper.findById(sportMomentCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentComment 查找失败，数据库发生未知错误！sportMomentCommentId = " + sportMomentCommentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMomentComment == null) {
+            logger.warn("SportMomentComment 点赞失败，不存在该SportMomentComment！sportMomentCommentId = " + sportMomentCommentId);
+            throw new AddFailedException("点赞失败，不存在该SportMomentComment！");
+        }
+        // 判断是否点过赞
+        SportMomentCommentLike sportMomentCommentLike = null;
+        try {
+            sportMomentCommentLike = sportMomentCommentLikeMapper.findByUserIdAndSportMomentCommentId(userId, sportMomentCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentCommentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentCommentId = " + sportMomentCommentId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        if (sportMomentCommentLike != null) {
+            logger.warn("SportMomentCommentLike 点赞失败，重复点赞！sportMomentCommentLike = " + sportMomentCommentLike);
+            throw new AddFailedException("点赞失败，您已经点过赞了！");
+        }
+        // 新增sportMomentCommentLike
+        sportMomentCommentLike = new SportMomentCommentLike();
+        sportMomentCommentLike.setUserId(userId);
+        sportMomentCommentLike.setSportMomentCommentId(sportMomentCommentId);
+        sportMomentCommentLike.setLikedTime(new Date());
+        sportMomentCommentLike.setIsDelete(0);
+        try {
+            sportMomentCommentLikeMapper.add(sportMomentCommentLike);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentCommentLike 新增失败，数据库发生未知错误！事务回滚！sportMomentCommentLike = " + sportMomentCommentLike);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentCommentLike 新增成功！sportMomentCommentLike = " + sportMomentCommentLike);
+        // 修改评论的点赞数量
+        sportMomentComment.setLikeCount(sportMomentComment.getLikeCount() + 1);
+        try {
+            sportMomentCommentMapper.update(sportMomentComment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentComment 修改失败，数据库发生未知错误！事务回滚！sportMomentComment = " + sportMomentComment);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentComment 修改成功！sportMomentComment = " + sportMomentComment);
+    }
 
     @Override
     public List<UserSportMomentComment> findBySportMomentIdAndPage(Integer sportMomentId, Integer pageIndex, Integer pageSize) throws FindFailedException {

@@ -26,6 +26,15 @@ public class UserSportMomentCommentController extends BaseController {
     @Autowired
     private IUserSportMomentCommentService userSportMomentCommentService;
 
+    @PostMapping("/like.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleLike(@RequestParam(value = "sportMomentCommentId") Integer sportMomentCommentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentCommentService.like(userId, sportMomentCommentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞成功！");
+    }
+
     @PostMapping("/findBySportMomentIdAndPage.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<List<UserSportMomentComment>> handleFindByPage(@RequestParam(value = "sportMomentId") Integer sportMomentId,

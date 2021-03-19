@@ -2,6 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.SportMomentCommentMapper">
+    <!--更新sportMomentComment-->
+    <!--void update(SportMomentComment sportMomentComment);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
+        UPDATE `t_sport_moment_comment` SET
+            `content` = #{content}, `like_count` = #{likeCount}, `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
     <!--通过sportMomentCommentId查找-->
     <!--SportMomentComment findById(Integer sportMomentCommentId);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SportMomentComment">
