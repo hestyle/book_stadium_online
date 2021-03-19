@@ -44,6 +44,15 @@ public class UserSportMomentCommentController extends BaseController {
         return new ResponseResult<Boolean>(SUCCESS, "查找成功！", flag);
     }
 
+    @PostMapping("/dislike.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleDislike(@RequestParam(value = "sportMomentCommentId") Integer sportMomentCommentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentCommentService.dislike(userId, sportMomentCommentId);
+        return new ResponseResult<Void>(SUCCESS, "点赞取消成功！");
+    }
+
     @PostMapping("/findBySportMomentIdAndPage.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<List<UserSportMomentComment>> handleFindByPage(@RequestParam(value = "sportMomentId") Integer sportMomentId,

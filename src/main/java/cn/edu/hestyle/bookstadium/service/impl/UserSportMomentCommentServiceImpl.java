@@ -7,6 +7,7 @@ import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentCommentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,6 +97,60 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
             e.printStackTrace();
             logger.warn("SportMomentComment 修改失败，数据库发生未知错误！事务回滚！sportMomentComment = " + sportMomentComment);
             throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentComment 修改成功！sportMomentComment = " + sportMomentComment);
+    }
+
+    @Override
+    @Transactional
+    public void dislike(Integer userId, Integer sportMomentCommentId) throws DeleteFailedException {
+        if (sportMomentCommentId == null) {
+            logger.warn("SportMomentComment 点赞取消失败，未指定需要取消点赞的SportMomentCommentId！");
+            throw new DeleteFailedException("点赞取消失败，未指定需要取消点赞的SportMomentCommentId！");
+        }
+        // 判断sportMomentComment是否存在
+        SportMomentComment sportMomentComment = null;
+        try {
+            sportMomentComment = sportMomentCommentMapper.findById(sportMomentCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentComment 查找失败，数据库发生未知错误！sportMomentCommentId = " + sportMomentCommentId);
+            throw new DeleteFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMomentComment == null) {
+            logger.warn("SportMomentComment 点赞取消失败，不存在该SportMomentComment！sportMomentCommentId = " + sportMomentCommentId);
+            throw new DeleteFailedException("点赞取消失败，不存在该SportMomentComment！");
+        }
+        // 判断是否点过赞
+        SportMomentCommentLike sportMomentCommentLike = null;
+        try {
+            sportMomentCommentLike = sportMomentCommentLikeMapper.findByUserIdAndSportMomentCommentId(userId, sportMomentCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentCommentLike 查找失败，数据库发生未知错误！userId = " + userId + ", sportMomentCommentId = " + sportMomentCommentId);
+            throw new DeleteFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        if (sportMomentCommentLike == null) {
+            logger.warn("SportMomentCommentLike 点赞取消失败，还未点赞！userId = " + userId + ", sportMomentCommentId = " + sportMomentCommentId);
+            throw new DeleteFailedException("点赞取消失败，您还未点赞！");
+        }
+        // 删除sportMomentCommentLike
+        try {
+            sportMomentCommentLikeMapper.deleteById(sportMomentCommentLike.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentCommentLike 删除失败，数据库发生未知错误！事务回滚！sportMomentCommentLike = " + sportMomentCommentLike);
+            throw new DeleteFailedException("点赞取消失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMomentCommentLike 删除成功！sportMomentCommentLike = " + sportMomentCommentLike);
+        // 修改评论的点赞数量
+        sportMomentComment.setLikeCount(sportMomentComment.getLikeCount() - 1);
+        try {
+            sportMomentCommentMapper.update(sportMomentComment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMomentComment 修改失败，数据库发生未知错误！事务回滚！sportMomentComment = " + sportMomentComment);
+            throw new DeleteFailedException("点赞取消失败，数据库发生未知错误！");
         }
         logger.warn("SportMomentComment 修改成功！sportMomentComment = " + sportMomentComment);
     }

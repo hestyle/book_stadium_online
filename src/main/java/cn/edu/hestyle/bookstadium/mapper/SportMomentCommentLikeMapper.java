@@ -18,6 +18,12 @@ public interface SportMomentCommentLikeMapper {
     void add(SportMomentCommentLike sportMomentCommentLike);
 
     /**
+     * 通过sportMomentCommentLikeId删除
+     * @param sportMomentCommentLikeId  sportMomentCommentLikeId
+     */
+    void deleteById(Integer sportMomentCommentLikeId);
+
+    /**
      * 通过userId、sportMomentCommentId进行查找
      * @param userId                    userId
      * @param sportMomentCommentId      sportMomentCommentId

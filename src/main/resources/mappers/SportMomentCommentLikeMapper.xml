@@ -8,6 +8,14 @@
         INSERT INTO `t_sport_moment_comment_like`(`user_id`, `sport_moment_comment_id`, `liked_time`, `is_delete`)
         VALUES (#{userId}, #{sportMomentCommentId}, #{likedTime}, #{isDelete})
     </insert>
+    <!--通过sportMomentCommentLikeId删除-->
+    <!--void deleteById(Integer sportMomentCommentLikeId);-->
+    <delete id="deleteById">
+        DELETE FROM
+            `t_sport_moment_comment_like`
+        WHERE
+            `id` = #{sportMomentCommentLikeId}
+    </delete>
     <!--通过userId、sportMomentCommentId进行查找-->
     <!--SportMomentCommentLike findByUserIdAndSportMomentCommentId(Integer userId, Integer sportMomentCommentId);-->
     <select id="findByUserIdAndSportMomentCommentId" resultType="cn.edu.hestyle.bookstadium.entity.SportMomentCommentLike">

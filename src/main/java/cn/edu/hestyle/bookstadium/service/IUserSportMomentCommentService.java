@@ -2,6 +2,7 @@ package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.UserSportMomentComment;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 
 import java.util.List;
@@ -20,6 +21,14 @@ public interface IUserSportMomentCommentService {
      * @throws AddFailedException   添加失败异常
      */
     void like(Integer userId, Integer sportMomentCommentId) throws AddFailedException;
+
+    /**
+     * 取消点赞sportMomentComment
+     * @param userId                userId
+     * @param sportMomentCommentId  sportMomentCommentId
+     * @throws AddFailedException   添加失败异常
+     */
+    void dislike(Integer userId, Integer sportMomentCommentId) throws DeleteFailedException;
 
     /**
      * 判断user是否点赞了sportMomentComment
