@@ -42,6 +42,14 @@ public interface IUserService {
     void modifyPassword(Integer userId, String password, String newPassword) throws ModifyFailedException;
 
     /**
+     * 修改头像
+     * @param userId                    userId
+     * @param avatarPath                avatarPath
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyAvatarPath(Integer userId, String avatarPath) throws ModifyFailedException;
+
+    /**
      * 修改性别
      * @param userId                    userId
      * @param gender                    gender

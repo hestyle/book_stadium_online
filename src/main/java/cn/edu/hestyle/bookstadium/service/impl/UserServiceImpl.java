@@ -9,8 +9,10 @@ import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -228,6 +230,44 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public void modifyAvatarPath(Integer userId, String avatarPath) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (avatarPath == null || avatarPath.length() == 0) {
+            logger.warn("User 头像修改失败！未上传图片！userId = " + userId);
+            throw new ModifyFailedException("修改失败，未上传图片！");
+        }
+        try {
+            checkAvatarPath(avatarPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 头像修改失败，msg = " + e.getMessage());
+            throw new ModifyFailedException("修改失败，" + e.getMessage() + " !");
+        }
+        user.setAvatarPath(avatarPath);
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！user = " + user);
+    }
+
+    @Override
     public void modifyGender(Integer userId, String gender) throws ModifyFailedException {
         User user = null;
         try {
@@ -333,5 +373,31 @@ public class UserServiceImpl implements IUserService {
         }
         logger.warn("User 查询成功！user = " + user);
         return user;
+    }
+
+    /**
+     * 检查imagePaths的合法性
+     * @param avatarPath            avatarPath
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkAvatarPath(String avatarPath) throws Exception {
+        if (avatarPath == null || avatarPath.length() == 0) {
+            throw new Exception("头像路径为空！");
+        }
+        try {
+            String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/user/avatar";
+            String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+            String filePath = pathNameTruth + avatarPath.substring(avatarPath.lastIndexOf('/'));
+            File file = new File(filePath);
+            if (!file.exists()) {
+                throw new Exception(avatarPath + "文件不存在于服务器上！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(avatarPath + "文件不存在于服务器上！");
+        }
+        logger.info("User avatarPath = " + avatarPath + " 通过检查！");
+        return true;
     }
 }
