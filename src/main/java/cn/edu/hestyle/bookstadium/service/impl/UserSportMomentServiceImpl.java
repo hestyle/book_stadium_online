@@ -11,6 +11,7 @@ import cn.edu.hestyle.bookstadium.service.IUserSportMomentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -207,6 +208,60 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             throw new FindFailedException("查找失败，数据库发生未知错误！");
         }
         return sportMomentLike != null;
+    }
+
+    @Override
+    public void modify(Integer userId, UserSportMoment userSportMoment) throws ModifyFailedException {
+        if (userSportMoment == null || userSportMoment.getSportMomentId() == null) {
+            logger.warn("SportMoment 修改失败，未指定需要修改的 sportMomentId！userSportMoment =" + userSportMoment);
+            throw new ModifyFailedException("修改失败，未指定需要修改的动态！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(userSportMoment.getSportMomentId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + userSportMoment.getSportMomentId());
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 修改失败，不存在该SportMoment！sportMomentId = " + userSportMoment.getSportMomentId());
+            throw new ModifyFailedException("修改失败，不存在该运动动态！");
+        }
+        // 判断userId删除的sportMoment是否是自己创建的
+        if (!sportMoment.getUserId().equals(userId)) {
+            logger.warn("SportMoment 修改失败，用户 userId = " + userId + "无法修改其他账号的SportMoment！sportMoment = " + sportMoment);
+            throw new ModifyFailedException("修改失败，您的账号无权限修改该运动动态！");
+        }
+        // 检查字段的合法性
+        if (userSportMoment.getContent() == null || userSportMoment.getContent().length() == 0) {
+            logger.warn("SportMoment 修改失败，未填写运动动态的内容！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，未填写运动动态的内容！");
+        }
+        if (userSportMoment.getContent().length() > SPORT_MOMENT_CONTENT_MAX_LENGTH) {
+            logger.warn("SportMoment 修改失败，运动动态的内容长度超过了" + SPORT_MOMENT_CONTENT_MAX_LENGTH + "个字符！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，运动动态的内容长度超过了" + SPORT_MOMENT_CONTENT_MAX_LENGTH + "个字符！");
+        }
+        // 检查imagePaths
+        try {
+            checkImagePaths(userSportMoment.getImagePaths());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，image path列表格式错误！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，动态包含的图片格式错误！");
+        }
+        sportMoment.setContent(userSportMoment.getContent());
+        sportMoment.setImagePaths(userSportMoment.getImagePaths());
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！userSportMoment = " + userSportMoment + ", sportMoment = " + sportMoment);
+            throw new ModifyFailedException("修改失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！userSportMoment = " + userSportMoment + ", sportMoment = " + sportMoment);
     }
 
     @Override

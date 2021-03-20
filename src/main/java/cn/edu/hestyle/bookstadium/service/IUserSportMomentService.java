@@ -4,6 +4,7 @@ import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 import java.util.List;
 
@@ -44,6 +45,14 @@ public interface IUserSportMomentService {
      * @throws FindFailedException  查询失败异常
      */
     boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException;
+
+    /**
+     * 修改userSportMoment
+     * @param userId                    userId
+     * @param userSportMoment           userSportMoment
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modify(Integer userId, UserSportMoment userSportMoment) throws ModifyFailedException;
 
     /**
      * 通过sportMomentId进行删除
