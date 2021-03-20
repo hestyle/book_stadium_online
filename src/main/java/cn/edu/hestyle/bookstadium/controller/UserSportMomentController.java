@@ -93,11 +93,50 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "点赞取消成功！");
     }
 
+    @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleModify(@RequestParam(value = "userSportMomentData") String userSportMomentData, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        UserSportMoment userSportMoment = null;
+        try {
+            userSportMoment = objectMapper.readValue(userSportMomentData, UserSportMoment.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("UserSportMoment 修改失败，数据格式错误！userSportMomentData = " + userSportMomentData);
+            throw new RequestException("修改失败，数据格式错误！");
+        }
+        userSportMomentService.modify(userId, userSportMoment);
+        return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
+    @PostMapping("/deleteMySportMoment.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleFindMySportMomentByPage(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.deleteBySportMomentId(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
+    }
+
     @PostMapping("/findBySportMomentId.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<UserSportMoment> handleFindBySportMomentId(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
         UserSportMoment userSportMoment = userSportMomentService.findById(sportMomentId);
         return new ResponseResult<UserSportMoment>(SUCCESS, "查找成功！", userSportMoment);
+    }
+
+    @PostMapping("/findMySportMomentByPage.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<List<UserSportMoment>> handleFindMySportMomentByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                               HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        List<UserSportMoment> userSportMomentList = userSportMomentService.findByUserIdAndPage(userId, pageIndex, pageSize);
+        return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
     }
 
     @PostMapping("/findByContentKeyPage.do")

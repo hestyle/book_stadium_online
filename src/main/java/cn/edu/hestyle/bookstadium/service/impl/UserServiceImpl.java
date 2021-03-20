@@ -3,17 +3,16 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
-import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LogoutFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
 import cn.edu.hestyle.bookstadium.util.TokenUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.Date;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -26,7 +25,14 @@ import java.util.regex.Pattern;
  */
 @Service
 public class UserServiceImpl implements IUserService {
-
+    /** 密码的最大长度 */
+    private static final Integer USER_PASSWORD_MAX_LENGTH = 20;
+    /** 性别：男 */
+    private static final String USER_GENDER_MAN = "男";
+    /** 性别：女 */
+    private static final String USER_GENDER_WOMAN = "女";
+    /** 性别：保密 */
+    private static final String USER_GENDER_SECRECY = "保密";
     private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Resource
@@ -180,6 +186,162 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
+    public void modifyPassword(Integer userId, String password, String newPassword) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (password == null || password.length() == 0) {
+            logger.warn("User 密码修改失败，原密码错误！user = " + user);
+            throw new ModifyFailedException("修改失败，原密码错误！");
+        }
+        String passwordEncrypt = EncryptUtil.encryptPassword(password, user.getSaltValue());
+        if (!user.getPassword().equals(passwordEncrypt)) {
+            logger.warn("User 密码修改失败，原密码错误！user = " + user);
+            throw new ModifyFailedException("修改失败，原密码错误！");
+        }
+        if (newPassword == null || newPassword.length() == 0) {
+            logger.warn("User 密码修改失败，未设置新密码！user = " + user);
+            throw new ModifyFailedException("修改失败，未设置新密码！");
+        }
+        if (newPassword.length() > USER_PASSWORD_MAX_LENGTH) {
+            logger.warn("User 密码修改失败，新密码长度超过了 " + USER_PASSWORD_MAX_LENGTH + " 个字符！user = " + user);
+            throw new ModifyFailedException("修改失败，新密码长度超过了 " + USER_PASSWORD_MAX_LENGTH + " 个字符");
+        }
+        user.setPassword(EncryptUtil.encryptPassword(newPassword, user.getSaltValue()));
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！user = " + user);
+    }
+
+    @Override
+    public void modifyAvatarPath(Integer userId, String avatarPath) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (avatarPath == null || avatarPath.length() == 0) {
+            logger.warn("User 头像修改失败！未上传图片！userId = " + userId);
+            throw new ModifyFailedException("修改失败，未上传图片！");
+        }
+        try {
+            checkAvatarPath(avatarPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 头像修改失败，msg = " + e.getMessage());
+            throw new ModifyFailedException("修改失败，" + e.getMessage() + " !");
+        }
+        user.setAvatarPath(avatarPath);
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！user = " + user);
+    }
+
+    @Override
+    public void modifyGender(Integer userId, String gender) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        if (USER_GENDER_MAN.equals(gender)) {
+            user.setGender(USER_GENDER_MAN);
+        } else if (USER_GENDER_WOMAN.equals(gender)) {
+            user.setGender(USER_GENDER_WOMAN);
+        } else if (USER_GENDER_SECRECY.equals(gender)) {
+            user.setGender(USER_GENDER_SECRECY);
+        } else {
+            logger.warn("User 性别修改非法！gender = " + gender);
+            throw new ModifyFailedException("修改失败，性别设置非法！");
+        }
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 性别修改成功！user = " + user);
+    }
+
+    @Override
+    public void modifyPhoneNumber(Integer userId, String phoneNumber) throws ModifyFailedException {
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！userId = " + userId);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (user == null) {
+            logger.warn("User 不存在该user！userId = " + userId);
+            throw new ModifyFailedException("修改失败，账号未注册！");
+        }
+        // 检查电话号码
+        if (phoneNumber == null || phoneNumber.length() == 0) {
+            logger.info("User 电话号码修改失败，未输入电话号码！");
+            throw new ModifyFailedException("修改失败，未输入新电话号码！");
+        }
+        Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+        Matcher matcher = pattern.matcher(phoneNumber);
+        if (!matcher.matches()) {
+            logger.info("User 电话号码修改失败，电话号码非法！phoneNumber = " + phoneNumber);
+            throw new ModifyFailedException("修改失败，电话号码非法！");
+        }
+        user.setPhoneNumber(phoneNumber);
+        user.setModifiedUser(user.getUsername());
+        user.setModifiedTime(new Date());
+        try {
+            userMapper.update(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！user = " + user);
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        logger.warn("User 电话号码修改成功！user = " + user);
+    }
+
+    @Override
     public User findById(Integer id) throws FindFailedException {
         User user = null;
         try {
@@ -211,5 +373,31 @@ public class UserServiceImpl implements IUserService {
         }
         logger.warn("User 查询成功！user = " + user);
         return user;
+    }
+
+    /**
+     * 检查imagePaths的合法性
+     * @param avatarPath            avatarPath
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkAvatarPath(String avatarPath) throws Exception {
+        if (avatarPath == null || avatarPath.length() == 0) {
+            throw new Exception("头像路径为空！");
+        }
+        try {
+            String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/user/avatar";
+            String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+            String filePath = pathNameTruth + avatarPath.substring(avatarPath.lastIndexOf('/'));
+            File file = new File(filePath);
+            if (!file.exists()) {
+                throw new Exception(avatarPath + "文件不存在于服务器上！");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new Exception(avatarPath + "文件不存在于服务器上！");
+        }
+        logger.info("User avatarPath = " + avatarPath + " 通过检查！");
+        return true;
     }
 }

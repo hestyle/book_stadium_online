@@ -9,7 +9,9 @@ import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -209,6 +211,96 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public void modify(Integer userId, UserSportMoment userSportMoment) throws ModifyFailedException {
+        if (userSportMoment == null || userSportMoment.getSportMomentId() == null) {
+            logger.warn("SportMoment 修改失败，未指定需要修改的 sportMomentId！userSportMoment =" + userSportMoment);
+            throw new ModifyFailedException("修改失败，未指定需要修改的动态！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(userSportMoment.getSportMomentId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + userSportMoment.getSportMomentId());
+            throw new ModifyFailedException("修改失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 修改失败，不存在该SportMoment！sportMomentId = " + userSportMoment.getSportMomentId());
+            throw new ModifyFailedException("修改失败，不存在该运动动态！");
+        }
+        // 判断userId删除的sportMoment是否是自己创建的
+        if (!sportMoment.getUserId().equals(userId)) {
+            logger.warn("SportMoment 修改失败，用户 userId = " + userId + "无法修改其他账号的SportMoment！sportMoment = " + sportMoment);
+            throw new ModifyFailedException("修改失败，您的账号无权限修改该运动动态！");
+        }
+        // 检查字段的合法性
+        if (userSportMoment.getContent() == null || userSportMoment.getContent().length() == 0) {
+            logger.warn("SportMoment 修改失败，未填写运动动态的内容！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，未填写运动动态的内容！");
+        }
+        if (userSportMoment.getContent().length() > SPORT_MOMENT_CONTENT_MAX_LENGTH) {
+            logger.warn("SportMoment 修改失败，运动动态的内容长度超过了" + SPORT_MOMENT_CONTENT_MAX_LENGTH + "个字符！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，运动动态的内容长度超过了" + SPORT_MOMENT_CONTENT_MAX_LENGTH + "个字符！");
+        }
+        // 检查imagePaths
+        try {
+            checkImagePaths(userSportMoment.getImagePaths());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，image path列表格式错误！userSportMoment = " + userSportMoment);
+            throw new ModifyFailedException("修改失败，动态包含的图片格式错误！");
+        }
+        sportMoment.setContent(userSportMoment.getContent());
+        sportMoment.setImagePaths(userSportMoment.getImagePaths());
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 修改失败，数据库发生未知错误！userSportMoment = " + userSportMoment + ", sportMoment = " + sportMoment);
+            throw new ModifyFailedException("修改失败，数据库发生未知错误！");
+        }
+        logger.warn("SportMoment 修改成功！userSportMoment = " + userSportMoment + ", sportMoment = " + sportMoment);
+    }
+
+    @Override
+    public void deleteBySportMomentId(Integer userId, Integer sportMomentId) throws DeleteFailedException {
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 删除失败，未指定sportMomentId！");
+            throw new DeleteFailedException("删除失败，未指定sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + sportMomentId);
+            throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 删除失败，不存在该SportMoment！sportMomentId = " + sportMomentId);
+            throw new DeleteFailedException("删除失败，不存在该运动动态！");
+        }
+        // 判断userId删除的sportMoment是否是自己创建的
+        if (!sportMoment.getUserId().equals(userId)) {
+            logger.warn("SportMoment 删除失败，用户 userId = " + userId + "无法删除其他账号的SportMoment！sportMoment = " + sportMoment);
+            throw new DeleteFailedException("删除失败，您的账号无权限删除该运动动态！");
+        }
+        sportMoment.setIsDelete(1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 删除失败，数据库发生未知异常！sportMoment = " + sportMoment);
+            throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+        }
+        logger.warn("SportMoment 删除成功！sportMoment = " + sportMoment);
+    }
+
+    @Override
     public UserSportMoment findById(Integer sportMomentId) throws FindFailedException {
         if (sportMomentId == null) {
             logger.warn("UserSportMoment 查找失败，未指定sportMomentId！");
@@ -244,6 +336,29 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
         }
         logger.info("UserSportMoment 查找成功！userSportMoment = " + userSportMoment);
         return userSportMoment;
+    }
+
+    @Override
+    public List<UserSportMoment> findByUserIdAndPage(Integer userId, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<SportMoment> sportMomentList = null;
+        try {
+            sportMomentList = sportMomentMapper.findByUserIdAndPage(userId, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
     }
 
     @Override

@@ -5,7 +5,7 @@
     <!--添加sportMomentComment-->
     <!--void add(SportMomentComment sportMomentComment);-->
     <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.SportMomentComment" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO `t_sport_moment_comment`(`user_id`, `sport_moment_id`, `parentId`, `content`, `commented_time`, `like_count`, `is_delete`)
+        INSERT INTO `t_sport_moment_comment`(`user_id`, `sport_moment_id`, `parent_id`, `content`, `commented_time`, `like_count`, `is_delete`)
         VALUES (#{userId}, #{sportMomentId}, #{parentId}, #{content}, #{commentedTime}, #{likeCount}, #{isDelete})
     </insert>
     <!--更新sportMomentComment-->
@@ -23,7 +23,7 @@
             `id` AS `id`,
             `user_id` AS `userId`,
             `sport_moment_id` AS `sportMomentId`,
-            `parentId` AS `parentId`,
+            `parent_id` AS `parentId`,
             `content` AS `content`,
             `commented_time` AS `commentedTime`,
             `like_count` AS `likeCount`,
@@ -40,7 +40,7 @@
             `id` AS `id`,
             `user_id` AS `userId`,
             `sport_moment_id` AS `sportMomentId`,
-            `parentId` AS `parentId`,
+            `parent_id` AS `parentId`,
             `content` AS `content`,
             `commented_time` AS `commentedTime`,
             `like_count` AS `likeCount`,

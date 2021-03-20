@@ -1,10 +1,7 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.User;
-import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LoginFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.LogoutFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.RegisterFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.*;
 
 /**
  * @author hestyle
@@ -34,6 +31,39 @@ public interface IUserService {
      * @throws RegisterFailedException  注册失败异常
      */
     void register(User user) throws RegisterFailedException;
+
+    /**
+     * 修改密码
+     * @param userId                    userId
+     * @param password                  password
+     * @param newPassword               newPassword
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyPassword(Integer userId, String password, String newPassword) throws ModifyFailedException;
+
+    /**
+     * 修改头像
+     * @param userId                    userId
+     * @param avatarPath                avatarPath
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyAvatarPath(Integer userId, String avatarPath) throws ModifyFailedException;
+
+    /**
+     * 修改性别
+     * @param userId                    userId
+     * @param gender                    gender
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyGender(Integer userId, String gender) throws ModifyFailedException;
+
+    /**
+     * 修改密码
+     * @param userId                    userId
+     * @param phoneNumber               phoneNumber
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modifyPhoneNumber(Integer userId, String phoneNumber) throws ModifyFailedException;
 
     /**
      * 通过id查找（擦除盐值、密码字段）

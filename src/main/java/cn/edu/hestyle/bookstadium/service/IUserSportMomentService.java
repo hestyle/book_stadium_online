@@ -2,7 +2,9 @@ package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 import java.util.List;
 
@@ -45,12 +47,38 @@ public interface IUserSportMomentService {
     boolean hasLiked(Integer userId, Integer sportMomentId) throws FindFailedException;
 
     /**
+     * 修改userSportMoment
+     * @param userId                    userId
+     * @param userSportMoment           userSportMoment
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void modify(Integer userId, UserSportMoment userSportMoment) throws ModifyFailedException;
+
+    /**
+     * 通过sportMomentId进行删除
+     * @param userId                    userId
+     * @param sportMomentId             sportMomentId
+     * @throws DeleteFailedException    删除失败异常
+     */
+    void deleteBySportMomentId(Integer userId, Integer sportMomentId) throws DeleteFailedException;
+
+    /**
      * 通过sportMomentId进行查找
      * @param sportMomentId         sportMomentId
      * @return                      UserSportMoment
      * @throws FindFailedException  查询失败异常
      */
     UserSportMoment findById(Integer sportMomentId) throws FindFailedException;
+
+    /**
+     * 通过userId进行分页查询
+     * @param userId                userId
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List UserSportMoment
+     * @throws FindFailedException  查询失败异常
+     */
+    List<UserSportMoment> findByUserIdAndPage(Integer userId, Integer pageIndex, Integer pageSize) throws FindFailedException;
 
     /**
      * 通过contentKey分页查询
