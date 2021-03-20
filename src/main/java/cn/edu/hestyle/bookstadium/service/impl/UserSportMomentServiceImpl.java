@@ -9,6 +9,7 @@ import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -206,6 +207,42 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             throw new FindFailedException("查找失败，数据库发生未知错误！");
         }
         return sportMomentLike != null;
+    }
+
+    @Override
+    public void deleteBySportMomentId(Integer userId, Integer sportMomentId) throws DeleteFailedException {
+        if (sportMomentId == null) {
+            logger.warn("SportMoment 删除失败，未指定sportMomentId！");
+            throw new DeleteFailedException("删除失败，未指定sportMomentId！");
+        }
+        SportMoment sportMoment = null;
+        try {
+            sportMoment = sportMomentMapper.findById(sportMomentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！sportMomentId = " + sportMomentId);
+            throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+        }
+        if (sportMoment == null) {
+            logger.warn("SportMoment 删除失败，不存在该SportMoment！sportMomentId = " + sportMomentId);
+            throw new DeleteFailedException("删除失败，不存在该运动动态！");
+        }
+        // 判断userId删除的sportMoment是否是自己创建的
+        if (!sportMoment.getUserId().equals(userId)) {
+            logger.warn("SportMoment 删除失败，用户 userId = " + userId + "无法删除其他账号的SportMoment！sportMoment = " + sportMoment);
+            throw new DeleteFailedException("删除失败，您的账号无权限删除该运动动态！");
+        }
+        sportMoment.setIsDelete(1);
+        sportMoment.setModifiedUser("System");
+        sportMoment.setModifiedTime(new Date());
+        try {
+            sportMomentMapper.update(sportMoment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 删除失败，数据库发生未知异常！sportMoment = " + sportMoment);
+            throw new DeleteFailedException("删除失败，数据库发生未知异常！");
+        }
+        logger.warn("SportMoment 删除成功！sportMoment = " + sportMoment);
     }
 
     @Override

@@ -93,6 +93,15 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "点赞取消成功！");
     }
 
+    @PostMapping("/deleteMySportMoment.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<Void> handleFindMySportMomentByPage(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        userSportMomentService.deleteBySportMomentId(userId, sportMomentId);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
+    }
+
     @PostMapping("/findBySportMomentId.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<UserSportMoment> handleFindBySportMomentId(@RequestParam(value = "sportMomentId") Integer sportMomentId, HttpSession session) {
