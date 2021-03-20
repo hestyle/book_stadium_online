@@ -100,6 +100,17 @@ public class UserSportMomentController extends BaseController {
         return new ResponseResult<UserSportMoment>(SUCCESS, "查找成功！", userSportMoment);
     }
 
+    @PostMapping("/findMySportMomentByPage.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<List<UserSportMoment>> handleFindMySportMomentByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                               HttpSession session) {
+        // 从session中取出id
+        Integer userId = (Integer) session.getAttribute("id");
+        List<UserSportMoment> userSportMomentList = userSportMomentService.findByUserIdAndPage(userId, pageIndex, pageSize);
+        return new ResponseResult<List<UserSportMoment>>(SUCCESS, "查询成功！", userSportMomentList);
+    }
+
     @PostMapping("/findByContentKeyPage.do")
     public ResponseResult<List<UserSportMoment>> handleFindByContentKeyPage(@RequestParam(value = "contentKey") String contentKey,
                                                                             @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,

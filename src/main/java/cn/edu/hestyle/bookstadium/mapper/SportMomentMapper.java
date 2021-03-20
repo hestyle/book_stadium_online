@@ -32,6 +32,15 @@ public interface SportMomentMapper {
     SportMoment findById(Integer sportMomentId);
 
     /**
+     * 通过userId进行分页查询
+     * @param userId            userId
+     * @param beginIndex        beginIndex
+     * @param pageSize          pageSize
+     * @return                  List SportMoment
+     */
+    List<SportMoment> findByUserIdAndPage(Integer userId, Integer beginIndex, Integer pageSize);
+
+    /**
      * 通过contentKey分页查询
      * @param beginIndex        beginIndex
      * @param pageSize          pageSize

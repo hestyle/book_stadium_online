@@ -247,6 +247,29 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     }
 
     @Override
+    public List<UserSportMoment> findByUserIdAndPage(Integer userId, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<SportMoment> sportMomentList = null;
+        try {
+            sportMomentList = sportMomentMapper.findByUserIdAndPage(userId, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportMoment 查找失败，数据库发生未知异常！pageIndex = " + pageIndex + ", pageSize = " + pageSize);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        List<UserSportMoment> userSportMomentList = toUserSportMomentList(sportMomentList);
+        logger.warn("UserSportMoment 查找成功！userSportMomentList = " + userSportMomentList);
+        return userSportMomentList;
+    }
+
+    @Override
     public List<UserSportMoment> findByContentKeyPage(String contentKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
         if (contentKey == null || contentKey.length() == 0) {
             logger.warn("SportMoment 查找失败，contentKey为空！");
