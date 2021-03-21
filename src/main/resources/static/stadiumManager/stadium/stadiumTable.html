@@ -13,6 +13,12 @@
     <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
 </head>
     <body>
+        <div class="div-search">
+            <div class="layui-inline">
+                <input class="layui-input" id="stadiumNameKey" autocomplete="off" placeholder="请输入场馆名" style="width: 300px;">
+            </div>
+            <button class="layui-btn" data-type="reload" id="searchStadiumButton">搜索</button>
+        </div>
         <table id="stadiumTable" lay-filter="test"></table>
     </body>
     <!--顶部操作栏-->
@@ -285,7 +291,6 @@
             table.render({
                 elem: '#stadiumTable'
                 , toolbar: '#toolbarDemo'
-                , height: 550
                 , defaultToolbar: ['print', 'exports']
                 , method: 'POST'
                 , cols: [[
@@ -882,6 +887,24 @@
                         }
                     });
                 }
+            });
+            $('#searchStadiumButton').on('click', function () {
+                if ($('#stadiumNameKey').val().length === 0) {
+                    layer.open({
+                        title: '提示信息',
+                        content: "请输入场馆名称关键字！"
+                    });
+                    return false;
+                }
+                var nameKey = $('#stadiumNameKey').val();
+                layui.table.reload('stadiumTable', {
+                    page: {
+                        curr: 1
+                    }
+                    ,where: {
+                        nameKey: nameKey
+                    }
+                });
             });
         }
 
