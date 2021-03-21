@@ -27,6 +27,7 @@
         <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
         <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改场馆分类</a>
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumComment" style="background-color: #FF5722;">查看场馆评价</a>
     </script>
     <!--每条数据的编辑操作-->
     <script type="text/html" id="editDialog">
@@ -172,6 +173,104 @@
     <script type="text/html" id="stadiumCategoryPageDialog">
         <table id="all_stadiumCategory_table" lay-filter="allStadiumTable"></table>
     </script>
+    <!--场馆评论列表-->
+    <script type="text/html" id="stadiumCommentPageDialog">
+        <table id="all_stadiumComment_table" lay-filter="allStadiumCommentTable"></table>
+    </script>
+    <!--场馆评论单条数据的操作栏-->
+    <script type="text/html" id="stadiumCommentTableBarTemplet">
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="report">举报</a>
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumCommentDetail">查看</a>
+        {{#  if(d.managerReply != null){ }}
+        <a class="layui-btn layui-btn-disabled layui-btn-xs">回复</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="replyStadiumComment">回复</a>
+        {{#  }}}
+    </script>
+    <script type="text/html" id="stadiumCommentUsernameTemplet">
+        {{d.commentUser.username}}
+    </script>
+    <script type="text/html" id="stadiumCommentStarCountTemplet">
+        {{#  if(d.starCount >= 1){ }}
+        <img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>
+        {{#  } else { }}
+        <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
+        {{#  }}}
+        {{#  if(d.starCount >= 2){ }}
+        <img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>
+        {{#  } else { }}
+        <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
+        {{#  }}}
+        {{#  if(d.starCount >= 3){ }}
+        <img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>
+        {{#  } else { }}
+        <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
+        {{#  }}}
+        {{#  if(d.starCount >= 4){ }}
+        <img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>
+        {{#  } else { }}
+        <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
+        {{#  }}}
+        {{#  if(d.starCount >= 5){ }}
+        <img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>
+        {{#  } else { }}
+        <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
+        {{#  }}}
+    </script>
+    <!--StadiumComment查看操作-->
+    <script type="text/html" id="lookStadiumCommentDetailDialog">
+        <form class="layui-form" action="" style="padding: 20px;" lay-filter="stadiumCommentForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">用户名</label>
+                <div class="layui-input-inline">
+                    <input id="lookStadiumCommentUsername" type="text" placeholder="发表评价的用户名" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="lookStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价星级</label>
+                <div id="lookStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价时间</label>
+                <div class="layui-input-inline">
+                    <input id="lookStadiumCommentCommentedTime" placeholder="评价时间" class="layui-input" style="width: 140%;" disabled />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">我的回复</label>
+                <div class="layui-input-inline">
+                    <textarea id="lookStadiumCommentManagerReply" name="description" placeholder="无" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--StadiumComment回复操作-->
+    <script type="text/html" id="replyStadiumCommentDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 380px;" lay-filter="stadiumCommentReplyForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="replyStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价星级</label>
+                <div id="replyStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">回复内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="replyStadiumCommentManagerReply" placeholder="请输入回复的内容~" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
     <script>
         layui.config({
             base: '../../plugins/soulTable/',
@@ -199,7 +298,7 @@
                     , {field: 'description', title: '描述', width: 200, sort: true}
                     , {field: 'stadiumCategoryId', title: '分类', width: 150, sort: true}
                     , {field: 'imagePaths', title: '图片', width: 150, sort: true}
-                    , {fixed: 'right', width: 260, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                    , {fixed: 'right', width: 340, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                 ]]
                 , page: true
                 , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
@@ -630,6 +729,156 @@
                         },
                         btn2: function (index, layero) {
                             //return false 开启该代码可禁止点击该按钮关闭
+                        }
+                    });
+                } else if (layEvent === 'lookStadiumComment') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆【' + data.name + '】评价',
+                        area:['70%','80%'],
+                        content: $('#stadiumCommentPageDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            table.render({
+                                elem: '#all_stadiumComment_table'
+                                , width: 1020
+                                , defaultToolbar: ['print', 'exports']
+                                , method: 'POST'
+                                , cols: [[
+                                    {title: '<a class="" style="font-size: 20px; color:black;">场馆【'+ data.name + '】评论表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {field: 'username', title: '用户名', width: 140, sort: true, templet: '#stadiumCommentUsernameTemplet'}
+                                    , {field: 'content', title: '评价内容', width: 200, sort: true}
+                                    , {field: 'starCount', title: '评价星级', width: 160, sort: true, templet: '#stadiumCommentStarCountTemplet'}
+                                    , {field: 'commentedTime', title: '评价时间', width: 180, sort: true}
+                                    , {field: 'managerReply', title: '我的回复', width: 150, sort: true}
+                                    , {field: 'toolBar_field', width: 180, align: 'center', templet: '#stadiumCommentTableBarTemplet'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , page: true
+                                , url: "/book_stadium_online/stadiumComment/findByStadiumIdAndPage.do"
+                                , where: {
+                                    stadiumId: data.id
+                                }
+                                , headers: {
+                                    token: $.cookie("stadiumManagerToken")
+                                }
+                                , request: {
+                                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                                }
+                                , response: {
+                                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                                    ,statusCode: 200 //规定成功的状态码，默认：0
+                                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                                }
+                                , parseData: function(res){ //res 即为原始返回的数据
+                                    res.data = res.data.map(function(d){d['toolBar_field']='';return d;});
+                                    return {
+                                        "code": res.code, //解析接口状态
+                                        "message": res.message, //解析提示文本
+                                        "count": res.count, //解析数据长度
+                                        "data": res.data //解析数据列表
+                                    };
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }
+            });
+            //监听工具条
+            table.on('tool(allStadiumCommentTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'lookStadiumCommentDetail') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆评论详情',
+                        area: ['60%', '70%'],
+                        content: $('#lookStadiumCommentDetailDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("lookStadiumCommentDetailDialog", data);
+                            $('#lookStadiumCommentUsername').val(data.commentUser.username);
+                            $('#lookStadiumCommentContent').val(data.content);
+                            for (var i = 0; i < parseInt(data.starCount); ++i) {
+                                $('#lookStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            for (var i = parseInt(data.starCount); i < 5; ++i) {
+                                $('#lookStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            $('#lookStadiumCommentCommentedTime').val(data.commentedTime);
+                            $('#lookStadiumCommentManagerReply').val(data.managerReply);
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'replyStadiumComment') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆评论回复',
+                        area: ['450px'],
+                        content: $('#replyStadiumCommentDialog').html(),
+                        btn: ['回复', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            $('#replyStadiumCommentContent').val(data.content);
+                            for (var i = 0; i < parseInt(data.starCount); ++i) {
+                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            for (var i = parseInt(data.starCount); i < 5; ++i) {
+                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadiumComment/managerReply.do";
+                            var postData = '{"id":'+ data.id + ',"managerReply":"' + $('#replyStadiumCommentManagerReply').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumCommentData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            managerReply: $('#replyStadiumCommentManagerReply').val(),
+                                            toolBar_field: ''
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
                         }
                     });
                 }

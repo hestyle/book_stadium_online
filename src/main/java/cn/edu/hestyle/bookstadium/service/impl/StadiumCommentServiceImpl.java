@@ -11,6 +11,7 @@ import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumCommentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,8 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
     private static final Integer STADIUM_COMMENT_BLACK = 2;
     /** 评论的最大长度 */
     private static final Integer STADIUM_COMMENT_CONTENT_MAX_LENGTH = 200;
+    /** 评论回复的最大长度 */
+    private static final Integer STADIUM_COMMENT_REPLY_MAX_LENGTH = 200;
     /** 评论的最大星级 */
     private static final Integer STADIUM_COMMENT_MAX_STAR_COUNT = 5;
     private static final Logger logger = LoggerFactory.getLogger(StadiumCategoryServiceImpl.class);
@@ -125,6 +128,64 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
             throw new AddFailedException("评论失败，数据库发生未知错误！");
         }
         logger.warn("StadiumComment 增加成功！ stadiumComment = " + stadiumComment);
+    }
+
+    @Override
+    public void managerReply(Integer stadiumManagerId, StadiumComment stadiumComment) throws ModifyFailedException {
+        // 检查stadiumComment是否存在
+        if (stadiumComment == null || stadiumComment.getId() == null) {
+            logger.warn("StadiumComment 回复失败！未指定需要回复的体育场馆评论！ stadiumComment = " + stadiumComment);
+            throw new ModifyFailedException("回复失败，未指定需要回复的体育场馆评论！");
+        }
+        StadiumComment stadiumCommentModify = null;
+        try {
+            stadiumCommentModify = stadiumCommentMapper.findByStadiumCommentId(stadiumComment.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 查询失败！数据库发生未知错误！stadiumCommentId = " + stadiumComment.getId());
+            throw new ModifyFailedException("回复失败，数据库发生未知错误！");
+        }
+        if (stadiumCommentModify == null) {
+            logger.warn("StadiumComment 回复失败！回复的评论不存在！ stadiumComment = " + stadiumComment);
+            throw new ModifyFailedException("回复失败，回复的评论不存在！");
+        }
+        // 检查stadiumComment对应的Stadium是否是属于该stadiumManager
+        Stadium stadium = null;
+        try {
+            stadium = stadiumMapper.findById(stadiumCommentModify.getStadiumId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败！数据库发生未知错误！stadiumId = " + stadiumCommentModify.getStadiumId());
+            throw new ModifyFailedException("回复失败，数据库发生未知错误！");
+        }
+        if (stadium != null && !stadium.getStadiumManagerId().equals(stadiumManagerId)) {
+            logger.warn("StadiumComment 回复失败！尝试回复非该账号的场馆评论！stadiumManagerId = " + stadiumManagerId + "stadium = " + stadium);
+            throw new ModifyFailedException("回复失败，该评论对应的场馆不是您账号所创建！");
+        }
+        // 检查是否已回复
+        if (stadiumCommentModify.getManagerReply() != null) {
+            logger.warn("StadiumComment 回复失败！该场馆评论已回复！stadiumCommentModify = " + stadiumCommentModify);
+            throw new ModifyFailedException("回复失败，该场馆评论已经回复过！");
+        }
+        // 检查回复内容
+        String managerReply = stadiumComment.getManagerReply();
+        if (managerReply == null || managerReply.length() == 0) {
+            logger.warn("StadiumComment 回复失败！未填写回复内容！stadiumComment = " + stadiumComment);
+            throw new ModifyFailedException("回复失败，未填写回复内容！");
+        }
+        if (managerReply.length() > STADIUM_COMMENT_REPLY_MAX_LENGTH) {
+            logger.warn("StadiumComment 回复失败！回复内容超过了" + STADIUM_COMMENT_REPLY_MAX_LENGTH + "个字符！stadiumComment = " + stadiumComment);
+            throw new ModifyFailedException("回复失败，回复内容超过了" + STADIUM_COMMENT_REPLY_MAX_LENGTH + "个字符！");
+        }
+        stadiumCommentModify.setManagerReply(managerReply);
+        try {
+            stadiumCommentMapper.update(stadiumCommentModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 修改失败！数据库发生未知错误！stadiumCommentModify = " + stadiumCommentModify);
+            throw new ModifyFailedException("回复失败，数据库发生未知错误！");
+        }
+        logger.warn("StadiumComment 修改成功！stadiumCommentModify = " + stadiumCommentModify);
     }
 
     @Override

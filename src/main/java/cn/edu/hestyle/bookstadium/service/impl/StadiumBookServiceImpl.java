@@ -19,9 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author hestyle
@@ -89,6 +87,19 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
             DateFormat dateFormat = new SimpleDateFormat("yyyy年MM月dd日 HH时mm分ss秒");
             logger.warn("StadiumBook 添加失败，场馆预约的时间段起始时间，StadiumBook = " + stadiumBook);
             throw new AddFailedException("添加失败，体育场馆预约的时间段的起始时间节点在当前时间" + dateFormat.format(new Date()) + "的前面！");
+        }
+        // 检查该Stadium是否能插入这个预约时间段
+        boolean flag = false;
+        try {
+            flag = checkStadiumBookTime(stadiumBook.getStadiumId(), null, stadiumBook.getStartTime(), stadiumBook.getEndTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 修改失败，该场馆时段段冲突！stadiumId = " + stadiumBook.getStadiumId());
+            throw new ModifyFailedException("添加失败，该场馆预约的时间段将会与已经添加的场馆预约冲突！");
+        }
+        if (!flag) {
+            logger.warn("StadiumBook 修改失败，该场馆时段段冲突！stadiumId = " + stadiumBook.getStadiumId());
+            throw new ModifyFailedException("添加失败，该场馆预约的时间段将会与已经添加的场馆预约冲突！");
         }
         if (stadiumBook.getBookState() == null) {
             stadiumBook.setBookState(0);
@@ -180,6 +191,19 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         if (stadiumBookModify.getStartTime().compareTo(stadiumBookModify.getEndTime()) >= 0) {
             logger.warn("StadiumBook 修改失败，场馆预约时段起、止节点非法！data = " + stadiumBook);
             throw new ModifyFailedException("修改失败，场馆预约时段的起始时间节点 在 终止节点的后面！");
+        }
+        // 检查该Stadium是否能插入这个预约时间段
+        boolean flag = false;
+        try {
+            flag = checkStadiumBookTime(stadiumBook.getStadiumId(), stadiumBookModify.getId(), stadiumBookModify.getStartTime(), stadiumBookModify.getEndTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 修改失败，该场馆时段段冲突！stadiumId = " + stadiumBookModify.getStadiumId());
+            throw new ModifyFailedException("修改失败，该场馆预约的时间段将会与已经添加的场馆预约冲突！");
+        }
+        if (!flag) {
+            logger.warn("StadiumBook 修改失败，该场馆时段段冲突！stadiumId = " + stadiumBookModify.getStadiumId());
+            throw new ModifyFailedException("修改失败，该场馆预约的时间段将会与已经添加的场馆预约冲突！");
         }
         if (stadiumBook.getBookState() != null) {
             if (stadiumBook.getBookState() < 0 || stadiumBook.getBookState() > 3) {
@@ -374,5 +398,66 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         }
         logger.warn("StadiumBook 查找成功！stadiumBookList = " + stadiumBookList);
         return stadiumBookList;
+    }
+
+    private boolean checkStadiumBookTime(Integer stadiumId, Integer stadiumBookId, Date startTime, Date endTime) throws Exception {
+        List<StadiumBook> stadiumBookList = null;
+        try {
+            stadiumBookList = stadiumBookMapper.userFindByStadiumIdAndPage(stadiumId, 0, Integer.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 查询失败，数据库发生未知异常！stadiumId = " + stadiumId);
+            throw new ModifyFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumBookList == null || stadiumBookList.size() == 0) {
+            return true;
+        }
+        // 按照StartTime升序排序
+        Collections.sort(stadiumBookList, new Comparator<StadiumBook>() {
+            @Override
+            public int compare(StadiumBook o1, StadiumBook o2) {
+                return o1.getStartTime().compareTo(o2.getStartTime());
+            }
+        });
+        int startTimeIndex = stadiumBookList.size();
+        int endTimeIndex = -1;
+        // 查找startTimeIndex
+        for (int i = stadiumBookList.size() - 1; i >= 0; --i) {
+            StadiumBook stadiumBook = stadiumBookList.get(i);
+            if (stadiumBook.getId().equals(stadiumBookId)) {
+                // stadiumBookId != null 说明是时间段修改
+                startTimeIndex = i;
+                continue;
+            }
+            if (stadiumBook.getEndTime().before(startTime)) {
+                startTimeIndex = i + 1;
+                break;
+            }
+            if (stadiumBook.getStartTime().before(startTime)) {
+                throw new Exception("该体育场馆的预约时间段冲突！");
+            }
+            startTimeIndex = i + 1;
+        }
+        // 查找endTimeIndex
+        for (int i = 0; i < stadiumBookList.size(); ++i) {
+            StadiumBook stadiumBook = stadiumBookList.get(i);
+            if (stadiumBook.getId().equals(stadiumBookId)) {
+                // stadiumBookId != null 说明是时间段修改
+                endTimeIndex = i;
+                continue;
+            }
+            if (stadiumBook.getStartTime().after(endTime)) {
+                endTimeIndex = i - 1;
+                break;
+            }
+            if (stadiumBook.getEndTime().after(endTime)) {
+                throw new Exception("该体育场馆的预约时间段冲突！");
+            }
+            endTimeIndex = i - 1;
+        }
+        if (startTimeIndex < endTimeIndex) {
+            throw new Exception("该体育场馆的预约时间段冲突！");
+        }
+        return true;
     }
 }

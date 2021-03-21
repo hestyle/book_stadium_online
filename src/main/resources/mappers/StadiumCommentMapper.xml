@@ -8,6 +8,15 @@
         INSERT INTO `t_stadium_comment`(`stadium_id`, `user_id`, `content`, `star_count`, `commented_time`, `manager_reply`, `is_delete`)
         VALUES (#{stadiumId}, #{userId}, #{content}, #{starCount}, #{commentedTime}, #{managerReply}, #{isDelete})
     </insert>
+    <!--更新StadiumComment 只更新managerReply、isDelete字段-->
+    <!--void update(StadiumComment stadiumComment);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumComment">
+        UPDATE `t_stadium_comment` SET
+            `manager_reply` = #{managerReply},
+            `is_delete` = #{isDelete}
+        WHERE
+            `id`=#{id}
+    </update>
     <!--通过stadiumCommentId查找-->
     <!--StadiumComment findByStadiumCommentId(Integer stadiumCommentId);-->
     <select id="findByStadiumCommentId" resultType="cn.edu.hestyle.bookstadium.entity.StadiumComment">
