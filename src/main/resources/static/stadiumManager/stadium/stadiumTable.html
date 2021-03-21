@@ -178,10 +178,14 @@
         <table id="all_stadiumComment_table" lay-filter="allStadiumCommentTable"></table>
     </script>
     <!--场馆评论单条数据的操作栏-->
-    <script type="text/html" id="stadiumCommentTableBar">
+    <script type="text/html" id="stadiumCommentTableBarTemplet">
         <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="report">举报</a>
         <a class="layui-btn layui-btn-xs" lay-event="lookStadiumCommentDetail">查看</a>
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="reply">回复</a>
+        {{#  if(d.managerReply != null){ }}
+        <a class="layui-btn layui-btn-disabled layui-btn-xs">回复</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="replyStadiumComment">回复</a>
+        {{#  }}}
     </script>
     <script type="text/html" id="stadiumCommentUsernameTemplet">
         {{d.commentUser.username}}
@@ -242,6 +246,27 @@
                 <label class="layui-form-label" style="width: 15%;">我的回复</label>
                 <div class="layui-input-inline">
                     <textarea id="lookStadiumCommentManagerReply" name="description" placeholder="无" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--StadiumComment回复操作-->
+    <script type="text/html" id="replyStadiumCommentDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 380px;" lay-filter="stadiumCommentReplyForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="replyStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价星级</label>
+                <div id="replyStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">回复内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="replyStadiumCommentManagerReply" placeholder="请输入回复的内容~" class="layui-textarea" style="width: 140%;"></textarea>
                 </div>
             </div>
         </form>
@@ -729,7 +754,7 @@
                                     , {field: 'starCount', title: '评价星级', width: 160, sort: true, templet: '#stadiumCommentStarCountTemplet'}
                                     , {field: 'commentedTime', title: '评价时间', width: 180, sort: true}
                                     , {field: 'managerReply', title: '我的回复', width: 150, sort: true}
-                                    , {fixed: 'right', width: 180, align: 'center', toolbar: '#stadiumCommentTableBar'} //这里的toolbar值是模板元素的选择器
+                                    , {fixed: 'right', width: 180, align: 'center', toolbar: '#stadiumCommentTableBarTemplet'} //这里的toolbar值是模板元素的选择器
                                 ]]
                                 , page: true
                                 , url: "/book_stadium_online/stadiumComment/findByStadiumIdAndPage.do"
@@ -795,6 +820,62 @@
                             $('#lookStadiumCommentManagerReply').val(data.managerReply);
                         },
                         yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'replyStadiumComment') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆评论回复',
+                        area: ['450px'],
+                        content: $('#replyStadiumCommentDialog').html(),
+                        btn: ['回复', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            $('#replyStadiumCommentContent').val(data.content);
+                            for (var i = 0; i < parseInt(data.starCount); ++i) {
+                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            for (var i = parseInt(data.starCount); i < 5; ++i) {
+                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadiumComment/managerReply.do";
+                            var postData = '{"id":'+ data.id + ',"managerReply":"' + $('#replyStadiumCommentManagerReply').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumCommentData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        obj.update({
+                                            managerReply: $('#replyStadiumCommentManagerReply').val()
+                                        });
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
                             layer.close(index);
                         }
                     });
