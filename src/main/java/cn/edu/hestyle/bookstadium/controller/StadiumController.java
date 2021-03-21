@@ -135,12 +135,13 @@ public class StadiumController extends BaseController {
 
     @PostMapping("/stadiumManagerFindByPage.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
-    public ResponseResult<List<Stadium>> handleStadiumManagerFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+    public ResponseResult<List<Stadium>> handleStadiumManagerFindByPage(@RequestParam(value = "nameKey", defaultValue = "") String nameKey,
+                                                                        @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                         @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
         // 从session中取出id
         Integer stadiumManagerId = (Integer) session.getAttribute("id");
-        List<Stadium> stadiumList = stadiumService.stadiumManagerFindByPage(stadiumManagerId, pageIndex, pageSize);
-        Integer count = stadiumService.stadiumManagerGetCount(stadiumManagerId);
+        List<Stadium> stadiumList = stadiumService.stadiumManagerFindByPage(stadiumManagerId, pageIndex, pageSize, nameKey);
+        Integer count = stadiumService.stadiumManagerGetCount(stadiumManagerId, nameKey);
         return new ResponseResult<List<Stadium>>(SUCCESS, count, stadiumList, "查询成功！");
     }
 

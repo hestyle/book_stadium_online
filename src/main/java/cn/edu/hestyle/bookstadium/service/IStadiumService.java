@@ -82,12 +82,12 @@ public interface IStadiumService {
      * @return                      Stadium list
      * @throws FindFailedException  查询失败异常
      */
-    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize, String nameKey) throws FindFailedException;
 
     /**
      * 获取某stadiumManager的stadium个数
      * @param stadiumManagerId          stadiumManagerId
      * @return                          stadium个数
      */
-    Integer stadiumManagerGetCount(Integer stadiumManagerId) throws FindFailedException;
+    Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey) throws FindFailedException;
 }

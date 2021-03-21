@@ -119,7 +119,7 @@
             #{beginIndex}, #{pageSize}
     </select>
     <!--分页查询某stadiumManager的Stadium-->
-    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
+    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize, String nameKey);-->
     <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
         SELECT
             `id` as `id`,
@@ -139,11 +139,14 @@
             `t_stadium`
         WHERE
             `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
     <!--获取某stadiumManager的stadium个数-->
-    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId);-->
+    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey);-->
     <select id="stadiumManagerGetCount" resultType="java.lang.Integer">
         SELECT
             COUNT(`id`)
@@ -151,5 +154,8 @@
             `t_stadium`
         WHERE
             `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
     </select>
 </mapper>

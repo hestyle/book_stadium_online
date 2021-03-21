@@ -376,7 +376,7 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException {
+    public List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize, String nameKey) throws FindFailedException {
         StadiumManager stadiumManager = null;
         try {
             stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
@@ -393,9 +393,13 @@ public class StadiumServiceImpl implements IStadiumService {
         if (pageSize < 1) {
             throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
         }
+        // 去除nameKey中的特殊字符
+        if (nameKey != null && nameKey.length() != 0) {
+            nameKey = nameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         List<Stadium> stadiumList = null;
         try {
-            stadiumList = stadiumMapper.stadiumManagerFindByPage(stadiumManager.getId(),(pageIndex - 1) * pageSize, pageSize);
+            stadiumList = stadiumMapper.stadiumManagerFindByPage(stadiumManager.getId(),(pageIndex - 1) * pageSize, pageSize, nameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Stadium 查询失败，数据库发生未知异常！ stadiumManagerId= " + stadiumManager.getId());
@@ -406,7 +410,7 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public Integer stadiumManagerGetCount(Integer stadiumManagerId) throws FindFailedException {
+    public Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey) throws FindFailedException {
         StadiumManager stadiumManager = null;
         try {
             stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
@@ -415,9 +419,13 @@ public class StadiumServiceImpl implements IStadiumService {
             logger.warn("StadiumManager 查询失败，数据库发生未知异常！stadiumManagerId = " + stadiumManagerId);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
         }
+        // 去除nameKey中的特殊字符
+        if (nameKey != null && nameKey.length() != 0) {
+            nameKey = nameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         Integer count = 0;
         try {
-            count = stadiumMapper.stadiumManagerGetCount(stadiumManager.getId());
+            count = stadiumMapper.stadiumManagerGetCount(stadiumManager.getId(), nameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Stadium 查询失败，数据库发生未知异常！ stadiumManagerId= " + stadiumManager.getId());
