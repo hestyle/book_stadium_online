@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.StadiumComment;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
 import java.util.List;
 
@@ -19,6 +20,14 @@ public interface IStadiumCommentService {
      * @throws AddFailedException   增加失败异常
      */
     void userComment(Integer userId, Integer stadiumBookItemId, StadiumComment stadiumComment) throws AddFailedException;
+
+    /**
+     * 管理员回复场馆评论
+     * @param stadiumManagerId          stadiumManagerId
+     * @param stadiumComment            stadiumComment
+     * @throws ModifyFailedException    修改失败异常
+     */
+    void managerReply(Integer stadiumManagerId, StadiumComment stadiumComment) throws ModifyFailedException;
 
     /**
      * 通过stadiumCommentId查找

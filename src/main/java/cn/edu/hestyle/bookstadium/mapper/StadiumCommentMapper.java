@@ -19,6 +19,12 @@ public interface StadiumCommentMapper {
     void add(StadiumComment stadiumComment);
 
     /**
+     * 更新StadiumComment 只更新managerReply、isDelete字段
+     * @param stadiumComment    stadiumComment
+     */
+    void update(StadiumComment stadiumComment);
+
+    /**
      * 通过stadiumCommentId查找
      * @param stadiumCommentId  stadiumCommentId
      * @return                  StadiumComment

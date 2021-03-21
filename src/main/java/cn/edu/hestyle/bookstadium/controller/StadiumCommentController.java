@@ -2,6 +2,7 @@ package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.StadiumComment;
+import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumCommentService;
@@ -50,6 +51,25 @@ public class StadiumCommentController extends BaseController {
         }
         stadiumCommentService.userComment(userId, stadiumBookItemId, stadiumComment);
         return new ResponseResult<Void>(SUCCESS, "评论成功！");
+    }
+
+    @PostMapping("/managerReply.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
+    public ResponseResult<Void> handleUserComment(@RequestParam(name = "stadiumCommentData") String stadiumCommentData, HttpSession session) {
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(com.fasterxml.jackson.core.JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
+        StadiumComment stadiumComment = null;
+        try {
+            stadiumComment = objectMapper.readValue(stadiumCommentData, StadiumComment.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 回复失败，数据格式错误！stadiumCommentData = " + stadiumCommentData);
+            throw new RequestException("回复失败，数据格式错误！");
+        }
+        stadiumCommentService.managerReply(stadiumManagerId, stadiumComment);
+        return new ResponseResult<Void>(SUCCESS, "回复成功！");
     }
 
     @PostMapping("/findByStadiumCommentId.do")
