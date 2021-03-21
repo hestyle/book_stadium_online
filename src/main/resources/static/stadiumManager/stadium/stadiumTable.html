@@ -180,7 +180,7 @@
     <!--场馆评论单条数据的操作栏-->
     <script type="text/html" id="stadiumCommentTableBar">
         <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="report">举报</a>
-        <a class="layui-btn layui-btn-xs" lay-event="look">查看</a>
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumCommentDetail">查看</a>
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="reply">回复</a>
     </script>
     <script type="text/html" id="stadiumCommentUsernameTemplet">
@@ -212,6 +212,39 @@
         {{#  } else { }}
         <img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>
         {{#  }}}
+    </script>
+    <!--StadiumComment查看操作-->
+    <script type="text/html" id="lookStadiumCommentDetailDialog">
+        <form class="layui-form" action="" style="padding: 20px;" lay-filter="stadiumCommentForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">用户名</label>
+                <div class="layui-input-inline">
+                    <input id="lookStadiumCommentUsername" type="text" placeholder="发表评价的用户名" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="lookStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价星级</label>
+                <div id="lookStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价时间</label>
+                <div class="layui-input-inline">
+                    <input id="lookStadiumCommentCommentedTime" placeholder="评价时间" class="layui-input" style="width: 140%;" disabled />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">我的回复</label>
+                <div class="layui-input-inline">
+                    <textarea id="lookStadiumCommentManagerReply" name="description" placeholder="无" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+        </form>
     </script>
     <script>
         layui.config({
@@ -726,6 +759,40 @@
                                     };
                                 }
                             });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }
+            });
+            //监听工具条
+            table.on('tool(allStadiumCommentTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'lookStadiumCommentDetail') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆评论详情',
+                        area: ['60%', '70%'],
+                        content: $('#lookStadiumCommentDetailDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            form.val("lookStadiumCommentDetailDialog", data);
+                            $('#lookStadiumCommentUsername').val(data.commentUser.username);
+                            $('#lookStadiumCommentContent').val(data.content);
+                            for (var i = 0; i < parseInt(data.starCount); ++i) {
+                                $('#lookStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            for (var i = parseInt(data.starCount); i < 5; ++i) {
+                                $('#lookStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
+                            }
+                            $('#lookStadiumCommentCommentedTime').val(data.commentedTime);
+                            $('#lookStadiumCommentManagerReply').val(data.managerReply);
                         },
                         yes: function (index, layero) {
                             layer.close(index);
