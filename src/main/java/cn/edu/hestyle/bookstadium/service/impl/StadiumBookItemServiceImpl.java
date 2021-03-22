@@ -123,4 +123,21 @@ public class StadiumBookItemServiceImpl implements IStadiumBookItemService {
         logger.info("StadiumBookItem 查找成功！stadiumBookItemList = " + stadiumBookItemList);
         return stadiumBookItemList;
     }
+
+    @Override
+    public Integer getCountByStadiumBookId(Integer stadiumBookId) throws FindFailedException {
+        if (stadiumBookId == null) {
+            logger.warn("StadiumBookItem 查找失败，未指定stadiumBookId！");
+            throw new FindFailedException("查询失败，未指定需要查找的场馆预约！");
+        }
+        Integer count = 0;
+        try {
+            count = stadiumBookItemMapper.getCountByStadiumBookId(stadiumBookId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBookItem 查找失败，数据库发生未知异常！stadiumBookId = " + stadiumBookId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        return count;
+    }
 }

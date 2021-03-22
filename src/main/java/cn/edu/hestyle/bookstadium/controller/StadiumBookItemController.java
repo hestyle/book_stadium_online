@@ -36,11 +36,12 @@ public class StadiumBookItemController extends BaseController {
     }
 
     @PostMapping("/findByStadiumBookIdAndPage.do")
-    public ResponseResult<List<StadiumBookItem>> handleUserFindByStadiumBookIdAndPage(@RequestParam(name = "stadiumBookId") Integer stadiumBookId,
-                                                                                      @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                                                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-                                                                                      HttpSession session) {
+    public ResponseResult<List<StadiumBookItem>> handleFindByStadiumBookIdAndPage(@RequestParam(name = "stadiumBookId") Integer stadiumBookId,
+                                                                                  @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                                  HttpSession session) {
         List<StadiumBookItem> stadiumBookItemList = stadiumBookItemService.findByStadiumBookIdAndPage(stadiumBookId, pageIndex, pageSize);
-        return new ResponseResult<List<StadiumBookItem>>(SUCCESS, "查询成功！", stadiumBookItemList);
+        Integer count = stadiumBookItemService.getCountByStadiumBookId(stadiumBookId);
+        return new ResponseResult<List<StadiumBookItem>>(SUCCESS, count, stadiumBookItemList, "查询成功！");
     }
 }

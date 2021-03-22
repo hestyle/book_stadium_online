@@ -71,4 +71,14 @@
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
+    <!--获取stadiumBook的item数-->
+    <!--Integer getCountByStadiumBookId(Integer stadiumBookId);-->
+    <select id="getCountByStadiumBookId" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium_book_item`
+        WHERE
+            `stadium_book_id` = #{stadiumBookId} AND `is_delete` = 0
+    </select>
 </mapper>

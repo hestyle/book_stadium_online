@@ -30,4 +30,12 @@ public interface IStadiumBookItemService {
      * @throws FindFailedException      查询失败异常
      */
     List<StadiumBookItem> findByStadiumBookIdAndPage(Integer stadiumBookId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * 获取stadiumBook的item数
+     * @param stadiumBookId             stadiumBookId
+     * @return                          count
+     * @throws FindFailedException      查找失败异常
+     */
+    Integer getCountByStadiumBookId(Integer stadiumBookId) throws FindFailedException;
 }
