@@ -139,14 +139,11 @@ public class StadiumServiceImpl implements IStadiumService {
     }
 
     @Override
-    public List<Stadium> findByName(String name, Integer pageIndex, Integer pageSize) throws FindFailedException {
-        if (name == null || name.length() == 0) {
-            logger.warn("Stadium 查询失败，未指定需要查询的场馆name！");
-            throw new FindFailedException("查询失败，未指定需要查询的体育场馆名称！");
+    public List<Stadium> findByNameKeyAndPage(String nameKey, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        // 去除nameKey中的特殊字符
+        if (nameKey != null && nameKey.length() != 0) {
+            nameKey = nameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
         }
-        // 去除name中的特殊字符
-        name = name.replaceAll("%", "");
-        name = name.replaceAll("'", "");
         // 检查页码是否合法
         if (pageIndex < 1) {
             throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
@@ -157,14 +154,32 @@ public class StadiumServiceImpl implements IStadiumService {
         }
         List<Stadium> stadiumList = null;
         try {
-            stadiumList = stadiumMapper.findByName(name, (pageIndex - 1) * pageSize, pageSize);
+            stadiumList = stadiumMapper.findByNameKeyAndPage(nameKey, (pageIndex - 1) * pageSize, pageSize);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("Stadium 查询失败，数据库发生未知异常！name = " + name);
+            logger.warn("Stadium 查询失败，数据库发生未知异常！nameKey = " + nameKey);
             throw new FindFailedException("查询失败，数据库发生未知异常！");
         }
-        logger.warn("Stadium 查询成功！name = " + name + ", stadiumList = " + stadiumList);
+        logger.warn("Stadium 查询成功！nameKey = " + nameKey + ", stadiumList = " + stadiumList);
         return stadiumList;
+    }
+
+    @Override
+    public Integer getCount(String nameKey) throws FindFailedException {
+        // 去除nameKey中的特殊字符
+        if (nameKey != null && nameKey.length() != 0) {
+            nameKey = nameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
+        Integer count = 0;
+        try {
+            count = stadiumMapper.getCount(nameKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败，数据库发生未知异常！ nameKey= " + nameKey);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("Stadium 查询成功， nameKey= " + nameKey + "，count = " + count);
+        return count;
     }
 
     @Override

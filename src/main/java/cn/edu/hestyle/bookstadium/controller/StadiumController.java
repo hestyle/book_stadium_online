@@ -56,11 +56,14 @@ public class StadiumController extends BaseController {
         return new ResponseResult<Stadium>(SUCCESS, "查询成功！", stadium);
     }
 
-    @PostMapping("/findByName.do")
-    public ResponseResult<List<Stadium>> handleFindByName(@RequestParam(name = "name") String name, @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                          @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
-        List<Stadium> stadiumList = stadiumService.findByName(name, pageIndex, pageSize);
-        return new ResponseResult<List<Stadium>>(SUCCESS, "查询成功！", stadiumList);
+    @PostMapping("/findByNameKeyAndPage.do")
+    public ResponseResult<List<Stadium>> handleFindByNameKeyAndPage(@RequestParam(name = "nameKey", defaultValue = "") String nameKey,
+                                                                    @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                    @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                    HttpSession session) {
+        List<Stadium> stadiumList = stadiumService.findByNameKeyAndPage(nameKey, pageIndex, pageSize);
+        Integer count = stadiumService.getCount(nameKey);
+        return new ResponseResult<List<Stadium>>(SUCCESS, count, stadiumList, "查询成功！");
     }
 
     @PostMapping("/findByPage.do")
