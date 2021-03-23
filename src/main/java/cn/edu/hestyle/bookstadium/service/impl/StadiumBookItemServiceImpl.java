@@ -1,18 +1,24 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
+import cn.edu.hestyle.bookstadium.entity.Notice;
+import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.entity.StadiumBook;
 import cn.edu.hestyle.bookstadium.entity.StadiumBookItem;
+import cn.edu.hestyle.bookstadium.mapper.NoticeMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumBookItemMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumBookMapper;
+import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookItemService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.util.ResponseResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +29,16 @@ import java.util.List;
  */
 @Service
 public class StadiumBookItemServiceImpl implements IStadiumBookItemService {
+    /** 预约成功通知title、content */
+    private static final String STADIUM_BOOK_TITLE = "体育场馆预约";
+    private static final String STADIUM_BOOK_CONTENT = "成功预约了体育场馆【%s】的时间段【%s - %s】";
+
     private static final Logger logger = LoggerFactory.getLogger(StadiumBookItemServiceImpl.class);
 
+    @Resource
+    private NoticeMapper noticeMapper;
+    @Resource
+    private StadiumMapper stadiumMapper;
     @Resource
     private StadiumBookMapper stadiumBookMapper;
     @Resource
@@ -96,6 +110,33 @@ public class StadiumBookItemServiceImpl implements IStadiumBookItemService {
             throw new AddFailedException("预约失败，数据库发生未知异常！");
         }
         logger.info("StadiumBookItem 添加成功！additionStadiumBookItem = " + additionStadiumBookItem);
+        // 预约成功通知
+        Stadium stadium = null;
+        try {
+            stadium = stadiumMapper.findById(stadiumBook.getStadiumId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查询失败，数据库发生未知异常！stadiumId = " + stadiumBook.getStadiumId());
+            throw new AddFailedException("预约失败，数据库发生未知异常！");
+        }
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(userId);
+        notice.setTitle(STADIUM_BOOK_TITLE);
+        if (stadium != null) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat(ResponseResult.DATETIME_FORMAT);
+            notice.setContent(String.format(STADIUM_BOOK_CONTENT, stadium.getName(), simpleDateFormat.format(stadiumBook.getStartTime()), simpleDateFormat.format(stadiumBook.getEndTime())));
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 
     @Override
