@@ -2,7 +2,6 @@ package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.Announcement;
-import cn.edu.hestyle.bookstadium.entity.Banner;
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IAnnouncementService;
