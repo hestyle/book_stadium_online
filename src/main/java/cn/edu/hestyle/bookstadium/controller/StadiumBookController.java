@@ -4,6 +4,7 @@ import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumBook;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
@@ -105,5 +106,16 @@ public class StadiumBookController extends BaseController {
                                                                               HttpSession session) {
         List<StadiumBook> stadiumBookList = stadiumBookService.userFindByStadiumIdAndPage(stadiumId, pageIndex, pageSize);
         return new ResponseResult<List<StadiumBook>>(SUCCESS, "查询成功！", stadiumBookList);
+    }
+
+    @PostMapping("/systemManagerFindByStadiumIdAndPage.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<List<StadiumBook>> handleSystemManagerFindByStadiumIdAndPage(@RequestParam(name = "stadiumId") Integer stadiumId,
+                                                                                       @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                                       @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                                       HttpSession session) {
+        List<StadiumBook> stadiumBookList = stadiumBookService.systemManagerFindByStadiumIdAndPage(stadiumId, pageIndex, pageSize);
+        Integer count = stadiumBookService.systemManagerGetCountById(stadiumId);
+        return new ResponseResult<List<StadiumBook>>(SUCCESS, count, stadiumBookList, "查询成功！");
     }
 }

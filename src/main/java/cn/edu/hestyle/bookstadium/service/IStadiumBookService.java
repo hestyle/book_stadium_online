@@ -64,4 +64,20 @@ public interface IStadiumBookService {
      * @throws FindFailedException      查询失败异常
      */
     List<StadiumBook> userFindByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * systemManager通过stadiumId分页查询场馆预约
+     * @param stadiumId             stadiumId
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List StadiumBook
+     */
+    List<StadiumBook> systemManagerFindByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * systemManager获取某stadium对应预约的个数
+     * @param stadiumId         stadiumId
+     * @return                  stadiumBook个数
+     */
+    Integer systemManagerGetCountById(Integer stadiumId) throws FindFailedException;
 }
