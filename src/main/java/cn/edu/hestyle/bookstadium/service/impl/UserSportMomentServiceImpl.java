@@ -1,9 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
-import cn.edu.hestyle.bookstadium.entity.SportMoment;
-import cn.edu.hestyle.bookstadium.entity.SportMomentLike;
-import cn.edu.hestyle.bookstadium.entity.User;
-import cn.edu.hestyle.bookstadium.entity.UserSportMoment;
+import cn.edu.hestyle.bookstadium.entity.*;
+import cn.edu.hestyle.bookstadium.mapper.NoticeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentLikeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
@@ -36,9 +34,14 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
     /** 动态包含的最大图片数 */
     private static final Integer SPORT_MOMENT_IMAGE_PATH_MAX_LENGTH = 3;
     private static final Logger logger = LoggerFactory.getLogger(UserSportMomentServiceImpl.class);
+    /** 点赞通知title、content */
+    private static final String SPORT_MOMENT_LIKE_TITLE = "运动动态点赞";
+    private static final String SPORT_MOMENT_LIKE_CONTENT = "用户【%s】点赞了你的运动动态【%s...】";
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private NoticeMapper noticeMapper;
     @Resource
     private SportMomentMapper sportMomentMapper;
     @Resource
@@ -139,6 +142,37 @@ public class UserSportMomentServiceImpl implements IUserSportMomentService {
             throw new AddFailedException("点赞失败，数据库发生未知错误！");
         }
         logger.warn("SportMoment 修改成功！sportMoment = " + sportMoment);
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        // 给sportMoment对应的user发送通知
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(sportMoment.getUserId());
+        notice.setTitle(SPORT_MOMENT_LIKE_TITLE);
+        if (user != null) {
+            String sportMomentContent = sportMoment.getContent();
+            if (sportMomentContent.length() >= 20) {
+                notice.setContent(String.format(SPORT_MOMENT_LIKE_CONTENT, user.getUsername(), sportMoment.getContent().substring(0, 20)));
+            } else {
+                notice.setContent(String.format(SPORT_MOMENT_LIKE_CONTENT, user.getUsername(), sportMoment.getContent()));
+            }
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 
     @Override

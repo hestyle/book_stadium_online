@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.NoticeMapper">
+    <!--添加notice-->
+    <!--void add(Notice notice);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Notice" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_notice`(`to_account_type`, `account_id`, `title`, `content`, `generated_time`, `is_delete`)
+        VALUES (#{toAccountType}, #{accountId}, #{title}, #{content}, #{generatedTime}, #{isDelete})
+    </insert>
     <!--通过toAccountType、accountId分页查找Notice-->
     <!--List<Notice> findByIdAndPage(Integer toAccountType, Integer accountId, Integer beginIndex, Integer pageSize);-->
     <select id="findByIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.Notice">

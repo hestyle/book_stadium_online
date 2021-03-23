@@ -13,6 +13,12 @@ import java.util.List;
 @Mapper
 public interface NoticeMapper {
     /**
+     * 添加notice
+     * @param notice            notice
+     */
+    void add(Notice notice);
+
+    /**
      * 通过toAccountType、accountId分页查找Notice
      * @param toAccountType     toAccountType
      * @param accountId         accountId
