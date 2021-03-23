@@ -1,13 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
-import cn.edu.hestyle.bookstadium.entity.Stadium;
-import cn.edu.hestyle.bookstadium.entity.StadiumBookItem;
-import cn.edu.hestyle.bookstadium.entity.StadiumComment;
-import cn.edu.hestyle.bookstadium.entity.User;
-import cn.edu.hestyle.bookstadium.mapper.StadiumBookItemMapper;
-import cn.edu.hestyle.bookstadium.mapper.StadiumCommentMapper;
-import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
-import cn.edu.hestyle.bookstadium.mapper.UserMapper;
+import cn.edu.hestyle.bookstadium.entity.*;
+import cn.edu.hestyle.bookstadium.mapper.*;
 import cn.edu.hestyle.bookstadium.service.IStadiumCommentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
@@ -38,14 +32,23 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
     private static final Integer STADIUM_COMMENT_REPLY_MAX_LENGTH = 200;
     /** 评论的最大星级 */
     private static final Integer STADIUM_COMMENT_MAX_STAR_COUNT = 5;
+    /** 回复场馆评论通知title、content */
+    private static final String STADIUM_COMMENT_REPLY_TITLE = "场馆评论回复";
+    private static final String STADIUM_COMMENT_REPLY_CONTENT = "场馆管理员【%s】回复了你的场馆评论【%s...】";
+
+
     private static final Logger logger = LoggerFactory.getLogger(StadiumCategoryServiceImpl.class);
 
     @Resource
     private UserMapper userMapper;
     @Resource
+    private NoticeMapper noticeMapper;
+    @Resource
     private StadiumMapper stadiumMapper;
     @Resource
     private StadiumCommentMapper stadiumCommentMapper;
+    @Resource
+    private StadiumManagerMapper stadiumManagerMapper;
     @Resource
     private StadiumBookItemMapper stadiumBookItemMapper;
 
@@ -131,6 +134,7 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
     }
 
     @Override
+    @Transactional
     public void managerReply(Integer stadiumManagerId, StadiumComment stadiumComment) throws ModifyFailedException {
         // 检查stadiumComment是否存在
         if (stadiumComment == null || stadiumComment.getId() == null) {
@@ -186,6 +190,37 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
             throw new ModifyFailedException("回复失败，数据库发生未知错误！");
         }
         logger.warn("StadiumComment 修改成功！stadiumCommentModify = " + stadiumCommentModify);
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查找失败！数据库发生未知错误！stadiumManagerId = " + stadiumManagerId);
+            throw new ModifyFailedException("回复失败，数据库发生未知错误！");
+        }
+        // 给StadiumComment对应的user发送通知
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(stadiumCommentModify.getUserId());
+        notice.setTitle(STADIUM_COMMENT_REPLY_TITLE);
+        if (stadiumManager != null) {
+            String stadiumCommentContent = stadiumCommentModify.getContent();
+            if (stadiumCommentContent.length() >= 20) {
+                notice.setContent(String.format(STADIUM_COMMENT_REPLY_CONTENT, stadiumManager.getUsername(), stadiumCommentContent.substring(0, 20)));
+            } else {
+                notice.setContent(String.format(STADIUM_COMMENT_REPLY_CONTENT, stadiumManager.getUsername(), stadiumCommentContent));
+            }
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("回复失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 
     @Override
