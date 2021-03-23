@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.AnnouncementMapper">
+    <!--添加announcement-->
+    <!--void add(Announcement announcement);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Announcement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_announcement`(`title`, `content`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{content}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--更新announcement-->
+    <!--void update(Announcement announcement);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Announcement">
+        UPDATE `t_announcement` SET
+            `title` = #{title},
+            `content` = #{content},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id`=#{id}
+    </update>
+    <!--通过announcementId查找-->
+    <!--Announcement findById(Integer announcementId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Announcement">
+        SELECT
+            `id` as `id`,
+            `title` as `title`,
+            `content` as `content`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_announcement`
+        WHERE
+            `id`=#{announcementId}
+    </select>
+</mapper>
