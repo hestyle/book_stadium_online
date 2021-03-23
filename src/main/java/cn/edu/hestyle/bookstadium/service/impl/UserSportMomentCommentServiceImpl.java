@@ -36,6 +36,9 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     /** 回复动态评论通知title、content */
     private static final String SPORT_MOMENT_COMMENT_REPLY_TITLE = "运动动态评论回复";
     private static final String SPORT_MOMENT_COMMENT_REPLY_CONTENT = "用户【%s】回复了你的运动动态评论【%s...】";
+    /** 点赞动态评论通知title、content */
+    private static final String SPORT_MOMENT_COMMENT_LIKE_TITLE = "运动动态评论点赞";
+    private static final String SPORT_MOMENT_COMMENT_LIKE_CONTENT = "用户【%s】点赞了你的运动动态评论【%s...】";
 
     private static final Logger logger = LoggerFactory.getLogger(UserSportMomentCommentServiceImpl.class);
 
@@ -234,6 +237,37 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
             throw new AddFailedException("点赞失败，数据库发生未知错误！");
         }
         logger.warn("SportMomentComment 修改成功！sportMomentComment = " + sportMomentComment);
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        // 给sportMoment对应的user发送通知
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(sportMomentComment.getUserId());
+        notice.setTitle(SPORT_MOMENT_COMMENT_LIKE_TITLE);
+        if (user != null) {
+            String sportMomentContent = sportMomentComment.getContent();
+            if (sportMomentContent.length() >= 20) {
+                notice.setContent(String.format(SPORT_MOMENT_COMMENT_LIKE_CONTENT, user.getUsername(), sportMomentContent.substring(0, 20)));
+            } else {
+                notice.setContent(String.format(SPORT_MOMENT_COMMENT_LIKE_CONTENT, user.getUsername(), sportMomentContent));
+            }
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 
     @Override
