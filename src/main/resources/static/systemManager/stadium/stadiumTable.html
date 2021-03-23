@@ -253,6 +253,16 @@
     <script type="text/html" id="stadiumBookPageDialog">
         <table id="stadiumBook_table" lay-filter="stadiumBookTable"></table>
     </script>
+    <!--体育场馆预约表 col模板-->
+    <script type="text/html" id="bookStateTemplate">
+        {{#  if(d.bookState === 0){ }}
+        <span style="color: #000000;">暂未开始</span>
+        {{#  } else if(d.bookState === 1){ }}
+        <span style="color: #FF0000;">正在进行</span>
+        {{#  } else { }}
+        <span style="color: #0000FF;">已结束</span>
+        {{#  } }}
+    </script>
     <!--场馆预约单条数据的操作栏-->
     <script type="text/html" id="stadiumBookTableBarTemplet">
         <a class="layui-btn layui-btn-xs" lay-event="lookStadiumBookDetail">查看</a>
