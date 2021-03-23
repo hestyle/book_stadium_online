@@ -107,7 +107,7 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
                 logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
                 throw new AddFailedException("评论失败，数据库发生未知错误！");
             }
-            notice.setAccountId(sportMoment.getUserId());
+            notice.setAccountId(sportMomentComment.getUserId());
             notice.setTitle(SPORT_MOMENT_COMMENT_REPLY_TITLE);
             if (user != null) {
                 String sportMomentContent = sportMomentComment.getContent();
