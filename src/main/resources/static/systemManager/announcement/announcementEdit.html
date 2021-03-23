@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <title>APP首页公告</title>
+</head>
+<body>
+    <form class="layui-form" id="dialogModifySelfBaseInfoForm" style="margin-top:30px;padding-right:30px;width: 600px;">
+        <div class="layui-form-item">
+            <label class="layui-form-label">公告标题</label>
+            <div class="layui-input-block">
+                <input id="announcementTitle" type="text" placeholder="请输入APP首页公告标题" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">公告内容</label>
+            <div class="layui-input-block">
+                <textarea id="announcementContent" name="description" placeholder="请输入APP首页公告内容" class="layui-textarea"></textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <button id="clearButton" type="button" class="layui-btn layui-btn-danger layui-btn-sm" onclick="clearAnnouncement()" style="margin-left: 35%;">删除</button>
+            <button id="saveButton" type="button" class="layui-btn layui-btn-normal layui-btn-sm" onclick="saveAnnouncement()" style="">保存</button>
+        </div>
+    </form>
+    <script>
+        layuiModules=['layer', 'form'];
+        function mounted() {
+            form.render();
+            var url ="/book_stadium_online/announcement/find.do";
+            $.ajax({
+                "url" : url,
+                "data" : null,
+                "type" : "POST",
+                "dataType" : "json",
+                "beforeSend": function (request) {
+                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                },
+                "success" : function (json) {
+                    if (json.code === 200) {
+                        // 填充信息
+                        if (json.data.title != null && json.data.title.length !== 0) {
+                            $("#announcementTitle").val(json.data.title);
+                        }
+                        if (json.data.content != null && json.data.content.length !== 0) {
+                            $("#announcementContent").val(json.data.content);
+                        }
+                        form.render();
+                    } else {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: json.message,
+                            yes: function (index2, layero) {
+                                if (json.code === 401) {
+                                    // code==401说明未登录(BaseController.java定义)
+                                    parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                                }
+                                layer.close(index2);
+                            }
+                        });
+                    }
+                },
+                "error" : function () {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "出现异常！"
+                    });
+                }
+            });
+        }
+        // 保存announcement
+        function saveAnnouncement() {
+            if ($("#announcementTitle").val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请输入公告标题！"
+                });
+                return false;
+            }
+            if ($("#announcementContent").val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请输入公告内容！"
+                });
+                return false;
+            }
+            var url ="/book_stadium_online/announcement/save.do";
+            var announcementData = '{"title":"' + $("#announcementTitle").val() + '","content":"' + $("#announcementContent").val() + '"}';
+            $.ajax({
+                "url" : url,
+                "data" : {"announcementData":announcementData},
+                "type" : "POST",
+                "dataType" : "json",
+                "beforeSend": function (request) {
+                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                },
+                "success" : function (json) {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: json.message,
+                        yes: function (index2, layero) {
+                            if (json.code === 401) {
+                                // code==402说明未登录(BaseController.java定义)
+                                parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                            }
+                            layer.close(index2);
+                        }
+                    });
+                },
+                "error" : function () {
+                    // 弹出中间提示框
+                    layer.open({
+                        title: "提示信息",
+                        content: "出现异常！"
+                    });
+                }
+            });
+        }
+        // 清空announcement
+        function clearAnnouncement() {
+            layer.confirm('清空后APP首页将不会显示该公告！', {
+                yes: function (index, layero) {
+                    layer.close(index);
+                    var url ="/book_stadium_online/announcement/save.do";
+                    var announcementData = '{"isDelete":' + 1 + '}';
+                    $.ajax({
+                        "url" : url,
+                        "data" : {"announcementData":announcementData},
+                        "type" : "POST",
+                        "dataType" : "json",
+                        "beforeSend": function (request) {
+                            request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                        },
+                        "success" : function (json) {
+                            if (json.code === 200) {
+                                $("#announcementTitle").val('');
+                                $("#announcementContent").val('');
+                            }
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message,
+                                yes: function (index2, layero) {
+                                    if (json.code === 401) {
+                                        // code==402说明未登录(BaseController.java定义)
+                                        parent.location.href = "/book_stadium_online/stadiumManager/login.html";
+                                    }
+                                    layer.close(index2);
+                                }
+                            });
+                        },
+                        "error" : function () {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: "出现异常！"
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+</body>
+</html>
