@@ -33,11 +33,17 @@ public interface IStadiumService {
 
     /**
      * 通过name进行模糊查询
-     * @param name                  name
+     * @param nameKey               nameKey
      * @return                      List Stadium
      * @throws FindFailedException  查找失败异常
      */
-    List<Stadium> findByName(String name, Integer pageIndex, Integer pageSize) throws FindFailedException;
+    List<Stadium> findByNameKeyAndPage(String nameKey, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * 获取stadium个数
+     * @return                          stadium个数
+     */
+    Integer getCount(String nameKey) throws FindFailedException;
 
     /**
      * 分页查询未删除的Stadium
@@ -82,12 +88,12 @@ public interface IStadiumService {
      * @return                      Stadium list
      * @throws FindFailedException  查询失败异常
      */
-    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize, String nameKey) throws FindFailedException;
 
     /**
      * 获取某stadiumManager的stadium个数
      * @param stadiumManagerId          stadiumManagerId
      * @return                          stadium个数
      */
-    Integer stadiumManagerGetCount(Integer stadiumManagerId) throws FindFailedException;
+    Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey) throws FindFailedException;
 }

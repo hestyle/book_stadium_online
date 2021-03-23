@@ -56,11 +56,14 @@ public class StadiumController extends BaseController {
         return new ResponseResult<Stadium>(SUCCESS, "查询成功！", stadium);
     }
 
-    @PostMapping("/findByName.do")
-    public ResponseResult<List<Stadium>> handleFindByName(@RequestParam(name = "name") String name, @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                          @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
-        List<Stadium> stadiumList = stadiumService.findByName(name, pageIndex, pageSize);
-        return new ResponseResult<List<Stadium>>(SUCCESS, "查询成功！", stadiumList);
+    @PostMapping("/findByNameKeyAndPage.do")
+    public ResponseResult<List<Stadium>> handleFindByNameKeyAndPage(@RequestParam(name = "nameKey", defaultValue = "") String nameKey,
+                                                                    @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                    @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                    HttpSession session) {
+        List<Stadium> stadiumList = stadiumService.findByNameKeyAndPage(nameKey, pageIndex, pageSize);
+        Integer count = stadiumService.getCount(nameKey);
+        return new ResponseResult<List<Stadium>>(SUCCESS, count, stadiumList, "查询成功！");
     }
 
     @PostMapping("/findByPage.do")
@@ -135,12 +138,13 @@ public class StadiumController extends BaseController {
 
     @PostMapping("/stadiumManagerFindByPage.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
-    public ResponseResult<List<Stadium>> handleStadiumManagerFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+    public ResponseResult<List<Stadium>> handleStadiumManagerFindByPage(@RequestParam(value = "nameKey", defaultValue = "") String nameKey,
+                                                                        @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                         @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
         // 从session中取出id
         Integer stadiumManagerId = (Integer) session.getAttribute("id");
-        List<Stadium> stadiumList = stadiumService.stadiumManagerFindByPage(stadiumManagerId, pageIndex, pageSize);
-        Integer count = stadiumService.stadiumManagerGetCount(stadiumManagerId);
+        List<Stadium> stadiumList = stadiumService.stadiumManagerFindByPage(stadiumManagerId, pageIndex, pageSize, nameKey);
+        Integer count = stadiumService.stadiumManagerGetCount(stadiumManagerId, nameKey);
         return new ResponseResult<List<Stadium>>(SUCCESS, count, stadiumList, "查询成功！");
     }
 

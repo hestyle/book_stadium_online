@@ -400,6 +400,50 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         return stadiumBookList;
     }
 
+    @Override
+    public List<StadiumBook> systemManagerFindByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException {
+        if (stadiumId == null) {
+            logger.warn("StadiumBook 查找失败，未指定stadiumId！");
+            throw new FindFailedException("查询失败，未指定stadiumId！");
+        }
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<StadiumBook> stadiumBookList = null;
+        try {
+            stadiumBookList = stadiumBookMapper.systemManagerFindByStadiumIdAndPage(stadiumId, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 查找失败，数据库发生未知异常！stadiumId = " + stadiumId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumBook 查找成功！stadiumBookList = " + stadiumBookList);
+        return stadiumBookList;
+    }
+
+    @Override
+    public Integer systemManagerGetCountById(Integer stadiumId) throws FindFailedException {
+        if (stadiumId == null) {
+            logger.warn("StadiumBook 查找失败，未指定stadiumId！");
+            throw new FindFailedException("查询失败，未指定stadiumId！");
+        }
+        Integer count = 0;
+        try {
+            count = stadiumBookMapper.systemManagerGetCountById(stadiumId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 查询失败，数据库发生未知异常！ stadiumId= " + stadiumId);
+            throw new FindFailedException("查询失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumBook 查询成功， stadiumId= " + stadiumId + "，count = " + count);
+        return count;
+    }
+
     private boolean checkStadiumBookTime(Integer stadiumId, Integer stadiumBookId, Date startTime, Date endTime) throws Exception {
         List<StadiumBook> stadiumBookList = null;
         try {

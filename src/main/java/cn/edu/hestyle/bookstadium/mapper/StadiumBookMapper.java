@@ -61,4 +61,20 @@ public interface StadiumBookMapper {
      * @return                  stadiumBook个数
      */
     Integer stadiumManagerGetAllCount(Integer stadiumManagerId);
+
+    /**
+     * systemManager通过stadiumId分页查询场馆预约
+     * @param stadiumId             stadiumId
+     * @param beginIndex            beginIndex
+     * @param pageSize              pageSize
+     * @return                      List StadiumBook
+     */
+    List<StadiumBook> systemManagerFindByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);
+
+    /**
+     * systemManager获取某stadium对应预约的个数
+     * @param stadiumId         stadiumId
+     * @return                  stadiumBook个数
+     */
+    Integer systemManagerGetCountById(Integer stadiumId);
 }

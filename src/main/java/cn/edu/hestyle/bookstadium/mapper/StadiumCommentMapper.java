@@ -39,4 +39,11 @@ public interface StadiumCommentMapper {
      * @return                  List StadiumComment
      */
     List<StadiumComment> findByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取某Stadium的评论数量
+     * @param stadiumId         stadiumId
+     * @return                  Stadium的评论数量
+     */
+    Integer getCountByStadiumId(Integer stadiumId);
 }

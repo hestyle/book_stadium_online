@@ -41,10 +41,16 @@ public interface StadiumMapper {
 
     /**
      * 通过name进行模糊查询
-     * @param name          name
+     * @param nameKey       nameKey
      * @return              List<Stadium>
      */
-    List<Stadium> findByName(String name, Integer beginIndex, Integer pageSize);
+    List<Stadium> findByNameKeyAndPage(String nameKey, Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取stadium个数
+     * @return                  stadium个数
+     */
+    Integer getCount(String nameKey);
 
     /**
      * 分页查询stadiumCategoryId对应的Stadium
@@ -68,12 +74,12 @@ public interface StadiumMapper {
      * @param pageSize          一页大小
      * @return                  Stadium list
      */
-    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);
+    List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize, String nameKey);
 
     /**
      * 获取某stadiumManager的stadium个数
      * @param stadiumManagerId  stadiumManager
      * @return                  stadium个数
      */
-    Integer stadiumManagerGetCount(Integer stadiumManagerId);
+    Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey);
 }

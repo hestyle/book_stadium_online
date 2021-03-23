@@ -53,4 +53,14 @@
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
+    <!--获取某Stadium的评论数量-->
+    <!--Integer getCountByStadiumId(Integer stadiumId);-->
+    <select id="getCountByStadiumId" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium_comment`
+        WHERE
+            `stadium_id` = #{stadiumId}
+    </select>
 </mapper>

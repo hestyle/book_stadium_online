@@ -106,4 +106,39 @@
         WHERE
             `is_delete` = 0 AND `stadium_id` IN (SELECT id FROM `t_stadium` AS stadium WHERE `is_delete` = 0 AND `stadium_manager_id` = #{stadiumManagerId})
     </select>
+    <!--systemManager通过stadiumId分页查询场馆预约-->
+    <!--List<StadiumBook> systemManagerFindByStadiumIdAndPage(Integer stadiumId, Integer beginIndex, Integer pageSize);-->
+    <select id="systemManagerFindByStadiumIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumBook">
+        SELECT
+            `id` as `id`,
+            `stadium_id` as `stadiumId`,
+            `start_time` as `startTime`,
+            `end_time` as `endTime`,
+            `book_state` as `bookState`,
+            `max_book_count` as `maxBookCount`,
+            `now_book_count` as `nowBookCount`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_stadium_book`
+        WHERE
+            `is_delete` = 0 AND `stadium_id` = #{stadiumId}
+        ORDER BY
+            `start_time` DESC
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+    <!--systemManager获取某stadium对应预约的个数-->
+    <!--Integer systemManagerGetCountById(Integer stadiumId);-->
+    <select id="systemManagerGetCountById" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium_book`
+        WHERE
+            `is_delete` = 0 AND `stadium_id` = #{stadiumId}
+    </select>
 </mapper>

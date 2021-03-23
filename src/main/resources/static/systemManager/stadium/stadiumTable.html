@@ -12,65 +12,63 @@
     <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
 </head>
+    <style>
+        .layui-laypage .layui-laypage-curr .layui-laypage-em {
+            background-color: #0090FF;
+        }
+    </style>
     <body>
         <div class="div-search">
             <div class="layui-inline">
                 <input class="layui-input" id="stadiumNameKey" autocomplete="off" placeholder="请输入场馆名" style="width: 300px;">
             </div>
-            <button class="layui-btn" data-type="reload" id="searchStadiumButton">搜索</button>
+            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchStadiumButton">搜索</button>
         </div>
         <table id="stadiumTable" lay-filter="test"></table>
     </body>
-    <!--顶部操作栏-->
-    <script type="text/html" id="toolbarDemo">
-        <div class="layui-btn-container">
-            <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
-            <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
-        </div>
-    </script>
     <!--每条数据的操作栏-->
     <script type="text/html" id="barDemo">
-        <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="changeImage">修改图片</a>
-        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="changeCategoryIds">修改场馆分类</a>
-        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumComment" style="background-color: #FF5722;">查看场馆评价</a>
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="lookStadium">查看</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="lookStadiumComment">查看场馆评价</a>
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumBook">查看场馆预约</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="deleteStadium">删除</a>
     </script>
-    <!--每条数据的编辑操作-->
-    <script type="text/html" id="editDialog">
-        <form class="layui-form" action="" style="padding: 20px;" lay-filter="editDialogForm">
+    <!--每条数据的查看操作-->
+    <script type="text/html" id="lookStadiumDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 600px;" lay-filter="lookStadiumDialogForm">
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">id</label>
                 <div class="layui-input-inline">
-                    <input id="edit_id" type="text" name="id" placeholder="请输入id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="lookStadium_id" type="text" name="id" placeholder="场馆id" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">名称</label>
                 <div class="layui-input-inline">
-                    <input id="edit_name" type="text" name="name" placeholder="请输入名称" autocomplete="off" class="layui-input" style="width: 140%;">
+                    <input id="lookStadium_name" type="text" name="name" placeholder="场馆名称" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">地址</label>
                 <div class="layui-input-inline">
-                    <input id="edit_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;">
+                    <input id="lookStadium_address" type="text" name="address" placeholder="请输入地址" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">描述</label>
                 <div class="layui-input-inline">
-                    <textarea id="edit_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;"></textarea>
+                    <textarea id="lookStadium_description" name="description" placeholder="请输入描述" class="layui-textarea" style="width: 140%;" disabled></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">图片</label>
-                <div class="layui-input-inline" id="editStadiumImages" style="width: 450px;">
+                <div class="layui-input-inline" id="lookStadium_images" style="width: 450px;">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">场馆分类ID</label>
+                <label class="layui-form-label" style="width: 15%;">场馆分类</label>
                 <div class="layui-input-inline">
-                    <input id="edit_stadiumCategoryId" type="text" name="stadiumCategoryId" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                    <input id="lookStadium_stadiumCategoryId" type="text" name="stadiumCategoryId" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
                 </div>
             </div>
         </form>
@@ -181,17 +179,12 @@
     </script>
     <!--场馆评论列表-->
     <script type="text/html" id="stadiumCommentPageDialog">
-        <table id="all_stadiumComment_table" lay-filter="allStadiumCommentTable"></table>
+        <table id="stadiumComment_table" lay-filter="stadiumCommentTable"></table>
     </script>
     <!--场馆评论单条数据的操作栏-->
     <script type="text/html" id="stadiumCommentTableBarTemplet">
-        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="report">举报</a>
-        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumCommentDetail">查看</a>
-        {{#  if(d.managerReply != null){ }}
-        <a class="layui-btn layui-btn-disabled layui-btn-xs">回复</a>
-        {{#  } else { }}
-        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="replyStadiumComment">回复</a>
-        {{#  }}}
+        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="lookStadiumCommentDetail">查看</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
     </script>
     <script type="text/html" id="stadiumCommentUsernameTemplet">
         {{d.commentUser.username}}
@@ -256,26 +249,107 @@
             </div>
         </form>
     </script>
-    <!--StadiumComment回复操作-->
-    <script type="text/html" id="replyStadiumCommentDialog">
-        <form class="layui-form" action="" style="padding: 20px;width: 380px;" lay-filter="stadiumCommentReplyForm">
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">评价内容</label>
-                <div class="layui-input-inline">
-                    <textarea id="replyStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+    <!--场馆预约列表-->
+    <script type="text/html" id="stadiumBookPageDialog">
+        <table id="stadiumBook_table" lay-filter="stadiumBookTable"></table>
+    </script>
+    <!--体育场馆预约表 col模板-->
+    <script type="text/html" id="bookStateTemplate">
+        {{#  if(d.bookState === 0){ }}
+        <span style="color: #000000;">暂未开始</span>
+        {{#  } else if(d.bookState === 1){ }}
+        <span style="color: #FF0000;">正在进行</span>
+        {{#  } else { }}
+        <span style="color: #0000FF;">已结束</span>
+        {{#  } }}
+    </script>
+    <!--场馆预约单条数据的操作栏-->
+    <script type="text/html" id="stadiumBookTableBarTemplet">
+        <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="lookStadiumBookDetail">查看</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+    </script>
+    <!--每条数据的编辑操作-->
+    <script type="text/html" id="lookStadiumBookDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 700px;" lay-filter="lookStadiumBookDialogForm">
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">体育场馆信息</label>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">体育场馆名称</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_stadium_id" type="number" name="stadiumId" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                        <input id="look_stadium_name" type="text" name="name" placeholder="体育场馆名称" autocomplete="off" class="layui-input" style="display: inline;" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">地址</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_stadium_address" type="text" name="stadiumAddress" placeholder="体育场馆地址" autocomplete="off" class="layui-input" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">描述</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <textarea id="look_stadium_description" name="stadium_description" placeholder="体育场馆描述" class="layui-textarea" disabled></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">图片</label>
+                    <div id="edit_stadium_image" class="layui-input-inline" style="width: 75%;">
+                    </div>
                 </div>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">评价星级</label>
-                <div id="replyStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">回复内容</label>
-                <div class="layui-input-inline">
-                    <textarea id="replyStadiumCommentManagerReply" placeholder="请输入回复的内容~" class="layui-textarea" style="width: 140%;"></textarea>
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">场馆预约信息</label>
                 </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约状态</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_book_state_0" type="radio" name="look_book_state" value="0" title="暂不开始" checked>
+                        <input id="look_book_state_1" type="radio" name="look_book_state" value="1" title="开始预约">
+                        <input id="look_book_state_2" type="radio" name="look_book_state" value="2" title="结束预约">
+                        <input id="look_stadiumBook_id" type="text" name="id" autocomplete="off" class="layui-input" style="display: none;" disabled>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">预约容量</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_max_book_count" type="number" name="maxBookCount" placeholder="请输入预约容量" autocomplete="off" class="layui-input" value="1" min="1">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">起始时间</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_start_time" type="text" name="startTime" placeholder="请输入起始时间" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">终止时间</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_end_time" type="text" name="endTime" placeholder="请输入终止时间" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item" id="edit_is_delete">
+                    <label class="layui-form-label" style="width: 15%;text-align: left;">删除</label>
+                    <div class="layui-input-inline" style="width: 75%;">
+                        <input id="look_is_delete_0" type="radio" name="edit_is_delete" value="0" title="未删除" checked>
+                        <input id="look_is_delete_1" type="radio" name="edit_is_delete" value="1" title="已删除">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">已预约用户信息</label>
+                </div>
+                <table id="stadiumBookItemTable" lay-filter="stadiumBookItem"></table>
             </div>
         </form>
+    </script>
+    <!--场馆已预约用户 col模板-->
+    <script type="text/html" id="stadiumBookItemAvatarTemplate">
+        <img src="{{d.userAvatarPath}}" style="width: 30px;height: 30px;"/>
     </script>
     <script>
         layui.config({
@@ -290,25 +364,23 @@
         function mounted() {
             table.render({
                 elem: '#stadiumTable'
-                , toolbar: '#toolbarDemo'
                 , defaultToolbar: ['print', 'exports']
                 , method: 'POST'
                 , cols: [[
                     {title: '<a class="" style="font-size: 20px; color:black;">体育场馆表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
                 ],[ //表头
-                    {checkbox: true, LAY_CHECKED: false}
-                    , {field: 'id', title: 'id', width: 70, sort: true}
+                    {field: 'id', title: 'id', width: 70, sort: true}
                     , {field: 'name', title: '名称', width: 200, sort: true}
                     , {field: 'address', title: '地址', width: 200, sort: true}
                     , {field: 'description', title: '描述', width: 200, sort: true}
                     , {field: 'stadiumCategoryId', title: '分类', width: 150, sort: true}
                     , {field: 'imagePaths', title: '图片', width: 150, sort: true}
-                    , {fixed: 'right', width: 340, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                    , {fixed: 'right', width: 320, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                 ]]
                 , page: true
-                , url: "/book_stadium_online/stadium/stadiumManagerFindByPage.do"
+                , url: "/book_stadium_online/stadium/findByNameKeyAndPage.do"
                 , headers: {
-                    token: $.cookie("stadiumManagerToken")
+                    token: $.cookie("systemManagerToken")
                 }
                 , request: {
                     pageName: 'pageIndex' //页码的参数名称，默认：page
@@ -330,334 +402,28 @@
                     };
                 }
             });
-            //监听事件
-            table.on('toolbar(test)', function (obj) {
-                var checkStatus = table.checkStatus(obj.config.id);
-                switch (obj.event) {
-                    case 'add':
-                        layer.open({
-                            type: 1,
-                            title: '添加',
-                            area:['70%','80%'],
-                            content: $('#addDialog').html(),
-                            btn: ['确定', '取消'],
-                            success: function (index, layero) {
-                                // 清空缓存
-                                haveUploadCount = 0;
-                                form.render();
-                                upload.render({
-                                    elem: '#add_uploadImagesButton'
-                                    ,url: '/book_stadium_online/stadium/uploadImage.do'
-                                    ,accept: 'images'
-                                    ,acceptMime: 'image/*'
-                                    ,size: 10240
-                                    ,multiple: false
-                                    ,number: 1
-                                    ,headers: {
-                                        token: $.cookie("stadiumManagerToken")
-                                    }
-                                    ,done: function(res){
-                                        if (res.code === 200) {
-                                            // 文件上传成功后修改图片路径
-                                            if ($('#add_image_paths').val().length === 0) {
-                                                $('#add_image_paths').val(res.data);
-                                            } else {
-                                                $('#add_image_paths').val($('#add_image_paths').val() + ',' + res.data);
-                                            }
-                                            $('#stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
-                                                + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
-                                                + haveUploadCount + '" onclick="deleteImage(this, 0)">删除</button></div>');
-                                            haveUploadCount += 1;
-                                            if (haveUploadCount > 4) {
-                                                $('#add_uploadImagesButton').hide();
-                                            }
-                                        }
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: res.message
-                                        });
-                                    }
-                                    ,error: function(){
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: '文件上传失败！'
-                                        });
-                                    }
-                                });
-                            },
-                            yes: function (index, layero) {
-                                if (checkAddForm() === false) {
-                                    return false;
-                                }
-                                var url ="/book_stadium_online/stadium/stadiumManagerAdd.do";
-                                var postData = '{"name":"' + $('#add_name').val() + '","address":"' + $('#add_address').val() + '","description":"' +
-                                    $('#add_description').val() + '","imagePaths":"' + $('#add_image_paths').val() + '","stadiumCategoryId":"' + $('#add_stadiumCategoryId').val() + '"}';
-                                $.ajax({
-                                    "url" : url,
-                                    "data" : {"stadiumData":postData},
-                                    "type" : "POST",
-                                    "dataType" : "json",
-                                    "beforeSend": function (request) {
-                                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                    },
-                                    "success" : function (json) {
-                                        layer.open({
-                                            title: "提示信息",
-                                            content: json.message
-                                        });
-                                        if (json.code === 200) {
-                                            layer.close(index);
-                                            // 成功后，表格重载
-                                            layui.table.reload('stadiumTable');
-                                        }
-                                    },
-                                    "error" : function () {
-                                        // 弹出中间提示框
-                                        layer.open({
-                                            title: "提示信息",
-                                            content: "保存失败，出现未知异常！"
-                                        });
-                                    }
-                                });
-                            },
-                            btn2: function (index, layero) {
-                                //return false 开启该代码可禁止点击该按钮关闭
-                            }
-                        });
-                        break;
-                    case 'delete':
-                        // 拼接选中行的username
-                        var postData = '[';
-                        for (var value of checkStatus.data) {
-                            if (postData.length > 1) {
-                                postData += ',"' + value.id + '"';
-                            } else {
-                                postData += '"' + value.id + '"';
-                            }
-                        }
-                        postData += ']';
-                        // 判断是否选中待删除行
-                        if (postData.length === 2) {
-                            layer.open({
-                                title: "提示信息",
-                                content: "请选中需要删除的数据！"
-                            });
-                            return;
-                        }
-                        layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/stadium/stadiumManagerDeleteByIdList.do";
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"idListJsonString":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口、刷新表格
-                                        layer.close(index);
-                                        table.reload('stadiumTable');
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                            layer.close(index);
-                        });
-                        break;
-                }
-            });
-
             //监听工具条
             table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
                 var data = obj.data; //获得当前行数据
                 var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
 
-                if (layEvent === 'changeImage') {
+                if (layEvent === 'lookStadium') {
                     layer.open({
                         type: 1,
-                        title: '修改图片',
-                        area:['60%','80%'],
-                        content: $('#changeImageDialog').html(),
-                        btn: ['保存', '取消'],
-                        success: function (index, layero) {
-                            // 填充行数据
-                            form.render();
-                            form.val("changeImageDialogForm", data);
-
-                            if (data.imagePaths != null && data.imagePaths.length !== 0) {
-                                var imagePaths = data.imagePaths.split(',');
-                                for (var i in imagePaths) {
-                                    $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
-                                        + imagePaths[i] + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
-                                        + i + '" onclick="deleteImage(this, 1)">删除</button></div>');
-                                }
-                                haveUploadCount = imagePaths.length;
-                                if (haveUploadCount > 4) {
-                                    $('#change_uploadImagesButton').hide();
-                                }
-                            } else {
-                                haveUploadCount = 0;
-                            }
-                            upload.render({
-                                elem: '#change_uploadImagesButton'
-                                ,url: '/book_stadium_online/stadium/uploadImage.do'
-                                ,accept: 'images'
-                                ,acceptMime: 'image/*'
-                                ,size: 10240
-                                ,multiple: false
-                                ,number: 1
-                                ,headers: {
-                                    token: $.cookie("stadiumManagerToken")
-                                }
-                                ,done: function(res){
-                                    if (res.code === 200) {
-                                        // 文件上传成功后修改图片路径
-                                        if ($('#change_image_paths').val().length === 0) {
-                                            $('#change_image_paths').val(res.data);
-                                        } else {
-                                            $('#change_image_paths').val($('#change_image_paths').val() + ',' + res.data);
-                                        }
-                                        $('#change_stadiumImages').append('<div class="changeImageDiv" style="width: 300px;height: 90px;"><img src="'
-                                            + res.data + '" style="width: 80px;height: 80px;"/><button name="deleteImageBtn" class="layui-btn layui-btn-danger" style="margin-left: 10px; width: 80px; height: 25px; line-height: 25px; font-size: 12px;" title="'
-                                            + haveUploadCount + '" onclick="deleteImage(this, 1)">删除</button></div>');
-                                        haveUploadCount += 1;
-                                        if (haveUploadCount > 4) {
-                                            $('#change_uploadImagesButton').hide();
-                                        }
-                                    }
-                                    layer.open({
-                                        title: '提示信息',
-                                        content: res.message
-                                    });
-                                }
-                                ,error: function(){
-                                    layer.open({
-                                        title: '提示信息',
-                                        content: '文件上传失败！'
-                                    });
-                                }
-                            });
-                        },
-                        yes: function (index, layero) {
-                            // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ $('#change_image_id').val() + ',"imagePaths":"'+ $('#change_image_paths').val() + '"}';
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"modifyData":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口
-                                        obj.update({
-                                            imagePaths: $('#change_image_paths').val()
-                                        });
-                                        layer.close(index);
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "删除失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                        },
-                        btn2: function (index, layero) {
-                            //return false 开启该代码可禁止点击该按钮关闭
-                        }
-                    });
-                } else if (layEvent === 'edit') {
-                    layer.open({
-                        type: 1,
-                        title: '编辑',
-                        area:['70%','70%'],
-                        content: $('#editDialog').html(),
-                        btn: ['确定', '取消'],
+                        title: '体育场馆【' + data.name + '】',
+                        area:['660px','70%'],
+                        content: $('#lookStadiumDialog').html(),
+                        btn: ['关闭'],
                         success: function (index, layero) {
                             form.render();
                             if (data.imagePaths != null && data.imagePaths.length !== 0) {
                                 var imagePaths = data.imagePaths.split(',');
                                 for (var i in imagePaths) {
-                                    $('#editStadiumImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-right: 10px">');
+                                    $('#lookStadium_images').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-right: 10px">');
                                 }
                             }
-                            form.val("editDialogForm", data);
-                        },
-                        yes: function (index, layero) {
-                            // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ $('#edit_id').val() + ',"name":"' + $('#edit_name').val() + '","address":"' + $('#edit_address').val() +  '","description":"' + $('#edit_description').val() + '"}';
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"modifyData":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新表格
-                                        obj.update({
-                                            name: $('#edit_name').val()
-                                            ,address: $('#edit_address').val()
-                                            ,description: $('#edit_description').val()
-                                        });
-                                        layer.close(index);
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                        },
-                        btn2: function (index, layero) {
-                            layer.close(index);
-                        }
-                    });
-                } else if (layEvent === 'changeCategoryIds') {
-                    layer.open({
-                        type: 1,
-                        title: '修改场馆分类',
-                        area:['70%','80%'],
-                        content: $('#changeCategoryIdsDialog').html(),
-                        btn: ['保存', '取消'],
-                        success: function (index, layero) {
-                            // 填充行数据
-                            form.render();
-                            form.val("changeCategoryIdsDialogForm", data);
-                            // 获取stadiumCategoryId对应的title
+                            form.val("lookStadiumDialogForm", data);
                             if (data.stadiumCategoryId != null) {
                                 $.ajax({
                                     "url" : '/book_stadium_online/stadiumCategory/findById.do',
@@ -665,14 +431,13 @@
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
-                                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                        request.setRequestHeader("token", $.cookie("systemManagerToken"))
                                     },
                                     "success" : function (json) {
                                         if (json.code === 200) {
                                             // 保存到全局变量
                                             var stadiumCategory = json.data;
-                                            $('#change_stadiumCategoryId').val(stadiumCategory.id);
-                                            $('#change_stadiumCategoryId_name').val(stadiumCategory.title);
+                                            $('#lookStadium_stadiumCategoryId').val(stadiumCategory.title);
                                         } else {
                                             // 弹出中间提示框
                                             layer.open({
@@ -699,41 +464,7 @@
                             }
                         },
                         yes: function (index, layero) {
-                            // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadium/stadiumManagerModify.do";
-                            var postData = '{"id":'+ data.id + ',"stadiumCategoryId":"' + $('#change_stadiumCategoryId').val() + '"}';
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"modifyData":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口
-                                        obj.update({
-                                            stadiumCategoryId: $('#change_stadiumCategoryId').val()
-                                        });
-                                        layer.close(index);
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "删除失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                        },
-                        btn2: function (index, layero) {
-                            //return false 开启该代码可禁止点击该按钮关闭
+                            layer.close(index);
                         }
                     });
                 } else if (layEvent === 'lookStadiumComment') {
@@ -747,8 +478,8 @@
                             // 填充行数据
                             form.render();
                             table.render({
-                                elem: '#all_stadiumComment_table'
-                                , width: 1020
+                                elem: '#stadiumComment_table'
+                                , width: 980
                                 , defaultToolbar: ['print', 'exports']
                                 , method: 'POST'
                                 , cols: [[
@@ -759,7 +490,7 @@
                                     , {field: 'starCount', title: '评价星级', width: 160, sort: true, templet: '#stadiumCommentStarCountTemplet'}
                                     , {field: 'commentedTime', title: '评价时间', width: 180, sort: true}
                                     , {field: 'managerReply', title: '我的回复', width: 150, sort: true}
-                                    , {field: 'toolBar_field', width: 180, align: 'center', templet: '#stadiumCommentTableBarTemplet'} //这里的toolbar值是模板元素的选择器
+                                    , {field: 'toolBar_field', width: 120, align: 'center', templet: '#stadiumCommentTableBarTemplet'} //这里的toolbar值是模板元素的选择器
                                 ]]
                                 , page: true
                                 , url: "/book_stadium_online/stadiumComment/findByStadiumIdAndPage.do"
@@ -767,7 +498,7 @@
                                     stadiumId: data.id
                                 }
                                 , headers: {
-                                    token: $.cookie("stadiumManagerToken")
+                                    token: $.cookie("systemManagerToken")
                                 }
                                 , request: {
                                     pageName: 'pageIndex' //页码的参数名称，默认：page
@@ -795,10 +526,69 @@
                             layer.close(index);
                         }
                     });
+                } else if (layEvent === 'lookStadiumBook') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆【' + data.name + '】预约',
+                        area:['80%','80%'],
+                        content: $('#stadiumBookPageDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            table.render({
+                                elem: '#stadiumBook_table'
+                                , width: 980
+                                , defaultToolbar: ['print', 'exports']
+                                , method: 'POST'
+                                , cols: [[
+                                    {title: '<a class="" style="font-size: 20px; color:black;">场馆【'+ data.name + '】预约表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {field: 'id', title: 'id', width: 70, sort: true}
+                                    , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
+                                    , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
+                                    , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
+                                    , {field: 'startTime', title: '起始时间', width: 165, sort: true}
+                                    , {field: 'endTime', title: '终止时间', width: 165, sort: true}
+                                    , {fixed: 'right', align: 'left', toolbar: '#stadiumBookTableBarTemplet'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , page: true
+                                , url: "/book_stadium_online/stadiumBook/systemManagerFindByStadiumIdAndPage.do"
+                                , where: {
+                                    stadiumId: data.id
+                                }
+                                , headers: {
+                                    token: $.cookie("systemManagerToken")
+                                }
+                                , request: {
+                                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                                }
+                                , response: {
+                                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                                    ,statusCode: 200 //规定成功的状态码，默认：0
+                                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                                }
+                                , parseData: function(res){ //res 即为原始返回的数据
+                                    return {
+                                        "code": res.code, //解析接口状态
+                                        "message": res.message, //解析提示文本
+                                        "count": res.count, //解析数据长度
+                                        "data": res.data //解析数据列表
+                                    };
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
                 }
             });
             //监听工具条
-            table.on('tool(allStadiumCommentTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+            table.on('tool(stadiumCommentTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
                 var data = obj.data; //获得当前行数据
                 var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
@@ -857,7 +647,7 @@
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
                                 },
                                 "success" : function (json) {
                                     layer.open({
@@ -877,7 +667,7 @@
                                     // 弹出中间提示框
                                     layer.open({
                                         title: "提示信息",
-                                        content: "回复失败，出现未知异常！"
+                                        content: "删除失败，出现未知异常！"
                                     });
                                 }
                             });
@@ -888,6 +678,180 @@
                     });
                 }
             });
+
+            //监听工具条
+            table.on('tool(stadiumBookTable)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'lookStadiumBookDetail') {
+                    layer.open({
+                        type: 1,
+                        title: '查看场馆预约场次详情',
+                        area:['770px','80%'],
+                        content: $('#lookStadiumBookDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            if (data.bookState === 0) {
+                                $('#look_book_state_0').attr("checked", "checked");
+                                $('#look_book_state_1').attr("disabled", "disabled");
+                                $('#look_book_state_2').attr("disabled", "disabled");
+                            } else if (data.bookState === 1) {
+                                $('#look_book_state_0').attr("disabled", "disabled");
+                                $('#look_book_state_1').attr("checked", "checked");
+                                $('#look_book_state_2').attr("disabled", "disabled");
+                            } else {
+                                $('#look_book_state_0').attr("disabled", "disabled");
+                                $('#look_book_state_1').attr("disabled", "disabled");
+                                $('#look_book_state_2').attr("checked", "checked");
+                            }
+                            if (data.isDelete === 0) {
+                                $('#look_is_delete_0').attr("checked", "checked");
+                                $('#look_is_delete_1').attr("disabled", "disabled");
+                            } else {
+                                $('#look_is_delete_0').attr("disabled", "disabled");
+                                $('#look_is_delete_1').attr("checked", "checked");
+                            }
+                            form.val("lookStadiumBookDialogForm", data);
+                            $('#look_max_book_count').attr("disabled", "disabled");
+                            $('#look_start_time').attr("disabled", "disabled");
+                            $('#look_end_time').attr("disabled", "disabled");
+                            $.ajax({
+                                "url" : "/book_stadium_online/stadium/findById.do",
+                                "data" : {"stadiumId":data.stadiumId},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    if (json.code === 200) {
+                                        // 展示场馆信息
+                                        $('#look_stadium_name').val(json.data.name);
+                                        $('#look_stadium_address').val(json.data.address);
+                                        $('#look_stadium_description').val(json.data.description);
+                                        if (json.data.imagePaths != null && json.data.imagePaths.length !== 0) {
+                                            var imagePaths = json.data.imagePaths.split(',');
+                                            for (var i in imagePaths) {
+                                                $('#look_stadium_image').append('<img src="' + imagePaths[i] + '" style="width: 80px;height: 80px;margin-left: 10px;"/>');
+                                            }
+                                        }
+                                        layer.close(index);
+                                    } else {
+                                        layer.open({
+                                            title: "提示信息",
+                                            content: json.message
+                                        });
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                            table.render({
+                                elem: '#stadiumBookItemTable'
+                                , defaultToolbar: ['print', 'exports']
+                                , method: 'POST'
+                                , cols: [[
+                                    {title: '<a class="" style="font-size: 20px; color:black;">已预约用户表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {field: 'userAvatarPath', title: '头像', width: 120, sort: true, templet: '#stadiumBookItemAvatarTemplate'}
+                                    , {field: 'username', title: '用户名', width: 200, sort: true}
+                                    , {field: 'bookedTime', title: '预约时间', width: 200, sort: true}
+                                ]]
+                                , page: true
+                                , url: "/book_stadium_online/stadiumBookItem/findByStadiumBookIdAndPage.do"
+                                , headers: {
+                                    token: $.cookie("systemManagerToken")
+                                }
+                                , where : {
+                                    stadiumBookId: data.id
+                                }
+                                , request: {
+                                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                                }
+                                , response: {
+                                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                                    ,statusCode: 200 //规定成功的状态码，默认：0
+                                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                                }
+                                , parseData: function(res){ //res 即为原始返回的数据
+                                    return {
+                                        "code": res.code, //解析接口状态
+                                        "message": res.message, //解析提示文本
+                                        "count": res.count, //解析数据长度
+                                        "data": res.data //解析数据列表
+                                    };
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        },
+                    });
+                } else if (layEvent === 'delete') {
+                    // if (data.bookState === 1) {
+                    //     layer.open({
+                    //         title: "提示信息",
+                    //         content: "删除失败，该预约正在进行，无法进行删除操作！"
+                    //     });
+                    //     return false;
+                    // }
+                    // if (data.bookState > 1 && data.nowBookCount > 0) {
+                    //     var endTime = new Date(Date.parse(data.endTime.replace(/-/g, "/")));
+                    //     var nowTime = new Date();
+                    //     if (endTime > nowTime) {
+                    //         layer.open({
+                    //             title: "提示信息",
+                    //             content: "删除失败，该预约有用户已预约，且时间段的终点时刻还未到达，无法进行删除操作！"
+                    //         });
+                    //         return false;
+                    //     }
+                    // }
+                    // layer.confirm('确定删除该场馆预约？<label style="display:block; color: red;">删除后无法恢复！</label>', function(index){
+                    //     var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
+                    //     var postData = '{"id":'+ data.id + ',"isDelete":' + 1 + '}';
+                    //     $.ajax({
+                    //         "url" : url,
+                    //         "data" : {"stadiumBookModifyData":postData},
+                    //         "type" : "POST",
+                    //         "dataType" : "json",
+                    //         "beforeSend": function (request) {
+                    //             request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                    //         },
+                    //         "success" : function (json) {
+                    //             layer.open({
+                    //                 title: "提示信息",
+                    //                 content: json.message
+                    //             });
+                    //             if (json.code === 200) {
+                    //                 // 删除了预约，则刷新整个表格
+                    //                 layui.table.reload('stadiumBookTable');
+                    //             }
+                    //         },
+                    //         "error" : function () {
+                    //             // 弹出中间提示框
+                    //             layer.open({
+                    //                 title: "提示信息",
+                    //                 content: "删除失败，出现未知异常！"
+                    //             });
+                    //         }
+                    //     });
+                    //     layer.close(index);
+                    // });
+                }
+            });
+
             $('#searchStadiumButton').on('click', function () {
                 if ($('#stadiumNameKey').val().length === 0) {
                     layer.open({
@@ -970,7 +934,7 @@
                         , limit: 100
                         , url: "/book_stadium_online/stadiumCategory/findByPage.do"
                         , headers: {
-                            token: $.cookie("stadiumManagerToken")
+                            token: $.cookie("systemManagerToken")
                         }
                         , request: {
                             pageName: 'pageIndex' //页码的参数名称，默认：page

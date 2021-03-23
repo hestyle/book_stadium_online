@@ -46,4 +46,11 @@ public interface IStadiumCommentService {
      * @throws FindFailedException  查询失败异常
      */
     List<StadiumComment> findByStadiumIdAndPage(Integer stadiumId, Integer pageIndex, Integer pageSize) throws FindFailedException;
+
+    /**
+     * 获取某Stadium的评论数量
+     * @param stadiumId         stadiumId
+     * @return                  Stadium的评论数量
+     */
+    Integer getCountByStadiumId(Integer stadiumId) throws FindFailedException;
 }

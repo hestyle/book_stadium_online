@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.mapper;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumBookItem;
+import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -48,4 +49,12 @@ public interface StadiumBookItemMapper {
      * @return                      List StadiumBookItem
      */
     List<StadiumBookItem> findByStadiumBookIdAndPage(Integer stadiumBookId, Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取stadiumBook的item数
+     * @param stadiumBookId             stadiumBookId
+     * @return                          count
+     * @throws FindFailedException      查找失败异常
+     */
+    Integer getCountByStadiumBookId(Integer stadiumBookId);
 }

@@ -1,10 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.*;
-import cn.edu.hestyle.bookstadium.mapper.SportMomentCommentLikeMapper;
-import cn.edu.hestyle.bookstadium.mapper.SportMomentCommentMapper;
-import cn.edu.hestyle.bookstadium.mapper.SportMomentMapper;
-import cn.edu.hestyle.bookstadium.mapper.UserMapper;
+import cn.edu.hestyle.bookstadium.mapper.*;
 import cn.edu.hestyle.bookstadium.service.IUserSportMomentCommentService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
@@ -33,10 +30,22 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
     /** 评论内容最大长度 */
     private static final Integer USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH = 200;
 
+    /** 评论动态通知title、content */
+    private static final String SPORT_MOMENT_COMMENT_TITLE = "运动动态评论";
+    private static final String SPORT_MOMENT_COMMENT_CONTENT = "用户【%s】评论了你的运动动态【%s...】";
+    /** 回复动态评论通知title、content */
+    private static final String SPORT_MOMENT_COMMENT_REPLY_TITLE = "运动动态评论回复";
+    private static final String SPORT_MOMENT_COMMENT_REPLY_CONTENT = "用户【%s】回复了你的运动动态评论【%s...】";
+    /** 点赞动态评论通知title、content */
+    private static final String SPORT_MOMENT_COMMENT_LIKE_TITLE = "运动动态评论点赞";
+    private static final String SPORT_MOMENT_COMMENT_LIKE_CONTENT = "用户【%s】点赞了你的运动动态评论【%s...】";
+
     private static final Logger logger = LoggerFactory.getLogger(UserSportMomentCommentServiceImpl.class);
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private NoticeMapper noticeMapper;
     @Resource
     private SportMomentMapper sportMomentMapper;
     @Resource
@@ -73,6 +82,9 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
             logger.warn("SportMomentComment 添加失败，评论内容超过了 " + USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH  + " 个字符！userSportMomentComment = " + userSportMomentComment);
             throw new AddFailedException("评论失败，评论内容超过了 " + USER_SPORT_MOMENT_COMMENT_CONTENT_MAX_LENGTH  + " 个字符");
         }
+        // 给sportMoment对应的user发送通知
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
         // 追评需要检查原评论是否存在
         if (userSportMomentComment.getParentId() != null) {
             SportMomentComment sportMomentComment = null;
@@ -87,7 +99,54 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
                 logger.warn("SportMomentComment 添加失败，回复的原评论不存在！sportMomentCommentId = " + userSportMomentComment.getParentId());
                 throw new AddFailedException("回复失败，原评论不存在，或已删除、屏蔽！");
             }
+            User user = null;
+            try {
+                user = userMapper.findById(sportMomentComment.getUserId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+                throw new AddFailedException("评论失败，数据库发生未知错误！");
+            }
+            notice.setAccountId(sportMomentComment.getUserId());
+            notice.setTitle(SPORT_MOMENT_COMMENT_REPLY_TITLE);
+            if (user != null) {
+                String sportMomentContent = sportMomentComment.getContent();
+                if (sportMomentContent.length() >= 20) {
+                    notice.setContent(String.format(SPORT_MOMENT_COMMENT_REPLY_CONTENT, user.getUsername(), sportMomentContent.substring(0, 20)));
+                } else {
+                    notice.setContent(String.format(SPORT_MOMENT_COMMENT_REPLY_CONTENT, user.getUsername(), sportMomentContent));
+                }
+            }
+        } else {
+            User user = null;
+            try {
+                user = userMapper.findById(sportMoment.getUserId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+                throw new AddFailedException("评论失败，数据库发生未知错误！");
+            }
+            notice.setAccountId(sportMoment.getUserId());
+            notice.setTitle(SPORT_MOMENT_COMMENT_TITLE);
+            if (user != null) {
+                String sportMomentContent = sportMoment.getContent();
+                if (sportMomentContent.length() >= 20) {
+                    notice.setContent(String.format(SPORT_MOMENT_COMMENT_CONTENT, user.getUsername(), sportMoment.getContent().substring(0, 20)));
+                } else {
+                    notice.setContent(String.format(SPORT_MOMENT_COMMENT_CONTENT, user.getUsername(), sportMoment.getContent()));
+                }
+            }
         }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("评论失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
         SportMomentComment additionSportMomentComment = new SportMomentComment();
         additionSportMomentComment.setUserId(userId);
         additionSportMomentComment.setSportMomentId(userSportMomentComment.getSportMomentId());
@@ -178,6 +237,37 @@ public class UserSportMomentCommentServiceImpl implements IUserSportMomentCommen
             throw new AddFailedException("点赞失败，数据库发生未知错误！");
         }
         logger.warn("SportMomentComment 修改成功！sportMomentComment = " + sportMomentComment);
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        // 给sportMoment对应的user发送通知
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(sportMomentComment.getUserId());
+        notice.setTitle(SPORT_MOMENT_COMMENT_LIKE_TITLE);
+        if (user != null) {
+            String sportMomentContent = sportMomentComment.getContent();
+            if (sportMomentContent.length() >= 20) {
+                notice.setContent(String.format(SPORT_MOMENT_COMMENT_LIKE_CONTENT, user.getUsername(), sportMomentContent.substring(0, 20)));
+            } else {
+                notice.setContent(String.format(SPORT_MOMENT_COMMENT_LIKE_CONTENT, user.getUsername(), sportMomentContent));
+            }
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("点赞失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 
     @Override

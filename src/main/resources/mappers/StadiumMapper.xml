@@ -71,8 +71,8 @@
             #{beginIndex}, #{pageSize}
     </select>
     <!--通过name进行模糊查询-->
-    <!--List<Stadium> findByName(String name);-->
-    <select id="findByName" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
+    <!--List<Stadium> findByNameKeyAndPage(String nameKey, Integer beginIndex, Integer pageSize);-->
+    <select id="findByNameKeyAndPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
         SELECT
             `id` as `id`,
             `stadium_manager_id` as `stadiumManagerId`,
@@ -90,9 +90,25 @@
         FROM
             `t_stadium`
         WHERE
-            `is_delete` = 0 AND `name` like CONCAT('%', #{name}, '%')
+            `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
         LIMIT
             #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取stadium个数-->
+    <!--Integer getCount(String nameKey);-->
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_stadium`
+        WHERE
+            `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
     </select>
     <!--分页查询stadiumCategoryId对应的Stadium-->
     <!--List<Stadium> findByStadiumCategoryId(Integer stadiumCategoryId, Integer beginIndex, Integer pageSize);-->
@@ -119,7 +135,7 @@
             #{beginIndex}, #{pageSize}
     </select>
     <!--分页查询某stadiumManager的Stadium-->
-    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);-->
+    <!--List<Stadium> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize, String nameKey);-->
     <select id="stadiumManagerFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Stadium">
         SELECT
             `id` as `id`,
@@ -139,11 +155,14 @@
             `t_stadium`
         WHERE
             `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
     <!--获取某stadiumManager的stadium个数-->
-    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId);-->
+    <!--Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey);-->
     <select id="stadiumManagerGetCount" resultType="java.lang.Integer">
         SELECT
             COUNT(`id`)
@@ -151,5 +170,8 @@
             `t_stadium`
         WHERE
             `stadium_manager_id` = #{stadiumManagerId} AND `is_delete` = 0
+        <if test="nameKey != null and nameKey.length != 0">
+            AND `name` LIKE CONCAT('%', #{nameKey}, '%')
+        </if>
     </select>
 </mapper>

@@ -166,6 +166,12 @@
                     </div>
                 </div>
             </div>
+            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;width: 100%;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="text-align: left;font-size: 20px;width: 100%;">已预约用户信息</label>
+                </div>
+                <table id="stadiumBookItemTable" lay-filter="stadiumBookItem"></table>
+            </div>
         </form>
     </script>
     <!--单条数据调整预约容量-->
@@ -208,6 +214,10 @@
         {{#  } else { }}
         <span style="color: #0000FF;">已结束</span>
         {{#  } }}
+    </script>
+    <!--场馆已预约用户 col模板-->
+    <script type="text/html" id="stadiumBookItemAvatarTemplate">
+        <img src="{{d.userAvatarPath}}" style="width: 30px;height: 30px;"/>
     </script>
     <script>
         layui.config({
@@ -575,6 +585,45 @@
                                         title: "提示信息",
                                         content: "保存失败，出现未知异常！"
                                     });
+                                }
+                            });
+                            table.render({
+                                elem: '#stadiumBookItemTable'
+                                , defaultToolbar: ['print', 'exports']
+                                , method: 'POST'
+                                , cols: [[
+                                    {title: '<a class="" style="font-size: 20px; color:black;">已预约用户表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {field: 'userAvatarPath', title: '头像', width: 120, sort: true, templet: '#stadiumBookItemAvatarTemplate'}
+                                    , {field: 'username', title: '用户名', width: 200, sort: true}
+                                    , {field: 'bookedTime', title: '预约时间', width: 200, sort: true}
+                                ]]
+                                , page: true
+                                , url: "/book_stadium_online/stadiumBookItem/findByStadiumBookIdAndPage.do"
+                                , headers: {
+                                    token: $.cookie("stadiumManagerToken")
+                                }
+                                , where : {
+                                    stadiumBookId: data.id
+                                }
+                                , request: {
+                                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                                }
+                                , response: {
+                                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                                    ,statusCode: 200 //规定成功的状态码，默认：0
+                                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                                }
+                                , parseData: function(res){ //res 即为原始返回的数据
+                                    return {
+                                        "code": res.code, //解析接口状态
+                                        "message": res.message, //解析提示文本
+                                        "count": res.count, //解析数据长度
+                                        "data": res.data //解析数据列表
+                                    };
                                 }
                             });
                         },

@@ -73,13 +73,18 @@
                 // 菜单列表数据(通过id、pid设置父、子级关系)
                 window.menuArray = [
                     {
-                        name: "APP轮播管理",
+                        name: "APP控制",
                         id: 1,
                         pid: -1,
                         url: ''
                     }, {
-                        name: "APP轮播项列表",
+                        name: "APP首页公告",
                         id: 11,
+                        pid: 1,
+                        url: '#/announcement/announcementEdit.html'
+                    }, {
+                        name: "APP轮播项列表",
+                        id: 12,
                         pid: 1,
                         url: '#/banner/bannerTable.html'
                     }, {
@@ -91,15 +96,10 @@
                         name: "体育场馆列表",
                         id: 21,
                         pid: 2,
-                        url: ''
-                    }, {
-                        name: "体育场馆预约列表",
-                        id: 22,
-                        pid: 2,
-                        url: ''
+                        url: '#/stadium/stadiumTable.html'
                     }, {
                         name: "体育场馆分类列表",
-                        id: 23,
+                        id: 22,
                         pid: 2,
                         url: '#/stadiumCategory/stadiumCategoryTable.html'
                     }
