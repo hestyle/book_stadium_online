@@ -30,6 +30,7 @@
     <script type="text/html" id="barDemo">
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="lookStadium">查看</a>
         <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="lookStadiumComment">查看场馆评价</a>
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumBook">查看场馆预约</a>
         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="deleteStadium">删除</a>
     </script>
     <!--每条数据的查看操作-->
@@ -183,7 +184,7 @@
     <!--场馆评论单条数据的操作栏-->
     <script type="text/html" id="stadiumCommentTableBarTemplet">
         <a class="layui-btn layui-btn-xs" lay-event="lookStadiumCommentDetail">查看</a>
-        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="report">删除</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
     </script>
     <script type="text/html" id="stadiumCommentUsernameTemplet">
         {{d.commentUser.username}}
@@ -248,6 +249,15 @@
             </div>
         </form>
     </script>
+    <!--场馆预约列表-->
+    <script type="text/html" id="stadiumBookPageDialog">
+        <table id="stadiumBook_table" lay-filter="stadiumBookTable"></table>
+    </script>
+    <!--场馆预约单条数据的操作栏-->
+    <script type="text/html" id="stadiumBookTableBarTemplet">
+        <a class="layui-btn layui-btn-xs" lay-event="lookStadiumBookDetail">查看</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+    </script>
     <!--StadiumComment回复操作-->
     <script type="text/html" id="replyStadiumCommentDialog">
         <form class="layui-form" action="" style="padding: 20px;width: 380px;" lay-filter="stadiumCommentReplyForm">
@@ -293,7 +303,7 @@
                     , {field: 'description', title: '描述', width: 200, sort: true}
                     , {field: 'stadiumCategoryId', title: '分类', width: 150, sort: true}
                     , {field: 'imagePaths', title: '图片', width: 150, sort: true}
-                    , {fixed: 'right', width: 210, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                    , {fixed: 'right', width: 320, align: 'center', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
                 ]]
                 , page: true
                 , url: "/book_stadium_online/stadium/findByNameKeyAndPage.do"
@@ -416,7 +426,7 @@
                                     stadiumId: data.id
                                 }
                                 , headers: {
-                                    token: $.cookie("stadiumManagerToken")
+                                    token: $.cookie("systemManagerToken")
                                 }
                                 , request: {
                                     pageName: 'pageIndex' //页码的参数名称，默认：page
@@ -431,6 +441,65 @@
                                 }
                                 , parseData: function(res){ //res 即为原始返回的数据
                                     res.data = res.data.map(function(d){d['toolBar_field']='';return d;});
+                                    return {
+                                        "code": res.code, //解析接口状态
+                                        "message": res.message, //解析提示文本
+                                        "count": res.count, //解析数据长度
+                                        "data": res.data //解析数据列表
+                                    };
+                                }
+                            });
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'lookStadiumBook') {
+                    layer.open({
+                        type: 1,
+                        title: '场馆【' + data.name + '】预约',
+                        area:['80%','80%'],
+                        content: $('#stadiumBookPageDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                            table.render({
+                                elem: '#stadiumBook_table'
+                                , width: 980
+                                , defaultToolbar: ['print', 'exports']
+                                , method: 'POST'
+                                , cols: [[
+                                    {title: '<a class="" style="font-size: 20px; color:black;">场馆【'+ data.name + '】预约表</a>',align: 'center', colspan: 8} //rowspan即纵向跨越的单元格数
+                                ],[ //表头
+                                    {field: 'id', title: 'id', width: 70, sort: true}
+                                    , {field: 'bookState', title: '预约状态', width: 105, sort: true, templet: '#bookStateTemplate'}
+                                    , {field: 'maxBookCount', title: '预约容量', width: 115, sort: true}
+                                    , {field: 'nowBookCount', title: '已预约数', width: 115, sort: true}
+                                    , {field: 'startTime', title: '起始时间', width: 165, sort: true}
+                                    , {field: 'endTime', title: '终止时间', width: 165, sort: true}
+                                    , {fixed: 'right', align: 'left', toolbar: '#stadiumBookTableBarTemplet'} //这里的toolbar值是模板元素的选择器
+                                ]]
+                                , page: true
+                                , url: "/book_stadium_online/stadiumBook/systemManagerFindByStadiumIdAndPage.do"
+                                , where: {
+                                    stadiumId: data.id
+                                }
+                                , headers: {
+                                    token: $.cookie("systemManagerToken")
+                                }
+                                , request: {
+                                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                                }
+                                , response: {
+                                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                                    ,statusCode: 200 //规定成功的状态码，默认：0
+                                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                                }
+                                , parseData: function(res){ //res 即为原始返回的数据
                                     return {
                                         "code": res.code, //解析接口状态
                                         "message": res.message, //解析提示文本
