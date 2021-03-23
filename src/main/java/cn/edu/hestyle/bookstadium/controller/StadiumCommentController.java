@@ -83,7 +83,8 @@ public class StadiumCommentController extends BaseController {
                                                                              @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                              @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, HttpSession session) {
         List<StadiumComment> stadiumCommentList = stadiumCommentService.findByStadiumIdAndPage(stadiumId, pageIndex, pageSize);
-        return new ResponseResult<List<StadiumComment>>(SUCCESS, "查询成功！", stadiumCommentList);
+        Integer count = stadiumCommentService.getCountByStadiumId(stadiumId);
+        return new ResponseResult<List<StadiumComment>>(SUCCESS, count, stadiumCommentList, "查询成功！");
     }
 
 }

@@ -250,4 +250,21 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
         logger.warn("StadiumComment 查询成功！stadiumCommentList = " + stadiumCommentList);
         return stadiumCommentList;
     }
+
+    @Override
+    public Integer getCountByStadiumId(Integer stadiumId) throws FindFailedException {
+        if (stadiumId == null) {
+            logger.warn("StadiumComment 查询失败！未指定stadiumId！");
+            throw new FindFailedException("查询失败，未指定体育场馆id！");
+        }
+        Integer count = 0;
+        try {
+            count = stadiumCommentMapper.getCountByStadiumId(stadiumId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 查询失败！数据库发生未知错误！stadiumId = " + stadiumId);
+            throw new FindFailedException("查询失败，数据库发生未知错误！");
+        }
+        return count;
+    }
 }
