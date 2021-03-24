@@ -2,6 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ChatMapper">
+    <!--通过id查找Chat-->
+    <!--Chat findById(Integer chatId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Chat">
+        SELECT
+            `id` as `id`,
+            `chat_type` as `chatType`,
+            `from_account_id` as `fromAccountId`,
+            `to_account_id` as  `toAccountId`,
+            `from_unread_count` as `fromUnreadCount`,
+            `to_unread_count` as `toUnreadCount`,
+            `last_chat_message_id` as `lastChatMessageId`,
+            `created_time` as `createdTime`,
+            `modified_time` as `modifiedTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat`
+        WHERE
+            `id` = #{chatId} AND `is_delete` = 0
+    </select>
     <!--user分页查找Chat-->
     <!--List<Chat> userFindByPage(Integer userId, Integer beginIndex, Integer pageSize);-->
     <select id="userFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Chat">

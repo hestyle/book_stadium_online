@@ -13,6 +13,13 @@ import java.util.List;
 @Mapper
 public interface ChatMapper {
     /**
+     * 通过id查找Chat
+     * @param chatId        chatId
+     * @return              Chat
+     */
+    Chat findById(Integer chatId);
+
+    /**
      * user分页查找Chat
      * @param userId            userId
      * @param beginIndex        beginIndex
