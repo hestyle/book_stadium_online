@@ -12,6 +12,13 @@ import java.util.List;
  */
 @Mapper
 public interface ChatMapper {
+
+    /**
+     * 更新chat(只能更新fromUnreadCount、toUnreadCount、lastChatMessageId、modifiedTime、isDelete字段)
+     * @param chat              chat
+     */
+    void update(Chat chat);
+
     /**
      * 通过id查找Chat
      * @param chatId        chatId
