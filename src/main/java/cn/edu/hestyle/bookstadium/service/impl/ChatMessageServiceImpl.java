@@ -81,8 +81,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
             // 当前账号是chat接受者
             chatMessage.setFromAccountId(chat.getToAccountId());
             chatMessage.setToAccountId(chat.getFromAccountId());
-            // chat发送者未读消息增加一条
-            chat.setToUnreadCount(chat.getFromAccountId() + 1);
+            // chat发起者未读消息增加一条
+            chat.setFromUnreadCount(chat.getFromUnreadCount() + 1);
         } else if (!chat.getFromAccountId().equals(userId)) {
             if (!chat.getToAccountId().equals(userId)) {
                 logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
@@ -91,8 +91,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
             // 当前账号是chat接受者
             chatMessage.setFromAccountId(chat.getToAccountId());
             chatMessage.setToAccountId(chat.getFromAccountId());
-            // chat发送者未读消息增加一条
-            chat.setToUnreadCount(chat.getFromAccountId() + 1);
+            // chat发起者未读消息增加一条
+            chat.setFromUnreadCount(chat.getFromUnreadCount() + 1);
         } else {
             // 当前账号是chat发起者
             chatMessage.setFromAccountId(chat.getFromAccountId());
