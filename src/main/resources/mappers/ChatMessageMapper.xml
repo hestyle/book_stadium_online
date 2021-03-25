@@ -2,6 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ChatMessageMapper">
+    <!--添加chatMessage-->
+    <!--void add(ChatMessage chatMessage);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.ChatMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_chat_message`(`chat_id`, `chat_type`, `from_account_id`, `to_account_id`, `content`, `sent_time`, `is_delete`)
+        VALUES (#{chatId}, #{chatType}, #{fromAccountId}, #{toAccountId}, #{content}, #{sentTime}, #{isDelete})
+    </insert>
     <!--通过id查找ChatMessage-->
     <!--ChatMessage findById(Integer id);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.ChatMessage">

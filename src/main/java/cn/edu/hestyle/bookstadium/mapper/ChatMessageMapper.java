@@ -13,9 +13,15 @@ import java.util.List;
 @Mapper
 public interface ChatMessageMapper {
     /**
+     * 添加chatMessage
+     * @param chatMessage   chatMessage
+     */
+    void add(ChatMessage chatMessage);
+
+    /**
      * 通过id查找ChatMessage
-     * @param id        id
-     * @return          ChatMessage
+     * @param id            id
+     * @return              ChatMessage
      */
     ChatMessage findById(Integer id);
 

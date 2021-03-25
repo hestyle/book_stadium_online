@@ -1,10 +1,15 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
+import cn.edu.hestyle.bookstadium.entity.Banner;
 import cn.edu.hestyle.bookstadium.entity.ChatMessage;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IChatMessageService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +27,26 @@ import java.util.List;
 @RestController
 @RequestMapping("/chatMessage")
 public class ChatMessageController extends BaseController {
-
+    private static final Logger logger = LoggerFactory.getLogger(ChatMessageController.class);
     @Autowired
     private IChatMessageService chatMessageService;
+
+    @PostMapping("/userSend.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<ChatMessage> handleUserFindByChatIdAndPage(@RequestParam(value = "chatMessageData") String chatMessageData, HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ChatMessage chatMessage = null;
+        try {
+            chatMessage = objectMapper.readValue(chatMessageData, ChatMessage.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("ChatMessage 发送失败，数据格式错误！chatMessageData = " + chatMessageData);
+            throw new RequestException("发丝包裹失败，数据格式错误！");
+        }
+        chatMessage = chatMessageService.userSend(userId, chatMessage);
+        return new ResponseResult<ChatMessage>(SUCCESS, "发送成功！", chatMessage);
+    }
 
     @PostMapping("/userFindByChatIdAndPage.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})

@@ -11,6 +11,14 @@ import java.util.List;
  */
 public interface IChatMessageService {
     /**
+     * user发送chatMessage
+     * @param userId        userId
+     * @param chatMessage   chatMessage
+     * @return              ChatMessage
+     */
+    ChatMessage userSend(Integer userId, ChatMessage chatMessage);
+
+    /**
      * user通过chatId分页查询ChatMessage
      * @param userId        userId
      * @param chatId        chatId
