@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.ChatMessageMapper">
+    <!--通过id查找ChatMessage-->
+    <!--ChatMessage findById(Integer id);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.ChatMessage">
+        SELECT
+            `id` as `id`,
+            `chat_id` as `chatId`,
+            `chat_type` as `chatType`,
+            `from_account_id` as `fromAccountId`,
+            `to_account_id` as  `toAccountId`,
+            `content` as `content`,
+            `sent_time` as `sentTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat_message`
+        WHERE
+            `id` = #{id}
+    </select>
+    <!--通过chatId分页查询ChatMessage-->
+    <!--List<ChatMessage> findByChatIdAndPage(Integer chatId, Integer beginIndex, Integer pageSize);-->
+    <select id="findByChatIdAndPage" resultType="cn.edu.hestyle.bookstadium.entity.ChatMessage">
+        SELECT
+            `id` as `id`,
+            `chat_id` as `chatId`,
+            `chat_type` as `chatType`,
+            `from_account_id` as  `fromAccountId`,
+            `to_account_id` as `toAccountId`,
+            `content` as `content`,
+            `sent_time` as `sentTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat_message`
+        WHERE
+            `chat_id` = #{chatId}
+        ORDER BY
+            `sent_time` DESC
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+</mapper>

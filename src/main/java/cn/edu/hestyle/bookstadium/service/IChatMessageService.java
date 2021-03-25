@@ -1,0 +1,22 @@
+package cn.edu.hestyle.bookstadium.service;
+
+import cn.edu.hestyle.bookstadium.entity.ChatMessage;
+
+import java.util.List;
+
+/**
+ * @author hestyle
+ * @projectName book_stadium
+ * @date 2021/3/24 9:03 下午
+ */
+public interface IChatMessageService {
+    /**
+     * user通过chatId分页查询ChatMessage
+     * @param userId        userId
+     * @param chatId        chatId
+     * @param pageIndex     pageIndex
+     * @param pageSize      pageSize
+     * @return              List ChatMessage
+     */
+    List<ChatMessage> userFindByChatIdAndPage(Integer userId, Integer chatId, Integer pageIndex, Integer pageSize);
+}

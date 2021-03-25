@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hestyle.bookstadium.mapper.ChatMapper">
+    <!--更新chat(只能更新fromUnreadCount、toUnreadCount、lastChatMessageId、modifiedTime、isDelete字段)-->
+    <!--void update(Chat chat);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Chat">
+        UPDATE `t_chat` SET
+            `from_unread_count` = #{fromUnreadCount},
+            `to_unread_count` = #{toUnreadCount},
+            `last_chat_message_id` = #{lastChatMessageId},
+            `modified_time` = #{modifiedTime},
+            `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过id查找Chat-->
+    <!--Chat findById(Integer chatId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Chat">
+        SELECT
+            `id` as `id`,
+            `chat_type` as `chatType`,
+            `from_account_id` as `fromAccountId`,
+            `to_account_id` as  `toAccountId`,
+            `from_unread_count` as `fromUnreadCount`,
+            `to_unread_count` as `toUnreadCount`,
+            `last_chat_message_id` as `lastChatMessageId`,
+            `created_time` as `createdTime`,
+            `modified_time` as `modifiedTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat`
+        WHERE
+            `id` = #{chatId} AND `is_delete` = 0
+    </select>
+    <!--user分页查找Chat-->
+    <!--List<Chat> userFindByPage(Integer userId, Integer beginIndex, Integer pageSize);-->
+    <select id="userFindByPage" resultType="cn.edu.hestyle.bookstadium.entity.Chat">
+        SELECT
+            `id` as `id`,
+            `chat_type` as `chatType`,
+            `from_account_id` as `fromAccountId`,
+            `to_account_id` as  `toAccountId`,
+            `from_unread_count` as `fromUnreadCount`,
+            `to_unread_count` as `toUnreadCount`,
+            `last_chat_message_id` as `lastChatMessageId`,
+            `created_time` as `createdTime`,
+            `modified_time` as `modifiedTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat`
+        WHERE
+            (`chat_type` = 0 AND `from_account_id` = #{userId})
+                OR (`chat_type` = 0 AND `to_account_id` = #{userId})
+                OR (`chat_type` = 1 AND `from_account_id` = #{userId})
+                OR (`chat_type` = 2 AND `to_account_id` = #{userId} AND (`last_chat_message_id` IS NOT NULL))
+        ORDER BY
+            `modified_time` DESC
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+</mapper>
