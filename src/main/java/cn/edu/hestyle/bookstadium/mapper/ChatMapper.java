@@ -12,10 +12,15 @@ import java.util.List;
  */
 @Mapper
 public interface ChatMapper {
+    /**
+     * 添加chat
+     * @param chat          chat
+     */
+    void add(Chat chat);
 
     /**
      * 更新chat(只能更新fromUnreadCount、toUnreadCount、lastChatMessageId、modifiedTime、isDelete字段)
-     * @param chat              chat
+     * @param chat          chat
      */
     void update(Chat chat);
 
@@ -25,6 +30,14 @@ public interface ChatMapper {
      * @return              Chat
      */
     Chat findById(Integer chatId);
+
+    /**
+     * 查找两个user的chat（chatType = Chat.CHAT_TYPE_USER_TO_USER）
+     * @param userIdOne     userIdOne
+     * @param userIdTwo     userIdTwo
+     * @return              Chat
+     */
+    Chat findUserWithUserChat(Integer userIdOne, Integer userIdTwo);
 
     /**
      * user分页查找Chat

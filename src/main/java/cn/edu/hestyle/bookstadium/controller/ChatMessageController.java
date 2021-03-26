@@ -42,7 +42,7 @@ public class ChatMessageController extends BaseController {
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("ChatMessage 发送失败，数据格式错误！chatMessageData = " + chatMessageData);
-            throw new RequestException("发丝包裹失败，数据格式错误！");
+            throw new RequestException("消息发送失败，数据格式错误！");
         }
         chatMessage = chatMessageService.userSend(userId, chatMessage);
         return new ResponseResult<ChatMessage>(SUCCESS, "发送成功！", chatMessage);
