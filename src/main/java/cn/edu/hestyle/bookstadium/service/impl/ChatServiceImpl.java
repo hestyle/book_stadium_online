@@ -111,6 +111,78 @@ public class ChatServiceImpl implements IChatService {
     }
 
     @Override
+    public ChatVO userGetChatWithStadiumManager(Integer userId, Integer stadiumManagerId) {
+        StadiumManager stadiumManager = null;
+        try {
+            stadiumManager = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查找失败，数据库发生未知错误！stadiumManagerId = " + stadiumManagerId);
+            throw new FindFailedException("聊天创建失败，数据库发生未知错误！");
+        }
+        if (stadiumManager == null) {
+            logger.warn("Chat 聊天创建失败，对方不存在！stadiumManagerId = " + stadiumManagerId);
+            throw new FindFailedException("聊天创建失败，对方未注册！");
+        }
+        Chat chat = null;
+        try {
+            chat = chatMapper.findUserWithStadiumManagerChat(userId, stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Chat 查找失败，数据库发生未知错误！userId = " + userId + ", stadiumManagerId = " + stadiumManagerId);
+            throw new FindFailedException("聊天创建失败，数据库发生未知错误！");
+        }
+        if (chat == null) {
+            // chat不存在，则创建一个
+            chat = new Chat();
+            chat.setChatType(Chat.CHAT_TYPE_USER_TO_MANAGER);
+            chat.setFromAccountId(userId);
+            chat.setToAccountId(stadiumManagerId);
+            chat.setFromUnreadCount(0);
+            chat.setToUnreadCount(0);
+            chat.setCreatedTime(new Date());
+            chat.setModifiedTime(new Date());
+            chat.setIsDelete(0);
+            try {
+                chatMapper.add(chat);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Chat 插入失败，数据库发生未知错误！chat = " + chat);
+                throw new FindFailedException("聊天创建失败，数据库发生未知错误！");
+            }
+        }
+        User user = null;
+        try {
+            user = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查找失败，数据库发生未知错误！userId = " + userId);
+            throw new FindFailedException("聊天创建失败，数据库发生未知错误！");
+        }
+        ChatVO chatVO = chat.toChatVO();
+        if (chat.getChatType().equals(Chat.CHAT_TYPE_USER_TO_MANAGER) && chat.getFromAccountId().equals(userId)) {
+            // 填充chat发起方信息
+            if (user != null) {
+                chatVO.setFromAccountUsername(user.getUsername());
+                chatVO.setFromAccountAvatarPath(user.getAvatarPath());
+            }
+            // 填充chat接收方信息
+            chatVO.setToAccountUsername(stadiumManager.getUsername());
+            chatVO.setToAccountAvatarPath(stadiumManager.getAvatarPath());
+        } else if (chat.getChatType().equals(Chat.CHAT_TYPE_MANAGER_TO_USER) && chat.getToAccountId().equals(userId)) {
+            // 填充chat接收方信息
+            chatVO.setFromAccountUsername(stadiumManager.getUsername());
+            chatVO.setFromAccountAvatarPath(stadiumManager.getAvatarPath());
+            // 填充chat发起方信息
+            if (user != null) {
+                chatVO.setToAccountUsername(user.getUsername());
+                chatVO.setToAccountAvatarPath(user.getAvatarPath());
+            }
+        }
+        return chatVO;
+    }
+
+    @Override
     public List<ChatVO> userFindByPage(Integer userId, Integer pageIndex, Integer pageSize) {
         // 检查页码是否合法
         if (pageIndex < 1) {

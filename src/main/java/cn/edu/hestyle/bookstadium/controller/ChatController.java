@@ -42,6 +42,18 @@ public class ChatController extends BaseController {
         return new ResponseResult<ChatVO>(SUCCESS, "查询成功！", chatVO);
     }
 
+    @PostMapping("/userGetChatWithStadiumManager.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<ChatVO> handleUserGetChatWithStadiumManager(@RequestParam(value = "stadiumManagerId") Integer stadiumManagerId, HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("id");
+        if (stadiumManagerId == null) {
+            logger.warn("Chat 查找失败，未输入对方stadiumManagerId！");
+            throw new RequestException("聊天创建失败，未指定对方stadiumManagerId！");
+        }
+        ChatVO chatVO = chatService.userGetChatWithStadiumManager(userId, stadiumManagerId);
+        return new ResponseResult<ChatVO>(SUCCESS, "查询成功！", chatVO);
+    }
+
     @PostMapping("/userFindByPage.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
     public ResponseResult<List<ChatVO>> handleUserFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,

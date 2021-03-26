@@ -19,6 +19,14 @@ public interface IChatService {
     ChatVO userGetChatWithUser(Integer userId, Integer otherUserId);
 
     /**
+     * user chat stadiumManager
+     * @param userId            当前userId
+     * @param stadiumManagerId  stadiumManagerId
+     * @return                  ChatVO
+     */
+    ChatVO userGetChatWithStadiumManager(Integer userId, Integer stadiumManagerId);
+
+    /**
      * user分页查找
      * @param userId        userId
      * @param pageIndex     pageIndex

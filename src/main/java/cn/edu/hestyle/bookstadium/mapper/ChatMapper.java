@@ -40,6 +40,14 @@ public interface ChatMapper {
     Chat findUserWithUserChat(Integer userIdOne, Integer userIdTwo);
 
     /**
+     * 查找user与stadiumManager的chat（chatType = Chat.CHAT_TYPE_USER_TO_MANAGER or Chat.CHAT_TYPE_MANAGER_TO_USER）
+     * @param userId                userId
+     * @param stadiumManagerId      stadiumManagerId
+     * @return                      Chat
+     */
+    Chat findUserWithStadiumManagerChat(Integer userId, Integer stadiumManagerId);
+
+    /**
      * user分页查找Chat
      * @param userId            userId
      * @param beginIndex        beginIndex
