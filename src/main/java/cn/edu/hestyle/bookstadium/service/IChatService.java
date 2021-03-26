@@ -11,6 +11,22 @@ import java.util.List;
  */
 public interface IChatService {
     /**
+     * user chat user
+     * @param userId        当前userId
+     * @param otherUserId   对方otherUserId
+     * @return              ChatVO
+     */
+    ChatVO userGetChatWithUser(Integer userId, Integer otherUserId);
+
+    /**
+     * user chat stadiumManager
+     * @param userId            当前userId
+     * @param stadiumManagerId  stadiumManagerId
+     * @return                  ChatVO
+     */
+    ChatVO userGetChatWithStadiumManager(Integer userId, Integer stadiumManagerId);
+
+    /**
      * user分页查找
      * @param userId        userId
      * @param pageIndex     pageIndex
