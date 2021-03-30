@@ -24,6 +24,23 @@ public class SportKnowledgeServiceImpl implements ISportKnowledgeService {
     private SportKnowledgeMapper sportKnowledgeMapper;
 
     @Override
+    public SportKnowledge findById(Integer sportKnowledgeId) {
+        if (sportKnowledgeId == null) {
+            logger.warn("SportKnowledge 查找失败，未传入sportKnowledgeId参数！");
+            throw new FindFailedException("查询失败，未传入sportKnowledgeId参数！");
+        }
+        SportKnowledge sportKnowledge = null;
+        try {
+            sportKnowledge = sportKnowledgeMapper.findById(sportKnowledgeId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 查找失败，数据库发生未知错误！sportKnowledgeId = " + sportKnowledgeId);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        return sportKnowledge;
+    }
+
+    @Override
     public List<SportKnowledge> findByPage(Integer pageIndex, Integer pageSize) {
         // 检查页码是否合法
         if (pageIndex < 1) {

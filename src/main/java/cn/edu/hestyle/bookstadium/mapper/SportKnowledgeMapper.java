@@ -12,6 +12,12 @@ import java.util.List;
  */
 @Mapper
 public interface SportKnowledgeMapper {
+    /**
+     * 通过sportKnowledgeId查找
+     * @param sportKnowledgeId  sportKnowledgeId
+     * @return                  SportKnowledge
+     */
+    SportKnowledge findById(Integer sportKnowledgeId);
 
     /**
      * 分页查询SportKnowledge

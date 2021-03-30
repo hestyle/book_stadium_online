@@ -12,6 +12,13 @@ import java.util.List;
 public interface ISportKnowledgeService {
 
     /**
+     * 通过sportKnowledgeId查找
+     * @param sportKnowledgeId  sportKnowledgeId
+     * @return                  SportKnowledge
+     */
+    SportKnowledge findById(Integer sportKnowledgeId);
+
+    /**
      * 分页查询SportKnowledge
      * @param pageIndex     pageIndex
      * @param pageSize      pageSize

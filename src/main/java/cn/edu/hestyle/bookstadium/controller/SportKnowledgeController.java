@@ -27,6 +27,12 @@ public class SportKnowledgeController extends BaseController {
     @Autowired
     private ISportKnowledgeService sportKnowledgeService;
 
+    @PostMapping("/findById.do")
+    public ResponseResult<SportKnowledge> handleFindById(@RequestParam(value = "sportKnowledgeId") Integer sportKnowledgeId, HttpSession session) {
+        SportKnowledge sportKnowledge = sportKnowledgeService.findById(sportKnowledgeId);
+        return new ResponseResult<SportKnowledge>(SUCCESS, "查询成功！", sportKnowledge);
+    }
+
     @PostMapping("/findByPage.do")
     public ResponseResult<List<SportKnowledge>> handleFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
