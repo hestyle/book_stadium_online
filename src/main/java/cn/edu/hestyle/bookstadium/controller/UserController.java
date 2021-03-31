@@ -152,4 +152,21 @@ public class UserController extends BaseController {
         Integer count = userService.getCount();
         return new ResponseResult<List<User>>(SUCCESS, count, userList, "查询成功!");
     }
+
+    @PostMapping("/systemManagerAdd.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAdd(@RequestParam(name = "userData") String userData, HttpSession session) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = null;
+        // 从userData读取user对象
+        try {
+            user = objectMapper.readValue(userData, User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 添加失败，数据格式错误！data = " + userData);
+            throw new RequestParamException("User 添加失败，数据格式错误！");
+        }
+        userService.register(user);
+        return new ResponseResult<>(SUCCESS, user.getUsername() + " 添加成功！");
+    }
 }
