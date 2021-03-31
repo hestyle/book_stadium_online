@@ -41,6 +41,7 @@
         {{#  if(d.isDelete === 0){ }}
         <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="editUserAccount">编辑</a>
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="resetPassword">重置密码</a>
+        <a class="layui-btn layui-btn-warm layui-btn-xs" lay-event="addToBlack">拉黑</a>
         <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="delete">删除</a>
         {{#  } else if(d.isDelete === 1){ }}
         <a class="layui-btn layui-btn-disabled layui-btn-xs">已删除</a>
@@ -384,6 +385,37 @@
                         btn2: function (index, layero) {
                             layer.close(index);
                         }
+                    });
+                } else if (layEvent === 'addToBlack') {
+                    layer.confirm('是否拉黑' + data.username + '？<label style="display:block; color: red;">拉黑后，该用户将无法登录！</label>', function(index){
+                        var url ="/book_stadium_online/user/systemManagerAddToBlack.do";
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"userId":data.id},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "beforeSend": function (request) {
+                                request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                            },
+                            "success" : function (json) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: json.message
+                                });
+                                if (json.code === 200) {
+                                    // 刷新整个表格
+                                    layui.table.reload('userAccountTable');
+                                }
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "操作失败，出现未知异常！"
+                                });
+                            }
+                        });
+                        layer.close(index);
                     });
                 } else if (layEvent === 'delete') {
                     if (data.bookState === 1) {
