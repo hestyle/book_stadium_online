@@ -216,4 +216,13 @@ public class UserController extends BaseController {
         userService.systemManagerRemoveFromBlack(systemManagerId, userId);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "userId") Integer userId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerDeleteById(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }
