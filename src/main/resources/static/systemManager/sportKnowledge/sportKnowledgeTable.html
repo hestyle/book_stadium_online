@@ -278,12 +278,12 @@
                         }
                     });
                 }  else if (layEvent === 'delete') {
-                    layer.confirm('确定删除这个APP 轮播吗？<label style="display:block; color: red;">注意：删除后无法恢复！</label>', function(index){
-                        var url ="/book_stadium_online/banner/deleteByIdList.do";
+                    layer.confirm('确定删除这个运动常识吗？<label style="display:block; color: red;">注意：删除后无法恢复！</label>', function(index){
+                        var url ="/book_stadium_online/sportKnowledge/deleteByIdList.do";
                         var postData = '["'+ data.id + '"]';
                         $.ajax({
                             "url" : url,
-                            "data" : {"bannerIdListData":postData},
+                            "data" : {"sportKnowledgeIdListData":postData},
                             "type" : "POST",
                             "dataType" : "json",
                             "beforeSend": function (request) {
@@ -295,7 +295,7 @@
                                     content: json.message
                                 });
                                 if (json.code === 200) {
-                                    // 删除了预约，则刷新整个表格
+                                    // 删除操作，则刷新整个表格
                                     layui.table.reload('sportKnowledgeTable');
                                 }
                             },
