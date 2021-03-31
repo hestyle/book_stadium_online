@@ -187,11 +187,11 @@
                             });
                             return;
                         }
-                        layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/banner/deleteByIdList.do";
+                        layer.confirm('删除选中行？<label style="display:block; color: red;">注意：删除后无法恢复！</label>', function (index) {
+                            var url ="/book_stadium_online/sportKnowledge/deleteByIdList.do";
                             $.ajax({
                                 "url" : url,
-                                "data" : {"bannerIdListData":postData},
+                                "data" : {"sportKnowledgeIdListData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
