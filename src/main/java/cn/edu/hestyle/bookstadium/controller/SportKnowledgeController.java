@@ -1,8 +1,12 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.SportKnowledge;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.ISportKnowledgeService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +30,24 @@ public class SportKnowledgeController extends BaseController {
 
     @Autowired
     private ISportKnowledgeService sportKnowledgeService;
+
+    @PostMapping("/add.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleAdd(@RequestParam(name = "sportKnowledgeData") String sportKnowledgeData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        SportKnowledge sportKnowledge = null;
+        try {
+            sportKnowledge = objectMapper.readValue(sportKnowledgeData, SportKnowledge.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 添加失败，数据格式错误！data = " + sportKnowledgeData);
+            throw new RequestException("SportKnowledge 添加失败，数据格式错误！");
+        }
+        sportKnowledgeService.add(systemManagerId, sportKnowledge);
+        return new ResponseResult<Void>(SUCCESS, "添加成功！");
+    }
 
     @PostMapping("/findById.do")
     public ResponseResult<SportKnowledge> handleFindById(@RequestParam(value = "sportKnowledgeId") Integer sportKnowledgeId, HttpSession session) {

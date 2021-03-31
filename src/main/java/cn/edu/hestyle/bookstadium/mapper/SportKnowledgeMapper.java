@@ -13,6 +13,12 @@ import java.util.List;
 @Mapper
 public interface SportKnowledgeMapper {
     /**
+     * 添加SportKnowledge
+     * @param sportKnowledge    sportKnowledge
+     */
+    void add(SportKnowledge sportKnowledge);
+
+    /**
      * 通过sportKnowledgeId查找
      * @param sportKnowledgeId  sportKnowledgeId
      * @return                  SportKnowledge

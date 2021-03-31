@@ -10,6 +10,11 @@ import java.util.List;
  * @date 2021/3/30 2:10 下午
  */
 public interface ISportKnowledgeService {
+    /**
+     * 添加sportKnowledge
+     * @param sportKnowledge    sportKnowledge
+     */
+    void add(Integer systemManagerId, SportKnowledge sportKnowledge);
 
     /**
      * 通过sportKnowledgeId查找
