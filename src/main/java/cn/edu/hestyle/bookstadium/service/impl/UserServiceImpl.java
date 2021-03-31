@@ -60,14 +60,19 @@ public class UserServiceImpl implements IUserService {
             logger.error("User username=" + username + ", password=" + password + " 登录失败，数据库发生未知异常！");
             throw new LoginFailedException("登录失败，数据库发生未知异常！");
         }
-        // 判断username是否注册，或者已被删除
-        if (user == null || user.getIsDelete() == 1) {
+        // 判断username是否注册
+        if (user == null) {
             logger.info("User username=" + username + ", password=" + password + " 登录失败，用户名 " + username + " 未注册！");
             throw new LoginFailedException("登录失败，用户名 " + username + " 未注册！");
         }
+        // 判断账号是否被删除
+        if (1 == user.getIsDelete()) {
+            logger.info("User 登录失败，该用户已被管理员删除！user = " + user);
+            throw new LoginFailedException("登录失败，您的账号已被删除，请联系系统管理员！");
+        }
         // 判断账号是否拉黑
         if (2 == user.getIsDelete()) {
-            logger.info("User 登录失败，该用户已被拉黑！user = " + user);
+            logger.info("User 登录失败，该用户已被管理员拉黑！user = " + user);
             throw new LoginFailedException("登录失败，您的账号已被拉黑，请联系系统管理员！");
         }
         // 判断密码是否匹配
