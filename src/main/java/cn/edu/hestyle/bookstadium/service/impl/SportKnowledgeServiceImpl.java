@@ -60,4 +60,17 @@ public class SportKnowledgeServiceImpl implements ISportKnowledgeService {
         }
         return sportKnowledgeList;
     }
+
+    @Override
+    public Integer getCount() {
+        Integer count = 0;
+        try {
+            count = sportKnowledgeMapper.getCount();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 查找失败，数据库发生未知错误！");
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        return count;
+    }
 }

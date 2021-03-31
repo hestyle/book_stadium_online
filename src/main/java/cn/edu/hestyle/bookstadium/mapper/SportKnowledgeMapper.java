@@ -26,4 +26,10 @@ public interface SportKnowledgeMapper {
      * @return              List SportKnowledge
      */
     List<SportKnowledge> findByPage(Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取sportKnowledge的数量
+     * @return              sportKnowledge的数量
+     */
+    Integer getCount();
 }

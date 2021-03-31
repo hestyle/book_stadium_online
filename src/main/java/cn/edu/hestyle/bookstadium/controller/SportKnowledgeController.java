@@ -38,6 +38,7 @@ public class SportKnowledgeController extends BaseController {
                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                                                                  HttpSession session) {
         List<SportKnowledge> sportKnowledgeList = sportKnowledgeService.findByPage(pageIndex, pageSize);
-        return new ResponseResult<List<SportKnowledge>>(SUCCESS, "查询成功！", sportKnowledgeList);
+        Integer count = sportKnowledgeService.getCount();
+        return new ResponseResult<List<SportKnowledge>>(SUCCESS, count, sportKnowledgeList, "查询成功！");
     }
 }

@@ -25,4 +25,10 @@ public interface ISportKnowledgeService {
      * @return              List SportKnowledge
      */
     List<SportKnowledge> findByPage(Integer pageIndex, Integer pageSize);
+
+    /**
+     * 获取sportKnowledge的数量
+     * @return              sportKnowledge的数量
+     */
+    Integer getCount();
 }

@@ -40,4 +40,14 @@
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
+    <!--获取sportKnowledge的数量-->
+    <!--Integer getCount();-->
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_sport_knowledge`
+        WHERE
+            `is_delete` = 0
+    </select>
 </mapper>
