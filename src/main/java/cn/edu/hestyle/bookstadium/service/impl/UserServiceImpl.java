@@ -572,6 +572,51 @@ public class UserServiceImpl implements IUserService {
         logger.warn("User 更新成功！userModify = " + userModify);
     }
 
+    @Override
+    public void systemManagerRemoveFromBlack(Integer systemManagerId, Integer userId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 解除拉黑失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要解除拉黑的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 解除拉黑失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (userModify.getIsDelete() != null && userModify.getIsDelete().equals(1)) {
+            logger.warn("User 解除拉黑失败，该user未处于黑名单状态！userModify = " + userModify);
+            throw new FindFailedException("操作失败，该用户未处于黑名单状态！");
+        }
+        // 解除拉黑并清除token
+        userModify.setIsDelete(0);
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        userModify.setToken(null);
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
+    }
+
     /**
      * 检查imagePaths的合法性
      * @param avatarPath            avatarPath

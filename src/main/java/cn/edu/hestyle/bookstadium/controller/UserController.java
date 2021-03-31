@@ -207,4 +207,13 @@ public class UserController extends BaseController {
         userService.systemManagerAddToBlack(systemManagerId, userId);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerRemoveFromBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerRemoveFromBlack(@RequestParam(name = "userId") Integer userId,
+                                                                   HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerRemoveFromBlack(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }

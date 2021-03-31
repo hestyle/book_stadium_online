@@ -117,4 +117,11 @@ public interface IUserService {
      * @param userId                userId
      */
     void systemManagerAddToBlack(Integer systemManagerId, Integer userId);
+
+    /**
+     * systemManager移除user拉黑状态
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     */
+    void systemManagerRemoveFromBlack(Integer systemManagerId, Integer userId);
 }
