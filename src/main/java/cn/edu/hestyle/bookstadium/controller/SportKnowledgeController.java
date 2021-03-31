@@ -6,6 +6,7 @@ import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.ISportKnowledgeService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,6 +66,24 @@ public class SportKnowledgeController extends BaseController {
         }
         sportKnowledgeService.modify(systemManagerId, sportKnowledge);
         return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
+    @PostMapping("/deleteByIdList.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleDeleteByIdList(@RequestParam(name = "sportKnowledgeIdListData") String sportKnowledgeIdListData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Integer> sportKnowledgeIdList = null;
+        try {
+            sportKnowledgeIdList = objectMapper.readValue(sportKnowledgeIdListData, new TypeReference<List<Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 删除失败，数据格式错误！bannerIdListData = " + sportKnowledgeIdListData);
+            throw new RequestException("删除失败，数据格式错误！");
+        }
+        sportKnowledgeService.deleteByIdList(systemManagerId, sportKnowledgeIdList);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
     }
 
     @PostMapping("/findById.do")

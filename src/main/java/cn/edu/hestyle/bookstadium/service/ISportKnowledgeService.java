@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.SportKnowledge;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 
 import java.util.List;
 
@@ -22,6 +23,14 @@ public interface ISportKnowledgeService {
      * @param sportKnowledge    sportKnowledge
      */
     void modify(Integer systemManagerId, SportKnowledge sportKnowledge);
+
+    /**
+     * 批量删除sportKnowledge
+     * @param systemManagerId           systemManagerId
+     * @param sportKnowledgeIdList      sportKnowledgeIdList
+     * @throws DeleteFailedException    删除异常
+     */
+    void deleteByIdList(Integer systemManagerId, List<Integer> sportKnowledgeIdList) throws DeleteFailedException;
 
     /**
      * 通过sportKnowledgeId查找

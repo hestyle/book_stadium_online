@@ -6,10 +6,12 @@ import cn.edu.hestyle.bookstadium.mapper.SportKnowledgeMapper;
 import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.ISportKnowledgeService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
@@ -132,6 +134,50 @@ public class SportKnowledgeServiceImpl implements ISportKnowledgeService {
             throw new AddFailedException("操作失败，数据库发生未知异常!");
         }
         logger.warn("SportKnowledge 修改成功！sportKnowledgeModify = " + sportKnowledgeModify);
+    }
+
+    @Override
+    @Transactional
+    public void deleteByIdList(Integer systemManagerId, List<Integer> sportKnowledgeIdList) throws DeleteFailedException {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new AddFailedException("添加失败，数据库发生未知异常!");
+        }
+        if (sportKnowledgeIdList == null || sportKnowledgeIdList.size() == 0) {
+            logger.warn("SportKnowledge 删除失败，未传入有效的sportKnowledgeIdList参数！");
+            throw new AddFailedException("操作失败，未传入有效的sportKnowledgeIdList参数!");
+        }
+        logger.warn("SportKnowledge批量删除事务开始-----");
+        for (Integer sportKnowledgeId : sportKnowledgeIdList) {
+            SportKnowledge sportKnowledge = null;
+            try {
+                sportKnowledge = sportKnowledgeMapper.findById(sportKnowledgeId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("SportKnowledge 查询失败，数据库发生未知异常！SportKnowledge批量删除事务回滚-----");
+                throw new AddFailedException("操作失败，数据库发生未知异常!");
+            }
+            if (sportKnowledge == null) {
+                logger.warn("SportKnowledge 查询失败，sportKnowledgeId = " + sportKnowledgeId + " 不存在！ SportKnowledge批量删除事务回滚-----");
+                throw new AddFailedException("操作失败，数据库发生未知异常!");
+            }
+            sportKnowledge.setModifiedUser(systemManager.getUsername());
+            sportKnowledge.setModifiedTime(new Date());
+            sportKnowledge.setIsDelete(1);
+            try {
+                sportKnowledgeMapper.update(sportKnowledge);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("SportKnowledge 更新失败，数据库发生未知异常！sportKnowledge = " + sportKnowledge + "SportKnowledge批量删除事务回滚-----");
+                throw new AddFailedException("操作失败，数据库发生未知异常!");
+            }
+            logger.warn("SportKnowledge 更新成功！sportKnowledge = " + sportKnowledge);
+        }
+        logger.warn("SportKnowledge批量删除事务提交-----");
     }
 
     @Override
