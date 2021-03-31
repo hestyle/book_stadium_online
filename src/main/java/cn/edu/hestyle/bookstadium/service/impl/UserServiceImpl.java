@@ -14,6 +14,7 @@ import org.springframework.util.ResourceUtils;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -373,6 +374,40 @@ public class UserServiceImpl implements IUserService {
         }
         logger.warn("User 查询成功！user = " + user);
         return user;
+    }
+
+    @Override
+    public List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize) {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<User> userList = null;
+        try {
+            userList = userMapper.findByPage((pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return userList;
+    }
+
+    @Override
+    public Integer getCount() {
+        Integer count = null;
+        try {
+            count = userMapper.getCount();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return count;
     }
 
     /**

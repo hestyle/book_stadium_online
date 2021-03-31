@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IUserService;
@@ -140,5 +141,15 @@ public class UserController extends BaseController {
         logger.warn("User userId = " + userId + "上传文件 url = " + filePath + "成功！");
         userService.modifyAvatarPath(userId, filePath);
         return new ResponseResult<String>(SUCCESS, "头像修改成功!", filePath);
+    }
+
+    @PostMapping("/systemManagerFindByPage.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<List<User>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                    @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                    HttpSession session) {
+        List<User> userList = userService.systemManagerFindByPage(pageIndex, pageSize);
+        Integer count = userService.getCount();
+        return new ResponseResult<List<User>>(SUCCESS, count, userList, "查询成功!");
     }
 }

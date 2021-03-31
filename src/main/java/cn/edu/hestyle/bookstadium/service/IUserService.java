@@ -3,6 +3,8 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 
+import java.util.List;
+
 /**
  * @author hestyle
  * @projectName book_stadium
@@ -79,4 +81,18 @@ public interface IUserService {
      * @return      Stadium
      */
     User systemFindById(Integer id) throws FindFailedException;
+
+    /**
+     * systemManager分页查询User
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List User
+     */
+    List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize);
+
+    /**
+     * 获取User数量
+     * @return                      User数量
+     */
+    Integer getCount();
 }
