@@ -110,4 +110,11 @@ public interface IUserService {
      * @param newPassword           newPassword
      */
     void systemManagerResetPassword(Integer systemManagerId, Integer userId, String newPassword);
+
+    /**
+     * systemManager将user拉黑
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     */
+    void systemManagerAddToBlack(Integer systemManagerId, Integer userId);
 }

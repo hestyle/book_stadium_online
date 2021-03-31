@@ -198,4 +198,13 @@ public class UserController extends BaseController {
         userService.systemManagerResetPassword(systemManagerId, userId, newPassword);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerAddToBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAddToBlack(@RequestParam(name = "userId") Integer userId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerAddToBlack(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }
