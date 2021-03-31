@@ -68,7 +68,7 @@
             `username`=#{username}
     </select>
     <!--分页查询user-->
-    <!--List<User> findByPage(Integer beginIndex, Integer pageIndex);-->
+    <!--List<User> findByPage(Integer beginIndex, Integer pageIndex, String usernameKey);-->
     <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.User">
         SELECT
             `id` as `id`,
@@ -88,11 +88,14 @@
             `t_user`
         WHERE
             `is_delete` != 1
+        <if test="usernameKey != null and usernameKey.length != 0">
+            AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+        </if>
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
     <!--获取User数量-->
-    <!--Integer getCount();-->
+    <!--Integer getCount(String usernameKey);-->
     <select id="getCount" resultType="java.lang.Integer">
         SELECT
             COUNT(`id`)
@@ -100,5 +103,8 @@
             `t_user`
         WHERE
             `is_delete` != 1
+        <if test="usernameKey != null and usernameKey.length != 0">
+            AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+        </if>
     </select>
 </mapper>

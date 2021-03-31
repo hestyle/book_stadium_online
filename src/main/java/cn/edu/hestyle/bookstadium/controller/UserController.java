@@ -147,9 +147,10 @@ public class UserController extends BaseController {
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
     public ResponseResult<List<User>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                     @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                    @RequestParam(name = "usernameKey", defaultValue = "") String usernameKey,
                                                                     HttpSession session) {
-        List<User> userList = userService.systemManagerFindByPage(pageIndex, pageSize);
-        Integer count = userService.getCount();
+        List<User> userList = userService.systemManagerFindByPage(pageIndex, pageSize, usernameKey);
+        Integer count = userService.getCount(usernameKey);
         return new ResponseResult<List<User>>(SUCCESS, count, userList, "查询成功!");
     }
 

@@ -43,13 +43,14 @@ public interface UserMapper {
      * 分页查询user(未删除的)
      * @param beginIndex    beginIndex
      * @param pageSize      pageSize
+     * @param usernameKey   用户名关键字（可选）
      * @return              List User
      */
-    List<User> findByPage(Integer beginIndex, Integer pageSize);
+    List<User> findByPage(Integer beginIndex, Integer pageSize, String usernameKey);
 
     /**
      * 获取User数量
      * @return              user数量
      */
-    Integer getCount();
+    Integer getCount(String usernameKey);
 }

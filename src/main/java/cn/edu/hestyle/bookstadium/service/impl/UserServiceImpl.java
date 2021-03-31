@@ -377,7 +377,7 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize) {
+    public List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey) {
         // 检查页码是否合法
         if (pageIndex < 1) {
             throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
@@ -386,9 +386,13 @@ public class UserServiceImpl implements IUserService {
         if (pageSize < 1) {
             throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
         }
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         List<User> userList = null;
         try {
-            userList = userMapper.findByPage((pageIndex - 1) * pageSize, pageSize);
+            userList = userMapper.findByPage((pageIndex - 1) * pageSize, pageSize, usernameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("User 查询失败，数据库发生未知异常！");
@@ -398,10 +402,14 @@ public class UserServiceImpl implements IUserService {
     }
 
     @Override
-    public Integer getCount() {
+    public Integer getCount(String usernameKey) {
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         Integer count = null;
         try {
-            count = userMapper.getCount();
+            count = userMapper.getCount(usernameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("User 查询失败，数据库发生未知异常！");

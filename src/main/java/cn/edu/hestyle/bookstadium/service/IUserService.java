@@ -88,11 +88,11 @@ public interface IUserService {
      * @param pageSize              pageSize
      * @return                      List User
      */
-    List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize);
+    List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey);
 
     /**
      * 获取User数量
      * @return                      User数量
      */
-    Integer getCount();
+    Integer getCount(String usernameKey);
 }
