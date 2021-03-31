@@ -122,6 +122,23 @@
             </div>
         </form>
     </script>
+    <!--单条数据的重置密码操作-->
+    <script type="text/html" id="resetPasswordDialog">
+        <form id="resetPassword_form" class="layui-form" action="" style="padding: 20px;width: 450px;" lay-filter="resetPasswordDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">新密码</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="reset_password_new" type="password" name="password" placeholder="请输入新密码~" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">重复密码</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="reset_password_renew" type="password" name="rePassword" placeholder="请再次输入新密码~" class="layui-input">
+                </div>
+            </div>
+        </form>
+    </script>
     <!--userAccount表 AvatarPath col模板-->
     <script type="text/html" id="userAccountAvatarPathTemplate">
         {{#  if(d.avatarPath !== null && d.avatarPath.length !== 0){ }}
@@ -324,6 +341,50 @@
                             layer.close(index);
                         }
                     });
+                } else if (layEvent === 'resetPassword') {
+                    layer.open({
+                        type: 1,
+                        title: '重置用户' + data.username + " 登录密码",
+                        area:['520px','60%'],
+                        content: $('#resetPasswordDialog').html(),
+                        btn: ['保存', '取消'],
+                        yes: function (index, layero) {
+                            if (checkResetPasswordForm() === false) {
+                                return false;
+                            }
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/user/systemManagerResetPassword.do";
+                            var postData = {"userId":data.id, "newPassword":$('#reset_password_new').val()};
+                            $.ajax({
+                                "url" : url,
+                                "data" : postData,
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
                 } else if (layEvent === 'delete') {
                     if (data.bookState === 1) {
                         layer.open({
@@ -434,6 +495,28 @@
                 layer.open({
                     title: "提示信息",
                     content: "请输入添加账号的电话号码！"
+                });
+                return false;
+            }
+            return true;
+        }
+
+        /**
+         * 检查重置user密码的表单
+         * @returns {boolean}
+         */
+        function checkResetPasswordForm() {
+            if ($('#reset_password_new').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请输入新密码！"
+                });
+                return false;
+            }
+            if ($('#reset_password_new').val() !== $('#reset_password_renew').val()) {
+                layer.open({
+                    title: "提示信息",
+                    content: "两次输入的密码不一致！"
                 });
                 return false;
             }
