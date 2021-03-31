@@ -102,4 +102,12 @@ public interface IUserService {
      * @param user                  user
      */
     void systemManagerModify(Integer systemManagerId, User user);
+
+    /**
+     * systemManager重置user密码
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     * @param newPassword           newPassword
+     */
+    void systemManagerResetPassword(Integer systemManagerId, Integer userId, String newPassword);
 }

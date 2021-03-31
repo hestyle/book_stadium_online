@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
  */
 @Service
 public class UserServiceImpl implements IUserService {
+    /** 密码的最小长度 */
+    private static final Integer USER_PASSWORD_MIN_LENGTH = 5;
     /** 密码的最大长度 */
     private static final Integer USER_PASSWORD_MAX_LENGTH = 20;
     /** 性别：男 */
@@ -475,6 +477,49 @@ public class UserServiceImpl implements IUserService {
             throw new ModifyFailedException("操作失败，数据库发生未知异常！");
         }
         logger.warn("User 修改成功！userModify = " + userModify);
+    }
+
+    @Override
+    public void systemManagerResetPassword(Integer systemManagerId, Integer userId, String newPassword) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 密码重置失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要重置密码的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 密码重置失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (newPassword == null || newPassword.length() < USER_PASSWORD_MIN_LENGTH || newPassword.length() > USER_PASSWORD_MAX_LENGTH) {
+            logger.warn("User 密码重置失败，新密码长度无效！不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
+            throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！");
+        }
+        userModify.setPassword(EncryptUtil.encryptPassword(newPassword, userModify.getSaltValue()));
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
     }
 
     /**

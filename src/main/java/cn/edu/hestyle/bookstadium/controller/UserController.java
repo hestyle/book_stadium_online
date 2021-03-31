@@ -188,4 +188,14 @@ public class UserController extends BaseController {
         userService.systemManagerModify(systemManagerId, user);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerResetPassword.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerResetPassword(@RequestParam(name = "userId") Integer userId,
+                                                                 @RequestParam(name = "newPassword") String newPassword,
+                                                                 HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerResetPassword(systemManagerId, userId, newPassword);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }
