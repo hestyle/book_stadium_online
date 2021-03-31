@@ -44,23 +44,15 @@
     <script type="text/html" id="addDialog">
         <form id="add_form" class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="addDialogForm">
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播名称</label>
+                <label class="layui-form-label" style="width: 20%;text-align: left;">标题</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_banner_title" type="text" name="title" placeholder="请输入轮播名称" autocomplete="off" class="layui-input">
+                    <input id="add_sport_knowledge_title" type="text" name="title" placeholder="请输入运动常识标题~" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">轮播内容</label>
+                <label class="layui-form-label" style="width: 20%;text-align: left;">内容</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <textarea id="add_banner_content" name="content" placeholder="请输入描述" class="layui-textarea"></textarea>
-                </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;text-align: left;">图片</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_banner_image_path" type="text" name="imagePath" autocomplete="off" class="layui-input" disabled style="display: none;">
-                    <button type="button" class="layui-btn layui-btn-normal" id="add_uploadImageButton" style="display: block;"><i class="layui-icon">&#xe67c;</i>添加图片</button>
-                    <img id="add_banner_image" src="" style="width: 80px;height: 80px;display: none;margin-top: 20px;"/>
+                    <textarea id="add_sport_knowledge_content" name="content" placeholder="请输入运动常识内容~" class="layui-textarea"></textarea>
                 </div>
             </div>
         </form>
@@ -145,50 +137,15 @@
                             area:['460px','80%'],
                             content: $('#addDialog').html(),
                             btn: ['确定', '取消'],
-                            success: function (index, layero) {
-                                // 清空缓存
-                                form.render();
-                                upload.render({
-                                    elem: '#add_uploadImageButton'
-                                    ,url: '/book_stadium_online/banner/uploadImage.do'
-                                    ,accept: 'images'
-                                    ,acceptMime: 'image/*'
-                                    ,size: 10240
-                                    ,multiple: false
-                                    ,number: 1
-                                    ,headers: {
-                                        "token": $.cookie("systemManagerToken")
-                                    }
-                                    ,done: function(res){
-                                        if (res.code === 200) {
-                                            // 文件上传成功后修改图片路径
-                                            $('#add_banner_image_path').val(res.data);
-                                            $('#add_banner_image').attr("src", res.data);
-                                            $('#add_banner_image').show();
-                                        }
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: res.message
-                                        });
-                                    }
-                                    ,error: function(){
-                                        layer.open({
-                                            title: '提示信息',
-                                            content: '文件上传失败！'
-                                        });
-                                    }
-                                });
-                            },
                             yes: function (index, layero) {
                                 if (checkAddForm() === false) {
                                     return false;
                                 }
-                                var url ="/book_stadium_online/banner/add.do";
-                                var postData = '{"title":"' + $('#add_banner_title').val() + '","content":"' + $('#add_banner_content').val()
-                                    + '","imagePath":"' + $('#add_banner_image_path').val() + '"}';
+                                var url ="/book_stadium_online/sportKnowledge/add.do";
+                                var postData = '{"title":"' + $('#add_sport_knowledge_title').val() + '","content":"' + $('#add_sport_knowledge_content').val() + '"}';
                                 $.ajax({
                                     "url" : url,
-                                    "data" : {"bannerData":postData},
+                                    "data" : {"sportKnowledgeData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
@@ -401,24 +358,17 @@
         }
 
         function checkAddForm() {
-            if ($('#add_banner_title').val().length === 0) {
+            if ($('#add_sport_knowledge_title').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请输入轮播名称！"
+                    content: "请输入运动常识标题！"
                 });
                 return false;
             }
-            if ($('#add_banner_content').val().length === 0) {
+            if ($('#add_sport_knowledge_content').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请输入轮播内容！"
-                });
-                return false;
-            }
-            if ($('#add_banner_image_path').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "请上传轮播图片！"
+                    content: "请输入运动常识内容！"
                 });
                 return false;
             }
