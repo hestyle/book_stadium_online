@@ -22,13 +22,18 @@
         }
     </style>
     <body>
+        <div class="div-search">
+            <div class="layui-inline">
+                <input class="layui-input" id="usernameKey" autocomplete="off" placeholder="请输入用户名关键字" style="width: 300px;">
+            </div>
+            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchUserButton">搜索</button>
+        </div>
         <table id="userAccountTable" lay-filter="test"></table>
     </body>
     <!--顶部操作栏-->
     <script type="text/html" id="toolbarDemo">
         <div class="layui-btn-container">
             <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="add">添加</button>
-            <button class="layui-btn layui-btn-sm" lay-event="delete" style="background-color: #FF0000;">删除</button>
         </div>
     </script>
     <!--每条数据的操作栏-->
@@ -235,11 +240,11 @@
             table.render({
                 elem: '#userAccountTable'
                 , toolbar: '#toolbarDemo'
-                , height: 550
+                , height: 500
                 , defaultToolbar: ['print', 'exports']
                 , method: 'POST'
                 , cols: [[
-                    {title: '<a class="" style="font-size: 20px; color:black;">用户账号表</a>',align: 'center', colspan: 9} //rowspan即纵向跨越的单元格数
+                    {title: '<a class="" style="font-size: 20px; color:black;">用户账号表</a>',align: 'center', colspan: 10} //rowspan即纵向跨越的单元格数
                 ],[ //表头
                     {checkbox: true, LAY_CHECKED: false}
                     , {field: 'id', title: 'id', width: 70, sort: true}
@@ -329,57 +334,6 @@
                             btn2: function (index, layero) {
                                 //return false 开启该代码可禁止点击该按钮关闭
                             }
-                        });
-                        break;
-                    case 'delete':
-                        // 拼接选中行的id
-                        var postData = '[';
-                        for (var value of checkStatus.data) {
-                            if (postData.length > 1) {
-                                postData += ',"' + value.id + '"';
-                            } else {
-                                postData += '"' + value.id + '"';
-                            }
-                        }
-                        postData += ']';
-                        // 判断是否选中待删除行
-                        if (postData.length === 2) {
-                            layer.open({
-                                title: "提示信息",
-                                content: "请选中需要删除的数据！"
-                            });
-                            return;
-                        }
-                        layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/stadiumBook/stadiumManagerDeleteByIdList.do";
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"idListJsonString":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口、刷新表格
-                                        layer.close(index);
-                                        table.reload('stadiumBookTable');
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                            layer.close(index);
                         });
                         break;
                 }
@@ -877,6 +831,25 @@
                         layer.close(index);
                     });
                 }
+            });
+
+            $('#searchUserButton').on('click', function () {
+                if ($('#usernameKey').val().length === 0) {
+                    layer.open({
+                        title: '提示信息',
+                        content: "请输入用户名关键字！"
+                    });
+                    return false;
+                }
+                var usernameKey = $('#usernameKey').val();
+                layui.table.reload('userAccountTable', {
+                    page: {
+                        curr: 1
+                    }
+                    ,where: {
+                        usernameKey: usernameKey
+                    }
+                });
             });
         }
 
