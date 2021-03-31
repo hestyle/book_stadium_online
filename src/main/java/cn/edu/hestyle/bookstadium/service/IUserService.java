@@ -95,4 +95,11 @@ public interface IUserService {
      * @return                      User数量
      */
     Integer getCount(String usernameKey);
+
+    /**
+     * systemManager修改user
+     * @param systemManagerId       systemManagerId
+     * @param user                  user
+     */
+    void systemManagerModify(Integer systemManagerId, User user);
 }

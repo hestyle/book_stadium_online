@@ -170,4 +170,22 @@ public class UserController extends BaseController {
         userService.register(user);
         return new ResponseResult<>(SUCCESS, user.getUsername() + " 添加成功！");
     }
+
+    @PostMapping("/systemManagerModify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerModify(@RequestParam(name = "userData") String userData, HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = null;
+        // 从userData读取user对象
+        try {
+            user = objectMapper.readValue(userData, User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 添加失败，数据格式错误！data = " + userData);
+            throw new RequestParamException("User 添加失败，数据格式错误！");
+        }
+        userService.systemManagerModify(systemManagerId, user);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }

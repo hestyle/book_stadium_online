@@ -1,6 +1,8 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.entity.User;
+import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.service.exception.*;
@@ -38,6 +40,8 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
 
     @Override
     public User login(String username, String password) throws LoginFailedException {
@@ -416,6 +420,61 @@ public class UserServiceImpl implements IUserService {
             throw new FindFailedException("操作失败，数据库发生未知异常！");
         }
         return count;
+    }
+
+    @Override
+    public void systemManagerModify(Integer systemManagerId, User user) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (user == null || user.getId() == null) {
+            logger.warn("User 修改失败，未指定需要修改的User！");
+            throw new ModifyFailedException("操作失败，未指定需要修改的User！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(user.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 修改失败，修改的user不存在！user = " + user);
+            throw new ModifyFailedException("操作失败，该用户不存在！");
+        }
+        String gender = user.getGender();
+        if (gender == null || (!USER_GENDER_MAN.equals(gender) && !USER_GENDER_WOMAN.equals(gender))) {
+            logger.info("User 修改失败，性别非法！user = " + user);
+            throw new ModifyFailedException("修改失败，性别非法！");
+        }
+        userModify.setGender(gender);
+        userModify.setAddress(user.getAddress());
+        String phoneNumber = user.getPhoneNumber();
+        if (phoneNumber != null) {
+            Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                logger.info("User 修改失败，电话号码非法！user = " + user);
+                throw new ModifyFailedException("修改失败，输入的电话号码非法！");
+            }
+        }
+        userModify.setPhoneNumber(user.getPhoneNumber());
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！userModify = " + userModify);
+            throw new ModifyFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！userModify = " + userModify);
     }
 
     /**
