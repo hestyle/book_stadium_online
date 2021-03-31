@@ -17,6 +17,13 @@ public interface ISportKnowledgeService {
     void add(Integer systemManagerId, SportKnowledge sportKnowledge);
 
     /**
+     * 修改sportKnowledge
+     * @param systemManagerId   systemManagerId
+     * @param sportKnowledge    sportKnowledge
+     */
+    void modify(Integer systemManagerId, SportKnowledge sportKnowledge);
+
+    /**
      * 通过sportKnowledgeId查找
      * @param sportKnowledgeId  sportKnowledgeId
      * @return                  SportKnowledge

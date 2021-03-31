@@ -8,6 +8,20 @@
         INSERT INTO `t_sport_knowledge`(`title`, `content`, `is_delete`, `created_time`, `created_user`)
         VALUES (#{title}, #{content}, #{isDelete}, #{createdTime}, #{createdUser})
     </insert>
+    <!--更新sportKnowledge-->
+    <!--void update(SportKnowledge sportKnowledge);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportKnowledge">
+        UPDATE `t_sport_knowledge` SET
+            `title` = #{title},
+            `content` = #{content},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id` = #{id}
+    </update>
     <!--通过sportKnowledgeId查找-->
     <!--SportKnowledge findById(Integer sportKnowledgeId);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SportKnowledge">

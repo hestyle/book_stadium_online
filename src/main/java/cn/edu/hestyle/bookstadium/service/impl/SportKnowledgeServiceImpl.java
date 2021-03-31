@@ -81,6 +81,60 @@ public class SportKnowledgeServiceImpl implements ISportKnowledgeService {
     }
 
     @Override
+    public void modify(Integer systemManagerId, SportKnowledge sportKnowledge) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new AddFailedException("添加失败，数据库发生未知异常!");
+        }
+        if (sportKnowledge == null || sportKnowledge.getId() == null) {
+            logger.warn("SportKnowledge 增加失败，未传入SportKnowledge参数！");
+            throw new AddFailedException("操作失败，未传入SportKnowledge参数！");
+        }
+        SportKnowledge sportKnowledgeModify = null;
+        try {
+            sportKnowledgeModify = sportKnowledgeMapper.findById(sportKnowledge.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 查询失败，数据库发生未知异常！sportKnowledgeId = " + sportKnowledge.getId());
+            throw new AddFailedException("操作失败，数据库发生未知异常!");
+        }
+        String title = sportKnowledge.getTitle();
+        if (title == null || title.length() == 0) {
+            logger.warn("SportKnowledge 修改失败，运动常识title为空！sportKnowledge = " + sportKnowledge);
+            throw new AddFailedException("操作失败，运动常识title不能为空！");
+        } else if (title.length() > SPORT_KNOWLEDGE_TITLE_MAX_LENGTH) {
+            logger.warn("SportKnowledge 修改失败，运动常识title过长！sportKnowledge = " + sportKnowledge);
+            throw new AddFailedException("操作失败，运动常识title超过了" + SPORT_KNOWLEDGE_TITLE_MAX_LENGTH + "个字符！");
+        } else {
+            sportKnowledgeModify.setTitle(title);
+        }
+        String content = sportKnowledge.getContent();
+        if (content == null || content.length() == 0) {
+            logger.warn("SportKnowledge 修改失败，运动常识content为空！sportKnowledge = " + sportKnowledge);
+            throw new AddFailedException("操作失败，运动常识content不能为空！");
+        } else if (content.length() > SPORT_KNOWLEDGE_CONTENT_MAX_LENGTH) {
+            logger.warn("SportKnowledge 修改失败，运动常识content过长！sportKnowledge = " + sportKnowledge);
+            throw new AddFailedException("操作失败，运动常识content超过了" + SPORT_KNOWLEDGE_CONTENT_MAX_LENGTH + "个字符！");
+        } else {
+            sportKnowledgeModify.setContent(content);
+        }
+        sportKnowledgeModify.setModifiedUser(systemManager.getUsername());
+        sportKnowledgeModify.setModifiedTime(new Date());
+        try {
+            sportKnowledgeMapper.update(sportKnowledgeModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 修改失败，数据库发生未知异常！sportKnowledgeModify = " + sportKnowledgeModify);
+            throw new AddFailedException("操作失败，数据库发生未知异常!");
+        }
+        logger.warn("SportKnowledge 修改成功！sportKnowledgeModify = " + sportKnowledgeModify);
+    }
+
+    @Override
     public SportKnowledge findById(Integer sportKnowledgeId) {
         if (sportKnowledgeId == null) {
             logger.warn("SportKnowledge 查找失败，未传入sportKnowledgeId参数！");

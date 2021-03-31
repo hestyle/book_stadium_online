@@ -19,6 +19,12 @@ public interface SportKnowledgeMapper {
     void add(SportKnowledge sportKnowledge);
 
     /**
+     * 更新sportKnowledge
+     * @param sportKnowledge    sportKnowledge
+     */
+    void update(SportKnowledge sportKnowledge);
+
+    /**
      * 通过sportKnowledgeId查找
      * @param sportKnowledgeId  sportKnowledgeId
      * @return                  SportKnowledge

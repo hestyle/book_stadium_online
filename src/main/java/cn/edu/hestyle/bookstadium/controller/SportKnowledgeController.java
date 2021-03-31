@@ -49,6 +49,24 @@ public class SportKnowledgeController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "添加成功！");
     }
 
+    @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleModify(@RequestParam(name = "sportKnowledgeData") String sportKnowledgeData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        SportKnowledge sportKnowledge = null;
+        try {
+            sportKnowledge = objectMapper.readValue(sportKnowledgeData, SportKnowledge.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 修改失败，数据格式错误！sportKnowledgeData = " + sportKnowledgeData);
+            throw new RequestException("SportKnowledge 修改失败，数据格式错误！");
+        }
+        sportKnowledgeService.modify(systemManagerId, sportKnowledge);
+        return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
     @PostMapping("/findById.do")
     public ResponseResult<SportKnowledge> handleFindById(@RequestParam(value = "sportKnowledgeId") Integer sportKnowledgeId, HttpSession session) {
         SportKnowledge sportKnowledge = sportKnowledgeService.findById(sportKnowledgeId);
