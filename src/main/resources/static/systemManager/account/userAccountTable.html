@@ -449,34 +449,15 @@
                         layer.close(index);
                     });
                 } else if (layEvent === 'delete') {
-                    if (data.bookState === 1) {
-                        layer.open({
-                            title: "提示信息",
-                            content: "删除失败，该预约正在进行，无法进行删除操作！"
-                        });
-                        return false;
-                    }
-                    if (data.bookState > 1 && data.nowBookCount > 0) {
-                        var endTime = new Date(Date.parse(data.endTime.replace(/-/g, "/")));
-                        var nowTime = new Date();
-                        if (endTime > nowTime) {
-                            layer.open({
-                                title: "提示信息",
-                                content: "删除失败，该预约有用户已预约，且时间段的终点时刻还未到达，无法进行删除操作！"
-                            });
-                            return false;
-                        }
-                    }
-                    layer.confirm('确定删除该场馆预约？<label style="display:block; color: red;">删除后无法恢复！</label>', function(index){
-                        var url ="/book_stadium_online/stadiumBook/stadiumManagerModify.do";
-                        var postData = '{"id":'+ data.id + ',"isDelete":' + 1 + '}';
+                    layer.confirm('确定删除用户账号 ' + data.username + '？<label style="display:block; color: red;">删除后该用户账号将无法登录，且删除操作无法撤销！</label>', function(index){
+                        var url ="/book_stadium_online/user/systemManagerDeleteById.do";
                         $.ajax({
                             "url" : url,
-                            "data" : {"stadiumBookModifyData":postData},
+                            "data" : {"userId":data.id},
                             "type" : "POST",
                             "dataType" : "json",
                             "beforeSend": function (request) {
-                                request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                                request.setRequestHeader("token", $.cookie("systemManagerToken"))
                             },
                             "success" : function (json) {
                                 layer.open({
@@ -484,15 +465,15 @@
                                     content: json.message
                                 });
                                 if (json.code === 200) {
-                                    // 删除了预约，则刷新整个表格
-                                    layui.table.reload('stadiumBookTable');
+                                    // 刷新整个表格
+                                    layui.table.reload('userAccountTable');
                                 }
                             },
                             "error" : function () {
                                 // 弹出中间提示框
                                 layer.open({
                                     title: "提示信息",
-                                    content: "删除失败，出现未知异常！"
+                                    content: "操作失败，出现未知异常！"
                                 });
                             }
                         });
