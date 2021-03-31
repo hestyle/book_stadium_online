@@ -3,6 +3,8 @@ package cn.edu.hestyle.bookstadium.service;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 
+import java.util.List;
+
 /**
  * @author hestyle
  * @projectName book_stadium
@@ -79,4 +81,54 @@ public interface IUserService {
      * @return      Stadium
      */
     User systemFindById(Integer id) throws FindFailedException;
+
+    /**
+     * systemManager分页查询User
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List User
+     */
+    List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey);
+
+    /**
+     * 获取User数量
+     * @return                      User数量
+     */
+    Integer getCount(String usernameKey);
+
+    /**
+     * systemManager修改user
+     * @param systemManagerId       systemManagerId
+     * @param user                  user
+     */
+    void systemManagerModify(Integer systemManagerId, User user);
+
+    /**
+     * systemManager重置user密码
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     * @param newPassword           newPassword
+     */
+    void systemManagerResetPassword(Integer systemManagerId, Integer userId, String newPassword);
+
+    /**
+     * systemManager将user拉黑
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     */
+    void systemManagerAddToBlack(Integer systemManagerId, Integer userId);
+
+    /**
+     * systemManager解除user拉黑状态
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     */
+    void systemManagerRemoveFromBlack(Integer systemManagerId, Integer userId);
+
+    /**
+     * systemManager通过userId删除user
+     * @param systemManagerId       systemManagerId
+     * @param userId                userId
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer userId);
 }

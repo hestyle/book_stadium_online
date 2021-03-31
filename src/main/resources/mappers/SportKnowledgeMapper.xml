@@ -2,6 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.SportKnowledgeMapper">
+    <!--添加SportKnowledge-->
+    <!--void add(SportKnowledge sportKnowledge);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.SportKnowledge" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_sport_knowledge`(`title`, `content`, `is_delete`, `created_time`, `created_user`)
+        VALUES (#{title}, #{content}, #{isDelete}, #{createdTime}, #{createdUser})
+    </insert>
+    <!--更新sportKnowledge-->
+    <!--void update(SportKnowledge sportKnowledge);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.SportKnowledge">
+        UPDATE `t_sport_knowledge` SET
+            `title` = #{title},
+            `content` = #{content},
+            `is_delete` = #{isDelete},
+            `created_user` = #{createdUser},
+            `created_time` = #{createdTime},
+            `modified_user` = #{modifiedUser},
+            `modified_time` = #{modifiedTime}
+        WHERE
+            `id` = #{id}
+    </update>
     <!--通过sportKnowledgeId查找-->
     <!--SportKnowledge findById(Integer sportKnowledgeId);-->
     <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.SportKnowledge">
@@ -39,5 +59,15 @@
             `created_time` ASC
         LIMIT
             #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取sportKnowledge的数量-->
+    <!--Integer getCount();-->
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_sport_knowledge`
+        WHERE
+            `is_delete` = 0
     </select>
 </mapper>

@@ -1,6 +1,7 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IUserService;
@@ -140,5 +141,88 @@ public class UserController extends BaseController {
         logger.warn("User userId = " + userId + "上传文件 url = " + filePath + "成功！");
         userService.modifyAvatarPath(userId, filePath);
         return new ResponseResult<String>(SUCCESS, "头像修改成功!", filePath);
+    }
+
+    @PostMapping("/systemManagerFindByPage.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<List<User>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                    @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                    @RequestParam(name = "usernameKey", defaultValue = "") String usernameKey,
+                                                                    HttpSession session) {
+        List<User> userList = userService.systemManagerFindByPage(pageIndex, pageSize, usernameKey);
+        Integer count = userService.getCount(usernameKey);
+        return new ResponseResult<List<User>>(SUCCESS, count, userList, "查询成功!");
+    }
+
+    @PostMapping("/systemManagerAdd.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAdd(@RequestParam(name = "userData") String userData, HttpSession session) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = null;
+        // 从userData读取user对象
+        try {
+            user = objectMapper.readValue(userData, User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 添加失败，数据格式错误！data = " + userData);
+            throw new RequestParamException("User 添加失败，数据格式错误！");
+        }
+        userService.register(user);
+        return new ResponseResult<>(SUCCESS, user.getUsername() + " 添加成功！");
+    }
+
+    @PostMapping("/systemManagerModify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerModify(@RequestParam(name = "userData") String userData, HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        User user = null;
+        // 从userData读取user对象
+        try {
+            user = objectMapper.readValue(userData, User.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 添加失败，数据格式错误！data = " + userData);
+            throw new RequestParamException("User 添加失败，数据格式错误！");
+        }
+        userService.systemManagerModify(systemManagerId, user);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerResetPassword.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerResetPassword(@RequestParam(name = "userId") Integer userId,
+                                                                 @RequestParam(name = "newPassword") String newPassword,
+                                                                 HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerResetPassword(systemManagerId, userId, newPassword);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerAddToBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAddToBlack(@RequestParam(name = "userId") Integer userId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerAddToBlack(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerRemoveFromBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerRemoveFromBlack(@RequestParam(name = "userId") Integer userId,
+                                                                   HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerRemoveFromBlack(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "userId") Integer userId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        userService.systemManagerDeleteById(systemManagerId, userId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
     }
 }

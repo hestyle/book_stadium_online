@@ -13,6 +13,18 @@ import java.util.List;
 @Mapper
 public interface SportKnowledgeMapper {
     /**
+     * 添加SportKnowledge
+     * @param sportKnowledge    sportKnowledge
+     */
+    void add(SportKnowledge sportKnowledge);
+
+    /**
+     * 更新sportKnowledge
+     * @param sportKnowledge    sportKnowledge
+     */
+    void update(SportKnowledge sportKnowledge);
+
+    /**
      * 通过sportKnowledgeId查找
      * @param sportKnowledgeId  sportKnowledgeId
      * @return                  SportKnowledge
@@ -26,4 +38,10 @@ public interface SportKnowledgeMapper {
      * @return              List SportKnowledge
      */
     List<SportKnowledge> findByPage(Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取sportKnowledge的数量
+     * @return              sportKnowledge的数量
+     */
+    Integer getCount();
 }

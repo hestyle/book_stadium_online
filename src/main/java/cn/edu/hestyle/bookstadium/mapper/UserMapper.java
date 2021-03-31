@@ -3,6 +3,8 @@ package cn.edu.hestyle.bookstadium.mapper;
 import cn.edu.hestyle.bookstadium.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * @author hestyle
  * @projectName book_stadium
@@ -36,4 +38,19 @@ public interface UserMapper {
      * @return          User
      */
     User findByUsername(String username);
+
+    /**
+     * 分页查询user(未删除的)
+     * @param beginIndex    beginIndex
+     * @param pageSize      pageSize
+     * @param usernameKey   用户名关键字（可选）
+     * @return              List User
+     */
+    List<User> findByPage(Integer beginIndex, Integer pageSize, String usernameKey);
+
+    /**
+     * 获取User数量
+     * @return              user数量
+     */
+    Integer getCount(String usernameKey);
 }

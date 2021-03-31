@@ -1,8 +1,13 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.SportKnowledge;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
+import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.ISportKnowledgeService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +32,60 @@ public class SportKnowledgeController extends BaseController {
     @Autowired
     private ISportKnowledgeService sportKnowledgeService;
 
+    @PostMapping("/add.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleAdd(@RequestParam(name = "sportKnowledgeData") String sportKnowledgeData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        SportKnowledge sportKnowledge = null;
+        try {
+            sportKnowledge = objectMapper.readValue(sportKnowledgeData, SportKnowledge.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 添加失败，数据格式错误！data = " + sportKnowledgeData);
+            throw new RequestException("SportKnowledge 添加失败，数据格式错误！");
+        }
+        sportKnowledgeService.add(systemManagerId, sportKnowledge);
+        return new ResponseResult<Void>(SUCCESS, "添加成功！");
+    }
+
+    @PostMapping("/modify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleModify(@RequestParam(name = "sportKnowledgeData") String sportKnowledgeData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        SportKnowledge sportKnowledge = null;
+        try {
+            sportKnowledge = objectMapper.readValue(sportKnowledgeData, SportKnowledge.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SportKnowledge 修改失败，数据格式错误！sportKnowledgeData = " + sportKnowledgeData);
+            throw new RequestException("SportKnowledge 修改失败，数据格式错误！");
+        }
+        sportKnowledgeService.modify(systemManagerId, sportKnowledge);
+        return new ResponseResult<Void>(SUCCESS, "修改成功！");
+    }
+
+    @PostMapping("/deleteByIdList.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleDeleteByIdList(@RequestParam(name = "sportKnowledgeIdListData") String sportKnowledgeIdListData, HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<Integer> sportKnowledgeIdList = null;
+        try {
+            sportKnowledgeIdList = objectMapper.readValue(sportKnowledgeIdListData, new TypeReference<List<Integer>>() {});
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Banner 删除失败，数据格式错误！bannerIdListData = " + sportKnowledgeIdListData);
+            throw new RequestException("删除失败，数据格式错误！");
+        }
+        sportKnowledgeService.deleteByIdList(systemManagerId, sportKnowledgeIdList);
+        return new ResponseResult<Void>(SUCCESS, "删除成功！");
+    }
+
     @PostMapping("/findById.do")
     public ResponseResult<SportKnowledge> handleFindById(@RequestParam(value = "sportKnowledgeId") Integer sportKnowledgeId, HttpSession session) {
         SportKnowledge sportKnowledge = sportKnowledgeService.findById(sportKnowledgeId);
@@ -38,6 +97,7 @@ public class SportKnowledgeController extends BaseController {
                                                                  @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                                                                  HttpSession session) {
         List<SportKnowledge> sportKnowledgeList = sportKnowledgeService.findByPage(pageIndex, pageSize);
-        return new ResponseResult<List<SportKnowledge>>(SUCCESS, "查询成功！", sportKnowledgeList);
+        Integer count = sportKnowledgeService.getCount();
+        return new ResponseResult<List<SportKnowledge>>(SUCCESS, count, sportKnowledgeList, "查询成功！");
     }
 }

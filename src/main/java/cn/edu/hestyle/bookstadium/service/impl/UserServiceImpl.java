@@ -1,6 +1,8 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.entity.User;
+import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import cn.edu.hestyle.bookstadium.service.exception.*;
@@ -14,6 +16,7 @@ import org.springframework.util.ResourceUtils;
 import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +28,8 @@ import java.util.regex.Pattern;
  */
 @Service
 public class UserServiceImpl implements IUserService {
+    /** 密码的最小长度 */
+    private static final Integer USER_PASSWORD_MIN_LENGTH = 5;
     /** 密码的最大长度 */
     private static final Integer USER_PASSWORD_MAX_LENGTH = 20;
     /** 性别：男 */
@@ -37,6 +42,8 @@ public class UserServiceImpl implements IUserService {
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
 
     @Override
     public User login(String username, String password) throws LoginFailedException {
@@ -57,6 +64,16 @@ public class UserServiceImpl implements IUserService {
         if (user == null) {
             logger.info("User username=" + username + ", password=" + password + " 登录失败，用户名 " + username + " 未注册！");
             throw new LoginFailedException("登录失败，用户名 " + username + " 未注册！");
+        }
+        // 判断账号是否被删除
+        if (1 == user.getIsDelete()) {
+            logger.info("User 登录失败，该用户已被管理员删除！user = " + user);
+            throw new LoginFailedException("登录失败，您的账号已被删除，请联系系统管理员！");
+        }
+        // 判断账号是否拉黑
+        if (2 == user.getIsDelete()) {
+            logger.info("User 登录失败，该用户已被管理员拉黑！user = " + user);
+            throw new LoginFailedException("登录失败，您的账号已被拉黑，请联系系统管理员！");
         }
         // 判断密码是否匹配
         String encryptedPassword = EncryptUtil.encryptPassword(password, user.getSaltValue());
@@ -373,6 +390,277 @@ public class UserServiceImpl implements IUserService {
         }
         logger.warn("User 查询成功！user = " + user);
         return user;
+    }
+
+    @Override
+    public List<User> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey) {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
+        List<User> userList = null;
+        try {
+            userList = userMapper.findByPage((pageIndex - 1) * pageSize, pageSize, usernameKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return userList;
+    }
+
+    @Override
+    public Integer getCount(String usernameKey) {
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
+        Integer count = null;
+        try {
+            count = userMapper.getCount(usernameKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return count;
+    }
+
+    @Override
+    public void systemManagerModify(Integer systemManagerId, User user) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (user == null || user.getId() == null) {
+            logger.warn("User 修改失败，未指定需要修改的User！");
+            throw new ModifyFailedException("操作失败，未指定需要修改的User！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(user.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 修改失败，修改的user不存在！user = " + user);
+            throw new ModifyFailedException("操作失败，该用户不存在！");
+        }
+        String gender = user.getGender();
+        if (gender == null || (!USER_GENDER_MAN.equals(gender) && !USER_GENDER_WOMAN.equals(gender))) {
+            logger.info("User 修改失败，性别非法！user = " + user);
+            throw new ModifyFailedException("修改失败，性别非法！");
+        }
+        userModify.setGender(gender);
+        userModify.setAddress(user.getAddress());
+        String phoneNumber = user.getPhoneNumber();
+        if (phoneNumber != null) {
+            Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                logger.info("User 修改失败，电话号码非法！user = " + user);
+                throw new ModifyFailedException("修改失败，输入的电话号码非法！");
+            }
+        }
+        userModify.setPhoneNumber(user.getPhoneNumber());
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 修改失败，数据库发生未知异常！userModify = " + userModify);
+            throw new ModifyFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 修改成功！userModify = " + userModify);
+    }
+
+    @Override
+    public void systemManagerResetPassword(Integer systemManagerId, Integer userId, String newPassword) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 密码重置失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要重置密码的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 密码重置失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (newPassword == null || newPassword.length() < USER_PASSWORD_MIN_LENGTH || newPassword.length() > USER_PASSWORD_MAX_LENGTH) {
+            logger.warn("User 密码重置失败，新密码长度无效！不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
+            throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！");
+        }
+        userModify.setPassword(EncryptUtil.encryptPassword(newPassword, userModify.getSaltValue()));
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
+    }
+
+    @Override
+    public void systemManagerAddToBlack(Integer systemManagerId, Integer userId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 拉黑失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要拉黑的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 拉黑失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (userModify.getIsDelete() != null && userModify.getIsDelete().equals(2)) {
+            logger.warn("User 拉黑失败，该user已处于黑名单状态！userModify = " + userModify);
+            throw new FindFailedException("操作失败，该用户已处于黑名单状态！");
+        }
+        // 拉黑并清除token
+        userModify.setIsDelete(2);
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        userModify.setToken(null);
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
+    }
+
+    @Override
+    public void systemManagerRemoveFromBlack(Integer systemManagerId, Integer userId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 解除拉黑失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要解除拉黑的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 解除拉黑失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (userModify.getIsDelete() == null || !userModify.getIsDelete().equals(2)) {
+            logger.warn("User 解除拉黑失败，该user未处于黑名单状态！userModify = " + userModify);
+            throw new FindFailedException("操作失败，该用户未处于黑名单状态！");
+        }
+        // 解除拉黑并清除token
+        userModify.setIsDelete(0);
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        userModify.setToken(null);
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
+    }
+
+    @Override
+    public void systemManagerDeleteById(Integer systemManagerId, Integer userId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userId == null) {
+            logger.warn("User 删除失败，未传入userId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要删除的用户账号！");
+        }
+        User userModify = null;
+        try {
+            userModify = userMapper.findById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (userModify == null) {
+            logger.warn("User 删除失败，该user不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        // 删除并清除token
+        userModify.setIsDelete(1);
+        userModify.setModifiedUser(systemManager.getUsername());
+        userModify.setModifiedTime(new Date());
+        userModify.setToken(null);
+        try {
+            userMapper.update(userModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 更新失败，数据库发生未知异常！userModify = " + userModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！userModify = " + userModify);
     }
 
     /**

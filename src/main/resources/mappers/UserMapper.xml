@@ -67,4 +67,44 @@
         WHERE
             `username`=#{username}
     </select>
+    <!--分页查询user-->
+    <!--List<User> findByPage(Integer beginIndex, Integer pageIndex, String usernameKey);-->
+    <select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.User">
+        SELECT
+            `id` as `id`,
+            `username` as `username`,
+            `avatar_path` as `avatarPath`,
+            `gender` as `gender`,
+            `address` as `address`,
+            `phone_number` as `phoneNumber`,
+            `credit_score` as `creditScore`,
+            `is_authenticate` as `isAuthenticate`,
+            `is_delete` as `isDelete`,
+            `created_user` as `createdUser`,
+            `created_time` as `createdTime`,
+            `modified_user` as `modifiedUser`,
+            `modified_time` as `modifiedTime`
+        FROM
+            `t_user`
+        WHERE
+            `is_delete` != 1
+        <if test="usernameKey != null and usernameKey.length != 0">
+            AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+        </if>
+        LIMIT
+            #{beginIndex}, #{pageSize}
+    </select>
+    <!--获取User数量-->
+    <!--Integer getCount(String usernameKey);-->
+    <select id="getCount" resultType="java.lang.Integer">
+        SELECT
+            COUNT(`id`)
+        FROM
+            `t_user`
+        WHERE
+            `is_delete` != 1
+        <if test="usernameKey != null and usernameKey.length != 0">
+            AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+        </if>
+    </select>
 </mapper>
