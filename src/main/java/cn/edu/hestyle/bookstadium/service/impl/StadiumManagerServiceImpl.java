@@ -324,7 +324,7 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
     }
 
     @Override
-    public List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize) {
+    public List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey) {
         // 检查页码是否合法
         if (pageIndex < 1) {
             throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
@@ -333,9 +333,13 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         if (pageSize < 1) {
             throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
         }
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         List<StadiumManager> stadiumManagerList = null;
         try {
-            stadiumManagerList = stadiumManagerMapper.findByPage((pageIndex - 1) * pageSize, pageSize);
+            stadiumManagerList = stadiumManagerMapper.findByPage((pageIndex - 1) * pageSize, pageSize, usernameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("User 查询失败，数据库发生未知异常！");
@@ -345,10 +349,14 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
     }
 
     @Override
-    public Integer getCount() {
+    public Integer getCount(String usernameKey) {
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         Integer count = null;
         try {
-            count = stadiumManagerMapper.getCount();
+            count = stadiumManagerMapper.getCount(usernameKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("User 查询失败，数据库发生未知异常！");

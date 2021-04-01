@@ -45,11 +45,11 @@ public interface StadiumManagerMapper {
      * @param pageSize          pageSize
      * @return                  List StadiumManager
      */
-    List<StadiumManager> findByPage(Integer beginIndex, Integer pageSize);
+    List<StadiumManager> findByPage(Integer beginIndex, Integer pageSize, String usernameKey);
 
     /**
      * 获取StadiumManager的数量(未删除)
      * @return                  StadiumManager的数量
      */
-    Integer getCount();
+    Integer getCount(String usernameKey);
 }

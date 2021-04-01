@@ -67,7 +67,7 @@
 			`id` = #{id}
 	</update>
 	<!--分页查找StadiumManager(未删除)-->
-	<!--List<StadiumManager> findByPage(Integer beginIndex, Integer pageSize);-->
+	<!--List<StadiumManager> findByPage(Integer beginIndex, Integer pageSize, String usernameKey);-->
 	<select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
 		SELECT
 		`id` as `id`,
@@ -87,11 +87,14 @@
 			`t_stadium_manager`
 		WHERE
 			`is_delete` != 1
+		<if test="usernameKey != null and usernameKey.length != 0">
+			AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+		</if>
 		LIMIT
 			#{beginIndex}, #{pageSize}
 	</select>
 	<!--获取StadiumManager的数量(未删除)-->
-	<!--Integer getCount();-->
+	<!--Integer getCount(String usernameKey);-->
 	<select id="getCount" resultType="java.lang.Integer">
 		SELECT
 			COUNT(`id`)
@@ -99,5 +102,8 @@
 			`t_stadium_manager`
 		WHERE
 			`is_delete` != 1
+		<if test="usernameKey != null and usernameKey.length != 0">
+			AND `username` LIKE CONCAT('%', #{usernameKey}, '%')
+		</if>
 	</select>
 </mapper>

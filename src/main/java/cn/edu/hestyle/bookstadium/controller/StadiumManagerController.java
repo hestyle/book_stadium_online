@@ -129,9 +129,10 @@ public class StadiumManagerController extends BaseController {
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
     public ResponseResult<List<StadiumManager>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                               @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                              @RequestParam(name = "usernameKey", defaultValue = "") String usernameKey,
                                                                               HttpSession session) {
-        List<StadiumManager> stadiumManagerList = stadiumManagerService.systemManagerFindByPage(pageIndex, pageSize);
-        Integer count = stadiumManagerService.getCount();
+        List<StadiumManager> stadiumManagerList = stadiumManagerService.systemManagerFindByPage(pageIndex, pageSize, usernameKey);
+        Integer count = stadiumManagerService.getCount(usernameKey);
         return new ResponseResult<List<StadiumManager>>(SUCCESS, count, stadiumManagerList, "查询成功!");
     }
 }

@@ -74,11 +74,11 @@ public interface IStadiumManagerService {
      * @param pageSize              pageSize
      * @return                      List StadiumManager
      */
-    List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize);
+    List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey);
 
     /**
      * 获取StadiumManager数量
      * @return                      User数量
      */
-    Integer getCount();
+    Integer getCount(String usernameKey);
 }
