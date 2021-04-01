@@ -110,4 +110,11 @@ public interface IStadiumManagerService {
      * @param stadiumManagerId      stadiumManagerId
      */
     void systemManagerRemoveFromBlack(Integer systemManagerId, Integer stadiumManagerId);
+
+    /**
+     * systemManager通过stadiumManagerId删除stadiumManager
+     * @param systemManagerId       systemManagerId
+     * @param stadiumManagerId      stadiumManagerId
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer stadiumManagerId);
 }

@@ -565,6 +565,47 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         logger.warn("StadiumManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
     }
 
+    @Override
+    public void systemManagerDeleteById(Integer systemManagerId, Integer stadiumManagerId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("SystemManager 删除失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要删除的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("SystemManager 删除失败，该SystemManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个SystemManager！");
+        }
+        // 删除并清除token
+        stadiumManagerModify.setIsDelete(1);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        stadiumManagerModify.setToken(null);
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
     /**
      * 检查imagePaths的合法性
      * @param avatarPath            avatarPath
