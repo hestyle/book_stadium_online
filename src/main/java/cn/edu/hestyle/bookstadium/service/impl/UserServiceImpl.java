@@ -519,7 +519,9 @@ public class UserServiceImpl implements IUserService {
             logger.warn("User 密码重置失败，新密码长度无效！不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
             throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + USER_PASSWORD_MIN_LENGTH + ", " + USER_PASSWORD_MAX_LENGTH + "]区间！");
         }
+        // systemManager重置密码后清除token
         userModify.setPassword(EncryptUtil.encryptPassword(newPassword, userModify.getSaltValue()));
+        userModify.setToken(null);
         userModify.setModifiedUser(systemManager.getUsername());
         userModify.setModifiedTime(new Date());
         try {
