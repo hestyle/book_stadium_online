@@ -25,7 +25,6 @@
     <script type="text/html" id="toolbarDemo">
         <div class="layui-btn-container">
             <button class="layui-btn layui-btn-sm" lay-event="add">添加</button>
-            <button class="layui-btn layui-btn-sm" lay-event="delete">删除</button>
         </div>
     </script>
     <!--每条数据的操作栏-->
@@ -423,57 +422,6 @@
                             btn2: function (index, layero) {
                                 //return false 开启该代码可禁止点击该按钮关闭
                             }
-                        });
-                        break;
-                    case 'delete':
-                        // 拼接选中行的username
-                        var postData = '[';
-                        for (var value of checkStatus.data) {
-                            if (postData.length > 1) {
-                                postData += ',"' + value.id + '"';
-                            } else {
-                                postData += '"' + value.id + '"';
-                            }
-                        }
-                        postData += ']';
-                        // 判断是否选中待删除行
-                        if (postData.length === 2) {
-                            layer.open({
-                                title: "提示信息",
-                                content: "请选中需要删除的数据！"
-                            });
-                            return;
-                        }
-                        layer.confirm('删除选中行？', function (index) {
-                            var url ="/book_stadium_online/stadium/stadiumManagerDeleteByIdList.do";
-                            $.ajax({
-                                "url" : url,
-                                "data" : {"idListJsonString":postData},
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        // 更新成功，则关闭重置窗口、刷新表格
-                                        layer.close(index);
-                                        table.reload('stadiumTable');
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
-                                    });
-                                }
-                            });
-                            layer.close(index);
                         });
                         break;
                 }

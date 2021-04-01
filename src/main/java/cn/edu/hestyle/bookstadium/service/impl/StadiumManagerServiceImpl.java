@@ -1,7 +1,9 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
+import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
@@ -15,6 +17,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +30,19 @@ import java.util.regex.Pattern;
  */
 @Service
 public class StadiumManagerServiceImpl implements IStadiumManagerService {
+    /** 密码的最小长度 */
+    private static final Integer STADIUM_MANAGER_PASSWORD_MIN_LENGTH = 5;
+    /** 密码的最大长度 */
+    private static final Integer STADIUM_MANAGER_PASSWORD_MAX_LENGTH = 20;
+    /** 性别：男 */
+    private static final String STADIUM_MANAGER_GENDER_MAN = "男";
+    /** 性别：女 */
+    private static final String STADIUM_MANAGER_GENDER_WOMAN = "女";
 
     private static final Logger logger = LoggerFactory.getLogger(StadiumManagerServiceImpl.class);
 
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
     @Resource
     private StadiumManagerMapper stadiumManagerMapper;
 
@@ -320,6 +333,279 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new ModifyFailedException("密码更新保存失败，数据库发生未知异常！");
         }
         logger.info("StadiumManager 账号密码更改保存成功！data = " + stadiumManager);
+    }
+
+    @Override
+    public List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize, String usernameKey) {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
+        List<StadiumManager> stadiumManagerList = null;
+        try {
+            stadiumManagerList = stadiumManagerMapper.findByPage((pageIndex - 1) * pageSize, pageSize, usernameKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return stadiumManagerList;
+    }
+
+    @Override
+    public Integer getCount(String usernameKey) {
+        // 去除usernameKey中的特殊字符
+        if (usernameKey != null && usernameKey.length() != 0) {
+            usernameKey = usernameKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
+        Integer count = null;
+        try {
+            count = stadiumManagerMapper.getCount(usernameKey);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return count;
+    }
+
+    @Override
+    public void systemManagerModify(Integer systemManagerId, StadiumManager stadiumManager) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null || stadiumManager.getId() == null) {
+            logger.warn("StadiumManager 修改失败，未指定需要修改的User！");
+            throw new ModifyFailedException("操作失败，未指定需要修改的StadiumManager！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManager.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("StadiumManager 修改失败，修改的StadiumManager不存在！stadiumManager = " + stadiumManager);
+            throw new ModifyFailedException("操作失败，该用户不存在！");
+        }
+        String gender = stadiumManager.getGender();
+        if (gender == null || (!STADIUM_MANAGER_GENDER_MAN.equals(gender) && !STADIUM_MANAGER_GENDER_WOMAN.equals(gender))) {
+            logger.info("StadiumManager 修改失败，性别非法！stadiumManager = " + stadiumManager);
+            throw new ModifyFailedException("修改失败，性别非法！");
+        }
+        stadiumManagerModify.setGender(gender);
+        stadiumManagerModify.setAddress(stadiumManager.getAddress());
+        String phoneNumber = stadiumManager.getPhoneNumber();
+        if (phoneNumber != null) {
+            Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                logger.info("StadiumManager 修改失败，电话号码非法！stadiumManager = " + stadiumManager);
+                throw new ModifyFailedException("修改失败，输入的电话号码非法！");
+            }
+        }
+        stadiumManagerModify.setPhoneNumber(stadiumManager.getPhoneNumber());
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 修改失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new ModifyFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 修改成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
+    @Override
+    public void systemManagerResetPassword(Integer systemManagerId, Integer stadiumManagerId, String newPassword) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("SystemManager 密码重置失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要重置密码的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("SystemManager 密码重置失败，该stadiumManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个stadiumManager账号！");
+        }
+        if (newPassword == null || newPassword.length() < STADIUM_MANAGER_PASSWORD_MIN_LENGTH || newPassword.length() > STADIUM_MANAGER_PASSWORD_MAX_LENGTH) {
+            logger.warn("SystemManager 密码重置失败，新密码长度无效！不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
+            throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！");
+        }
+        // systemManager重置密码后清除token
+        stadiumManagerModify.setPassword(EncryptUtil.encryptPassword(newPassword, stadiumManagerModify.getSaltValue()));
+        stadiumManagerModify.setToken(null);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("SystemManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
+    @Override
+    public void systemManagerAddToBlack(Integer systemManagerId, Integer stadiumManagerId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("StadiumManager 拉黑失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要拉黑的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("StadiumManager 拉黑失败，该stadiumManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (stadiumManagerModify.getIsDelete() != null && stadiumManagerModify.getIsDelete().equals(2)) {
+            logger.warn("StadiumManager 拉黑失败，该stadiumManager已处于黑名单状态！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，该stadiumManager已处于黑名单状态！");
+        }
+        // 拉黑并清除token
+        stadiumManagerModify.setIsDelete(2);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        stadiumManagerModify.setToken(null);
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
+    @Override
+    public void systemManagerRemoveFromBlack(Integer systemManagerId, Integer stadiumManagerId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("StadiumManager 解除拉黑失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要解除拉黑的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("StadiumManager 解除拉黑失败，该stadiumManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (stadiumManagerModify.getIsDelete() == null || !stadiumManagerModify.getIsDelete().equals(2)) {
+            logger.warn("StadiumManager 解除拉黑失败，该stadiumManager并未处于黑名单状态！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，该stadiumManager并未处于黑名单状态！");
+        }
+        // 解除拉黑并清除token
+        stadiumManagerModify.setIsDelete(0);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        stadiumManagerModify.setToken(null);
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
+    @Override
+    public void systemManagerDeleteById(Integer systemManagerId, Integer stadiumManagerId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("SystemManager 删除失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要删除的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("SystemManager 删除失败，该SystemManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个SystemManager！");
+        }
+        // 删除并清除token
+        stadiumManagerModify.setIsDelete(1);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        stadiumManagerModify.setToken(null);
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("User 更新成功！stadiumManagerModify = " + stadiumManagerModify);
     }
 
     /**

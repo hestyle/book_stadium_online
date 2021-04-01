@@ -61,6 +61,6 @@
         FROM
             `t_stadium_comment`
         WHERE
-            `stadium_id` = #{stadiumId}
+            `stadium_id` = #{stadiumId} AND `is_delete` = 0
     </select>
 </mapper>

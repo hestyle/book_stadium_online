@@ -53,4 +53,12 @@ public interface IStadiumCommentService {
      * @return                  Stadium的评论数量
      */
     Integer getCountByStadiumId(Integer stadiumId) throws FindFailedException;
+
+    /**
+     * systemManager通过stadiumCommentId删除
+     * @param systemManagerId   systemManagerId
+     * @param stadiumCommentId  stadiumCommentId
+     * @param deleteReason      删除原因
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer stadiumCommentId, String deleteReason);
 }

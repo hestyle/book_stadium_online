@@ -2,11 +2,9 @@ package cn.edu.hestyle.bookstadium.service;
 
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
-import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -73,14 +71,6 @@ public interface IStadiumService {
     void stadiumManagerModify(Integer stadiumManagerId, Stadium stadium) throws ModifyFailedException;
 
     /**
-     * 删除stadium（只能删除自己的）
-     * @param stadiumManagerId          stadiumManagerId
-     * @param stadiumIds                id list
-     * @throws DeleteFailedException    删除异常
-     */
-    void stadiumManagerDeleteByIds(Integer stadiumManagerId, List<Integer> stadiumIds) throws DeleteFailedException;
-
-    /**
      * Stadium分页查询
      * @param stadiumManagerId      stadiumManagerId
      * @param pageIndex             页下标
@@ -96,4 +86,12 @@ public interface IStadiumService {
      * @return                          stadium个数
      */
     Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey) throws FindFailedException;
+
+    /**
+     * systemManager通过stadiumId删除stadium
+     * @param systemManagerId           systemManagerId
+     * @param stadiumId                 stadiumId
+     * @param deleteReason              删除原因
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer stadiumId, String deleteReason);
 }

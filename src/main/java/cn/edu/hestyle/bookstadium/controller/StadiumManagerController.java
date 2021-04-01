@@ -1,8 +1,8 @@
 package cn.edu.hestyle.bookstadium.controller;
 
-import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
@@ -123,5 +123,88 @@ public class StadiumManagerController extends BaseController {
         String filePath = FileUploadProcessUtil.saveFile(file, UPLOAD_DIR_NAME,  FILE_MAX_SIZE, FILE_CONTENT_TYPES);
         logger.warn("StadiumManager stadiumManagerId = " + stadiumManagerId + "上传文件 url = " + filePath + "成功！");
         return new ResponseResult<String>(SUCCESS, "上传成功", filePath);
+    }
+
+    @PostMapping("/systemManagerFindByPage.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<List<StadiumManager>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                              @RequestParam(name = "usernameKey", defaultValue = "") String usernameKey,
+                                                                              HttpSession session) {
+        List<StadiumManager> stadiumManagerList = stadiumManagerService.systemManagerFindByPage(pageIndex, pageSize, usernameKey);
+        Integer count = stadiumManagerService.getCount(usernameKey);
+        return new ResponseResult<List<StadiumManager>>(SUCCESS, count, stadiumManagerList, "查询成功!");
+    }
+
+    @PostMapping("/systemManagerAdd.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAdd(@RequestParam(name = "stadiumManagerData") String stadiumManagerData, HttpSession session) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        StadiumManager stadiumManager = null;
+        // 从userData读取user对象
+        try {
+            stadiumManager = objectMapper.readValue(stadiumManagerData, StadiumManager.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 添加失败，数据格式错误！data = " + stadiumManagerData);
+            throw new RequestParamException("StadiumManager 添加失败，数据格式错误！");
+        }
+        stadiumManagerService.register(stadiumManager);
+        return new ResponseResult<>(SUCCESS, stadiumManager.getUsername() + " 添加成功！");
+    }
+
+    @PostMapping("/systemManagerModify.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerModify(@RequestParam(name = "stadiumManagerData") String stadiumManagerData, HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        StadiumManager stadiumManager = null;
+        // 从userData读取user对象
+        try {
+            stadiumManager = objectMapper.readValue(stadiumManagerData, StadiumManager.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 添加失败，数据格式错误！stadiumManagerData = " + stadiumManagerData);
+            throw new RequestParamException("StadiumManager 添加失败，数据格式错误！");
+        }
+        stadiumManagerService.systemManagerModify(systemManagerId, stadiumManager);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerResetPassword.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerResetPassword(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                                 @RequestParam(name = "newPassword") String newPassword,
+                                                                 HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerResetPassword(systemManagerId, stadiumManagerId, newPassword);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerAddToBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAddToBlack(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerAddToBlack(systemManagerId, stadiumManagerId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerRemoveFromBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerRemoveFromBlack(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                                   HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerRemoveFromBlack(systemManagerId, stadiumManagerId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
+
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerDeleteById(systemManagerId, stadiumManagerId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
     }
 }

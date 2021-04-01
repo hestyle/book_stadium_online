@@ -1,11 +1,7 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
-import cn.edu.hestyle.bookstadium.entity.Stadium;
-import cn.edu.hestyle.bookstadium.entity.StadiumBook;
-import cn.edu.hestyle.bookstadium.entity.StadiumManager;
-import cn.edu.hestyle.bookstadium.mapper.StadiumBookMapper;
-import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
-import cn.edu.hestyle.bookstadium.mapper.StadiumMapper;
+import cn.edu.hestyle.bookstadium.entity.*;
+import cn.edu.hestyle.bookstadium.mapper.*;
 import cn.edu.hestyle.bookstadium.service.IStadiumBookService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
@@ -28,15 +24,27 @@ import java.util.*;
  */
 @Service
 public class StadiumBookServiceImpl implements IStadiumBookService {
+    /** 回复场馆评论删除通知体育场馆管理员title、content */
+    private static final String STADIUM_BOOK_ITEM_DELETE_STADIUM_MANAGER_TITLE = "场馆预约删除";
+    private static final String STADIUM_BOOK_ITEM_DELETE_STADIUM_MANAGER_CONTENT = "系统管理员【%s】,因【%s】, 删除了你所创建的【%s】场馆的【%s-%s】预约场次，已经预约用户已被取消！";
+    /** 回复场馆评论删除通知用户的title、content */
+    private static final String STADIUM_BOOK_ITEM_DELETE_USER_TITLE = "场馆预约删除";
+    private static final String STADIUM_BOOK_ITEM_DELETE_USER_CONTENT = "系统管理员【%s】,因【%s】, 删除了【%s】场馆的【%s-%s】预约场次，你的预约已被取消！";
 
     private static final Logger logger = LoggerFactory.getLogger(StadiumBookServiceImpl.class);
 
     @Resource
+    private NoticeMapper noticeMapper;
+    @Resource
     private StadiumMapper stadiumMapper;
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
     @Resource
     private StadiumManagerMapper stadiumManagerMapper;
     @Resource
     private StadiumBookMapper stadiumBookMapper;
+    @Resource
+    private StadiumBookItemMapper stadiumBookItemMapper;
 
     @Override
     public void stadiumManagerAdd(Integer stadiumManagerId, StadiumBook stadiumBook) throws AddFailedException {
@@ -442,6 +450,135 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         }
         logger.warn("StadiumBook 查询成功， stadiumId= " + stadiumId + "，count = " + count);
         return count;
+    }
+
+    @Override
+    @Transactional
+    public void systemManagerDeleteById(Integer systemManagerId, Integer stadiumBookId, String deleteReason) {
+        if (stadiumBookId == null) {
+            logger.warn("StadiumBook 删除失败！未指定stadiumBookId！");
+            throw new FindFailedException("操作失败，未指定需要删除的场馆预约ID！");
+        }
+        StadiumBook stadiumBook = null;
+        try {
+            stadiumBook = stadiumBookMapper.findById(stadiumBookId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 查询失败！数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumBook == null || (stadiumBook.getIsDelete() != null && stadiumBook.getIsDelete() == 1)) {
+            logger.warn("StadiumBook 删除失败！该stadiumBook不存在或已被删除！stadiumBook = " + stadiumBook);
+            throw new FindFailedException("操作失败，该stadiumBook不存在或已被删除！");
+        }
+        if (deleteReason == null || deleteReason.length() == 0) {
+            logger.warn("StadiumBook 删除失败！未填写删除原因！stadiumBook = " + stadiumBook);
+            throw new FindFailedException("操作失败，未填写删除原因！");
+        }
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查找失败！数据库发生未知错误！systemManagerId = " + systemManagerId);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        // 1、更新stadiumBook为删除状态
+        stadiumBook.setIsDelete(1);
+        stadiumBook.setModifiedUser(systemManager.getUsername());
+        stadiumBook.setModifiedTime(new Date());
+        try {
+            stadiumBookMapper.update(stadiumBook);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBook 更新失败！数据库发生未知异常！stadiumBook = " + stadiumBook);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        // 2、通知体育场馆管理员
+        Stadium stadium = null;
+        try {
+            stadium = stadiumMapper.findById(stadiumBook.getStadiumId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Stadium 查找失败！数据库发生未知异常！stadiumId = " + stadiumBook.getStadiumId());
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadium == null) {
+            logger.warn("Stadium 查找失败！数据库内部发生错误！stadiumId = " + stadiumBook.getStadiumId() + " 不存在！");
+            throw new FindFailedException("操作失败，数据库内部发生错误！");
+        }
+        // 通知对应的user
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Notice managerNotice = new Notice();
+        managerNotice.setToAccountType(Notice.TO_ACCOUNT_STADIUM_MANAGER);
+        managerNotice.setAccountId(stadium.getStadiumManagerId());
+        managerNotice.setTitle(STADIUM_BOOK_ITEM_DELETE_STADIUM_MANAGER_TITLE);
+        managerNotice.setContent(String.format(STADIUM_BOOK_ITEM_DELETE_STADIUM_MANAGER_CONTENT, systemManager.getUsername(), deleteReason, stadium.getName(), simpleDateFormat.format(stadiumBook.getStartTime()), simpleDateFormat.format(stadiumBook.getEndTime())));
+        managerNotice.setGeneratedTime(new Date());
+        managerNotice.setIsDelete(0);
+        try {
+            noticeMapper.add(managerNotice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！managerNotice = " + managerNotice);
+            throw new AddFailedException("回复失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！managerNotice = " + managerNotice);
+        // 3、取消已经预约了该场次的用户预约
+        Integer beginIndex = 0;
+        Integer pageSize = 10;
+        Integer bookItemCount = 0;
+        try {
+            bookItemCount = stadiumBookItemMapper.getCountByStadiumBookId(stadiumBookId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumBookItem 查找失败！数据库发生未知异常！stadiumBookId = " + stadiumBookId);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        // 分页查询该StadiumBook的所有StadiumBookItem
+        while (beginIndex < bookItemCount) {
+            List<StadiumBookItem> stadiumBookItemList = null;
+            try {
+                stadiumBookItemList = stadiumBookItemMapper.findByStadiumBookIdAndPage(stadiumBookId, beginIndex, pageSize);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumBookItem 查找失败！数据库发生未知异常！stadiumBookId = " + stadiumBookId + ",beginIndex = " + beginIndex + ", pageSize" + pageSize);
+                throw new FindFailedException("操作失败，数据库发生未知异常！");
+            }
+            if (stadiumBookItemList != null && stadiumBookItemList.size() != 0) {
+                for (StadiumBookItem stadiumBookItem : stadiumBookItemList) {
+                    if (stadiumBookItem.getIsDelete() != null && stadiumBookItem.getIsDelete() != 0) {
+                        continue;
+                    }
+                    // 更新stadiumBookItem为删除状态
+                    stadiumBookItem.setIsDelete(1);
+                    try {
+                        stadiumBookItemMapper.update(stadiumBookItem);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("StadiumBookItem 查找失败！数据库发生未知异常！stadiumBookItem = " + stadiumBookItem);
+                        throw new FindFailedException("操作失败，数据库发生未知异常！");
+                    }
+                    // 通知对应的user
+                    Notice notice = new Notice();
+                    notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+                    notice.setAccountId(stadiumBookItem.getUserId());
+                    notice.setTitle(STADIUM_BOOK_ITEM_DELETE_USER_TITLE);
+                    notice.setContent(String.format(STADIUM_BOOK_ITEM_DELETE_USER_CONTENT, systemManager.getUsername(), deleteReason, stadium.getName(), simpleDateFormat.format(stadiumBook.getStartTime()), simpleDateFormat.format(stadiumBook.getEndTime())));
+                    notice.setGeneratedTime(new Date());
+                    notice.setIsDelete(0);
+                    try {
+                        noticeMapper.add(notice);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+                        throw new AddFailedException("回复失败，数据库发生未知错误！");
+                    }
+                    logger.warn("Notice 添加成功！notice = " + notice);
+                }
+            }
+            beginIndex += pageSize;
+        }
     }
 
     private boolean checkStadiumBookTime(Integer stadiumId, Integer stadiumBookId, Date startTime, Date endTime) throws Exception {

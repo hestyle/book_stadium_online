@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.StadiumComment;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumCommentService;
@@ -87,4 +88,14 @@ public class StadiumCommentController extends BaseController {
         return new ResponseResult<List<StadiumComment>>(SUCCESS, count, stadiumCommentList, "查询成功！");
     }
 
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "stadiumCommentId") Integer stadiumCommentId,
+                                                              @RequestParam(name = "deleteReason") String deleteReason,
+                                                              HttpSession session) {
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        stadiumCommentService.systemManagerDeleteById(stadiumManagerId, stadiumCommentId, deleteReason);
+        return new ResponseResult<Void>(SUCCESS, "操作成功！");
+    }
 }

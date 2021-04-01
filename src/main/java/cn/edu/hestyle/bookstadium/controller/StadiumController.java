@@ -3,12 +3,11 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,24 +117,6 @@ public class StadiumController extends BaseController {
         return new ResponseResult<>(SUCCESS, "更新保存成功！");
     }
 
-    @PostMapping("/stadiumManagerDeleteByIdList.do")
-    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
-    public ResponseResult<Void> handleStadiumManagerDeleteByIdList(@RequestParam(name = "idListJsonString") String idListJsonString, HttpSession session) {
-        // 从session中取出id
-        Integer stadiumManagerId = (Integer) session.getAttribute("id");
-        List<Integer> idList = null;
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            idList = objectMapper.readValue(idListJsonString, new TypeReference<List<Integer>>() {});
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return new ResponseResult<>(FAILURE, "id list数据格式不正确！");
-        }
-        System.err.println(idListJsonString);
-        stadiumService.stadiumManagerDeleteByIds(stadiumManagerId, idList);
-        return new ResponseResult<>(SUCCESS, "批量删除成功！");
-    }
-
     @PostMapping("/stadiumManagerFindByPage.do")
     @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
     public ResponseResult<List<Stadium>> handleStadiumManagerFindByPage(@RequestParam(value = "nameKey", defaultValue = "") String nameKey,
@@ -159,4 +140,14 @@ public class StadiumController extends BaseController {
         return new ResponseResult<String>(SUCCESS, "上传成功", filePath);
     }
 
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "stadiumId") Integer stadiumId,
+                                                              @RequestParam(name = "deleteReason") String deleteReason,
+                                                              HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumService.systemManagerDeleteById(systemManagerId, stadiumId, deleteReason);
+        return new ResponseResult<Void>(SUCCESS, "操作成功！");
+    }
 }
