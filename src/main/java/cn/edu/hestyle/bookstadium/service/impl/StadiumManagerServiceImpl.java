@@ -30,6 +30,10 @@ import java.util.regex.Pattern;
  */
 @Service
 public class StadiumManagerServiceImpl implements IStadiumManagerService {
+    /** 密码的最小长度 */
+    private static final Integer STADIUM_MANAGER_PASSWORD_MIN_LENGTH = 5;
+    /** 密码的最大长度 */
+    private static final Integer STADIUM_MANAGER_PASSWORD_MAX_LENGTH = 20;
     /** 性别：男 */
     private static final String STADIUM_MANAGER_GENDER_MAN = "男";
     /** 性别：女 */
@@ -426,6 +430,49 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new ModifyFailedException("操作失败，数据库发生未知异常！");
         }
         logger.warn("StadiumManager 修改成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
+    @Override
+    public void systemManagerResetPassword(Integer systemManagerId, Integer stadiumManagerId, String newPassword) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("SystemManager 密码重置失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要重置密码的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("SystemManager 密码重置失败，该stadiumManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个stadiumManager账号！");
+        }
+        if (newPassword == null || newPassword.length() < STADIUM_MANAGER_PASSWORD_MIN_LENGTH || newPassword.length() > STADIUM_MANAGER_PASSWORD_MAX_LENGTH) {
+            logger.warn("SystemManager 密码重置失败，新密码长度无效！不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
+            throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！");
+        }
+        stadiumManagerModify.setPassword(EncryptUtil.encryptPassword(newPassword, stadiumManagerModify.getSaltValue()));
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("SystemManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
     }
 
     /**

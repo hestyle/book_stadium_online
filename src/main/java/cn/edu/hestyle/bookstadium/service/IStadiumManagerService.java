@@ -88,4 +88,12 @@ public interface IStadiumManagerService {
      * @param stadiumManager        stadiumManager
      */
     void systemManagerModify(Integer systemManagerId, StadiumManager stadiumManager);
+
+    /**
+     * systemManager重置stadiumManager密码
+     * @param systemManagerId       systemManagerId
+     * @param stadiumManagerId      stadiumManagerId
+     * @param newPassword           newPassword
+     */
+    void systemManagerResetPassword(Integer systemManagerId, Integer stadiumManagerId, String newPassword);
 }
