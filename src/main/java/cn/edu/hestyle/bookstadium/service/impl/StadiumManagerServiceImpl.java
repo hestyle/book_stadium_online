@@ -462,7 +462,9 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             logger.warn("SystemManager 密码重置失败，新密码长度无效！不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！newPassword = " + newPassword);
             throw new FindFailedException("操作失败，新密码长度无效！长度不在[" + STADIUM_MANAGER_PASSWORD_MIN_LENGTH + ", " + STADIUM_MANAGER_PASSWORD_MAX_LENGTH + "]区间！");
         }
+        // systemManager重置密码后清除token
         stadiumManagerModify.setPassword(EncryptUtil.encryptPassword(newPassword, stadiumManagerModify.getSaltValue()));
+        stadiumManagerModify.setToken(null);
         stadiumManagerModify.setModifiedUser(systemManager.getUsername());
         stadiumManagerModify.setModifiedTime(new Date());
         try {
