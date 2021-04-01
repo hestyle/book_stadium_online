@@ -6,7 +6,6 @@ import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.ModifyFailedException;
 
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -80,4 +79,12 @@ public interface IStadiumBookService {
      * @return                  stadiumBook个数
      */
     Integer systemManagerGetCountById(Integer stadiumId) throws FindFailedException;
+
+    /**
+     * systemManager通过stadiumBookId删除
+     * @param systemManagerId   systemManagerId
+     * @param stadiumBookId     stadiumBookId
+     * @param deleteReason      删除原因
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer stadiumBookId, String deleteReason);
 }

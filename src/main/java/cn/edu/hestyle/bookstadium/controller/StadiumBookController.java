@@ -1,6 +1,5 @@
 package cn.edu.hestyle.bookstadium.controller;
 
-import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumBook;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
@@ -117,5 +116,16 @@ public class StadiumBookController extends BaseController {
         List<StadiumBook> stadiumBookList = stadiumBookService.systemManagerFindByStadiumIdAndPage(stadiumId, pageIndex, pageSize);
         Integer count = stadiumBookService.systemManagerGetCountById(stadiumId);
         return new ResponseResult<List<StadiumBook>>(SUCCESS, count, stadiumBookList, "查询成功！");
+    }
+
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "stadiumBookId") Integer stadiumBookId,
+                                                              @RequestParam(name = "deleteReason") String deleteReason,
+                                                              HttpSession session) {
+        // 从session中取出id
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        stadiumBookService.systemManagerDeleteById(stadiumManagerId, stadiumBookId, deleteReason);
+        return new ResponseResult<Void>(SUCCESS, "操作成功！");
     }
 }
