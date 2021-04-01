@@ -1,7 +1,9 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
+import cn.edu.hestyle.bookstadium.mapper.SystemManagerMapper;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 import cn.edu.hestyle.bookstadium.util.EncryptUtil;
@@ -28,9 +30,15 @@ import java.util.regex.Pattern;
  */
 @Service
 public class StadiumManagerServiceImpl implements IStadiumManagerService {
+    /** 性别：男 */
+    private static final String STADIUM_MANAGER_GENDER_MAN = "男";
+    /** 性别：女 */
+    private static final String STADIUM_MANAGER_GENDER_WOMAN = "女";
 
     private static final Logger logger = LoggerFactory.getLogger(StadiumManagerServiceImpl.class);
 
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
     @Resource
     private StadiumManagerMapper stadiumManagerMapper;
 
@@ -363,6 +371,61 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new FindFailedException("操作失败，数据库发生未知异常！");
         }
         return count;
+    }
+
+    @Override
+    public void systemManagerModify(Integer systemManagerId, StadiumManager stadiumManager) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManager == null || stadiumManager.getId() == null) {
+            logger.warn("StadiumManager 修改失败，未指定需要修改的User！");
+            throw new ModifyFailedException("操作失败，未指定需要修改的StadiumManager！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManager.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("StadiumManager 修改失败，修改的StadiumManager不存在！stadiumManager = " + stadiumManager);
+            throw new ModifyFailedException("操作失败，该用户不存在！");
+        }
+        String gender = stadiumManager.getGender();
+        if (gender == null || (!STADIUM_MANAGER_GENDER_MAN.equals(gender) && !STADIUM_MANAGER_GENDER_WOMAN.equals(gender))) {
+            logger.info("StadiumManager 修改失败，性别非法！stadiumManager = " + stadiumManager);
+            throw new ModifyFailedException("修改失败，性别非法！");
+        }
+        stadiumManagerModify.setGender(gender);
+        stadiumManagerModify.setAddress(stadiumManager.getAddress());
+        String phoneNumber = stadiumManager.getPhoneNumber();
+        if (phoneNumber != null) {
+            Pattern pattern = Pattern.compile("^((13[0-9])|(14[5|7])|(15([0-3]|[5-9]))|(17[013678])|(18[0,5-9]))\\d{8}$");
+            Matcher matcher = pattern.matcher(phoneNumber);
+            if (!matcher.matches()) {
+                logger.info("StadiumManager 修改失败，电话号码非法！stadiumManager = " + stadiumManager);
+                throw new ModifyFailedException("修改失败，输入的电话号码非法！");
+            }
+        }
+        stadiumManagerModify.setPhoneNumber(stadiumManager.getPhoneNumber());
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 修改失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new ModifyFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 修改成功！stadiumManagerModify = " + stadiumManagerModify);
     }
 
     /**

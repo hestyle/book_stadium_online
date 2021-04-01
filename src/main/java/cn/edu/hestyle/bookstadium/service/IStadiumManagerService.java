@@ -81,4 +81,11 @@ public interface IStadiumManagerService {
      * @return                      User数量
      */
     Integer getCount(String usernameKey);
+
+    /**
+     * systemManager修改stadiumManager
+     * @param systemManagerId       systemManagerId
+     * @param stadiumManager        stadiumManager
+     */
+    void systemManagerModify(Integer systemManagerId, StadiumManager stadiumManager);
 }
