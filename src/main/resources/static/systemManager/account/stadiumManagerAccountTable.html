@@ -354,8 +354,8 @@
                                 return false;
                             }
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/user/systemManagerResetPassword.do";
-                            var postData = {"userId":data.id, "newPassword":$('#reset_password_new').val()};
+                            var url ="/book_stadium_online/stadiumManager/systemManagerResetPassword.do";
+                            var postData = {"stadiumManagerId":data.id, "newPassword":$('#reset_password_new').val()};
                             $.ajax({
                                 "url" : url,
                                 "data" : postData,
