@@ -35,6 +35,9 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
     /** 回复场馆评论通知title、content */
     private static final String STADIUM_COMMENT_REPLY_TITLE = "场馆评论回复";
     private static final String STADIUM_COMMENT_REPLY_CONTENT = "场馆管理员【%s】回复了你的场馆评论【%s...】";
+    /** 回复场馆评论删除通知title、content */
+    private static final String STADIUM_COMMENT_DELETE_TITLE = "场馆评论删除";
+    private static final String STADIUM_COMMENT_DELETE_CONTENT = "系统管理员【%s】删除了你的场馆评论【%s...】，因为【%s】";
 
 
     private static final Logger logger = LoggerFactory.getLogger(StadiumCategoryServiceImpl.class);
@@ -45,6 +48,8 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
     private NoticeMapper noticeMapper;
     @Resource
     private StadiumMapper stadiumMapper;
+    @Resource
+    private SystemManagerMapper systemManagerMapper;
     @Resource
     private StadiumCommentMapper stadiumCommentMapper;
     @Resource
@@ -301,5 +306,70 @@ public class StadiumCommentServiceImpl implements IStadiumCommentService {
             throw new FindFailedException("查询失败，数据库发生未知错误！");
         }
         return count;
+    }
+
+    @Override
+    @Transactional
+    public void systemManagerDeleteById(Integer systemManagerId, Integer stadiumCommentId, String deleteReason) {
+        if (stadiumCommentId == null) {
+            logger.warn("StadiumComment 删除失败！未指定stadiumCommentId！");
+            throw new FindFailedException("操作失败，未指定需要删除的场馆评论ID！");
+        }
+        StadiumComment stadiumComment = null;
+        try {
+            stadiumComment = stadiumCommentMapper.findByStadiumCommentId(stadiumCommentId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 查询失败！数据库发生未知错误！stadiumCommentId = " + stadiumCommentId);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        if (stadiumComment == null || (stadiumComment.getIsDelete() != null && stadiumComment.getIsDelete().equals(1))) {
+            logger.warn("StadiumComment 删除失败！不存在该场馆评论！stadiumComment = " + stadiumComment);
+            throw new FindFailedException("操作失败，不存在该场馆评论！");
+        }
+        if (deleteReason == null || deleteReason.length() == 0) {
+            logger.warn("StadiumComment 删除失败！未填写删除原因！stadiumComment = " + stadiumComment);
+            throw new FindFailedException("操作失败，未填写删除原因！");
+        }
+        // 删除stadiumComment
+        stadiumComment.setIsDelete(1);
+        try {
+            stadiumCommentMapper.update(stadiumComment);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumComment 更新失败！数据库发生未知错误！stadiumComment = " + stadiumComment);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查找失败！数据库发生未知错误！systemManagerId = " + systemManagerId);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        // 通知对应的user
+        Notice notice = new Notice();
+        notice.setToAccountType(Notice.TO_ACCOUNT_USER);
+        notice.setAccountId(stadiumComment.getUserId());
+        notice.setTitle(STADIUM_COMMENT_DELETE_TITLE);
+        if (systemManager != null) {
+            String stadiumCommentContent = stadiumComment.getContent();
+            if (stadiumCommentContent.length() >= 20) {
+                notice.setContent(String.format(STADIUM_COMMENT_DELETE_CONTENT, systemManager.getUsername(), stadiumCommentContent.substring(0, 20), deleteReason));
+            } else {
+                notice.setContent(String.format(STADIUM_COMMENT_DELETE_CONTENT, systemManager.getUsername(), stadiumCommentContent, deleteReason));
+            }
+        }
+        notice.setGeneratedTime(new Date());
+        notice.setIsDelete(0);
+        try {
+            noticeMapper.add(notice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！notice = " + notice);
+            throw new AddFailedException("回复失败，数据库发生未知错误！");
+        }
+        logger.warn("Notice 添加成功！notice = " + notice);
     }
 }
