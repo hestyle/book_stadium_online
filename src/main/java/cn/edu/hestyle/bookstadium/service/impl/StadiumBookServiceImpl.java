@@ -525,10 +525,6 @@ public class StadiumBookServiceImpl implements IStadiumBookService {
         }
         logger.warn("Notice 添加成功！managerNotice = " + managerNotice);
         // 3、取消已经预约了该场次的用户预约
-        if (stadiumBook.getEndTime().before(new Date())) {
-            // 如果当前stadiumBook预约场次的终点时间已经过去了，则不通知
-            return;
-        }
         Integer beginIndex = 0;
         Integer pageSize = 10;
         Integer bookItemCount = 0;

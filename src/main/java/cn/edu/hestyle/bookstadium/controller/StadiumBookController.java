@@ -124,8 +124,8 @@ public class StadiumBookController extends BaseController {
                                                               @RequestParam(name = "deleteReason") String deleteReason,
                                                               HttpSession session) {
         // 从session中取出id
-        Integer stadiumManagerId = (Integer) session.getAttribute("id");
-        stadiumBookService.systemManagerDeleteById(stadiumManagerId, stadiumBookId, deleteReason);
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumBookService.systemManagerDeleteById(systemManagerId, stadiumBookId, deleteReason);
         return new ResponseResult<Void>(SUCCESS, "操作成功！");
     }
 }
