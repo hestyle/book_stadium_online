@@ -96,4 +96,12 @@ public interface IStadiumService {
      * @return                          stadium个数
      */
     Integer stadiumManagerGetCount(Integer stadiumManagerId, String nameKey) throws FindFailedException;
+
+    /**
+     * systemManager通过stadiumId删除stadium
+     * @param systemManagerId           systemManagerId
+     * @param stadiumId                 stadiumId
+     * @param deleteReason              删除原因
+     */
+    void systemManagerDeleteById(Integer systemManagerId, Integer stadiumId, String deleteReason);
 }

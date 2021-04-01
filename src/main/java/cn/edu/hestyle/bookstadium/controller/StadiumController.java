@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.Stadium;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
@@ -159,4 +160,14 @@ public class StadiumController extends BaseController {
         return new ResponseResult<String>(SUCCESS, "上传成功", filePath);
     }
 
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(name = "stadiumId") Integer stadiumId,
+                                                              @RequestParam(name = "deleteReason") String deleteReason,
+                                                              HttpSession session) {
+        // 从session中取出id
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumService.systemManagerDeleteById(systemManagerId, stadiumId, deleteReason);
+        return new ResponseResult<Void>(SUCCESS, "操作成功！");
+    }
 }
