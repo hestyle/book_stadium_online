@@ -180,4 +180,13 @@ public class StadiumManagerController extends BaseController {
         stadiumManagerService.systemManagerResetPassword(systemManagerId, stadiumManagerId, newPassword);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerAddToBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAddToBlack(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                              HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerAddToBlack(systemManagerId, stadiumManagerId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }

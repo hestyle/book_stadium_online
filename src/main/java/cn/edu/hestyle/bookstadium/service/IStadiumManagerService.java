@@ -96,4 +96,11 @@ public interface IStadiumManagerService {
      * @param newPassword           newPassword
      */
     void systemManagerResetPassword(Integer systemManagerId, Integer stadiumManagerId, String newPassword);
+
+    /**
+     * systemManager将stadiumManager拉黑
+     * @param systemManagerId       systemManagerId
+     * @param stadiumManagerId      stadiumManagerId
+     */
+    void systemManagerAddToBlack(Integer systemManagerId, Integer stadiumManagerId);
 }

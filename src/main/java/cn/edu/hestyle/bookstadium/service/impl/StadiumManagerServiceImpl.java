@@ -475,6 +475,51 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
         logger.warn("SystemManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
     }
 
+    @Override
+    public void systemManagerAddToBlack(Integer systemManagerId, Integer stadiumManagerId) {
+        SystemManager systemManager = null;
+        try {
+            systemManager = systemManagerMapper.findById(systemManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("SystemManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerId == null) {
+            logger.warn("StadiumManager 拉黑失败，未传入stadiumManagerId参数！");
+            throw new ModifyFailedException("操作失败，未指定需要拉黑的stadiumManager账号！");
+        }
+        StadiumManager stadiumManagerModify = null;
+        try {
+            stadiumManagerModify = stadiumManagerMapper.findById(stadiumManagerId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        if (stadiumManagerModify == null) {
+            logger.warn("StadiumManager 拉黑失败，该stadiumManager不存在！");
+            throw new FindFailedException("操作失败，不存在这个用户！");
+        }
+        if (stadiumManagerModify.getIsDelete() != null && stadiumManagerModify.getIsDelete().equals(2)) {
+            logger.warn("StadiumManager 拉黑失败，该stadiumManager已处于黑名单状态！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，该stadiumManager已处于黑名单状态！");
+        }
+        // 拉黑并清除token
+        stadiumManagerModify.setIsDelete(2);
+        stadiumManagerModify.setModifiedUser(systemManager.getUsername());
+        stadiumManagerModify.setModifiedTime(new Date());
+        stadiumManagerModify.setToken(null);
+        try {
+            stadiumManagerMapper.update(stadiumManagerModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 更新失败，数据库发生未知异常！stadiumManagerModify = " + stadiumManagerModify);
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        logger.warn("StadiumManager 更新成功！stadiumManagerModify = " + stadiumManagerModify);
+    }
+
     /**
      * 检查imagePaths的合法性
      * @param avatarPath            avatarPath
