@@ -103,4 +103,11 @@ public interface IStadiumManagerService {
      * @param stadiumManagerId      stadiumManagerId
      */
     void systemManagerAddToBlack(Integer systemManagerId, Integer stadiumManagerId);
+
+    /**
+     * systemManager解除stadiumManager拉黑状态
+     * @param systemManagerId       systemManagerId
+     * @param stadiumManagerId      stadiumManagerId
+     */
+    void systemManagerRemoveFromBlack(Integer systemManagerId, Integer stadiumManagerId);
 }

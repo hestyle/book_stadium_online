@@ -189,4 +189,13 @@ public class StadiumManagerController extends BaseController {
         stadiumManagerService.systemManagerAddToBlack(systemManagerId, stadiumManagerId);
         return new ResponseResult<>(SUCCESS, "操作成功！");
     }
+
+    @PostMapping("/systemManagerRemoveFromBlack.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerRemoveFromBlack(@RequestParam(name = "stadiumManagerId") Integer stadiumManagerId,
+                                                                   HttpSession session) {
+        Integer systemManagerId = (Integer) session.getAttribute("id");
+        stadiumManagerService.systemManagerRemoveFromBlack(systemManagerId, stadiumManagerId);
+        return new ResponseResult<>(SUCCESS, "操作成功！");
+    }
 }
