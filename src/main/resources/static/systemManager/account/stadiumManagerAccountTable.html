@@ -57,38 +57,38 @@
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">用户名</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_name" type="text" name="username" placeholder="请输入注册账号的用户名~" autocomplete="off" class="layui-input">
+                    <input id="add_stadiumManager_name" type="text" name="username" placeholder="请输入注册账号的用户名~" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">密码</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_password" type="password" name="password" placeholder="请输入注册账号的密码~" class="layui-input">
+                    <input id="add_stadiumManager_password" type="password" name="password" placeholder="请输入注册账号的密码~" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">重复密码</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_rePassword" type="password" name="rePassword" placeholder="请再次输入注册账号的密码~" class="layui-input">
+                    <input id="add_stadiumManager_rePassword" type="password" name="rePassword" placeholder="请再次输入注册账号的密码~" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">性别</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input type="radio" name="add_user_gender" value="男" title="男" checked>
-                    <input type="radio" name="add_user_gender" value="女" title="女">
+                    <input type="radio" name="add_stadiumManager_gender" value="男" title="男" checked>
+                    <input type="radio" name="add_stadiumManager_gender" value="女" title="女">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">地址</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_address" type="text" name="address" placeholder="请输入地址~" autocomplete="off" class="layui-input">
+                    <input id="add_stadiumManager_address" type="text" name="address" placeholder="请输入地址~" autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 20%;">电话号码</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_phoneNumber" type="tel" name="phoneNumber" placeholder="请输入电话号码~" autocomplete="off" class="layui-input">
+                    <input id="add_stadiumManager_phoneNumber" type="tel" name="phoneNumber" placeholder="请输入电话号码~" autocomplete="off" class="layui-input">
                 </div>
             </div>
         </form>
@@ -219,7 +219,7 @@
                     case 'add':
                         layer.open({
                             type: 1,
-                            title: '添加用户账号',
+                            title: '添加体育场馆管理员账号',
                             area:['520px','80%'],
                             content: $('#addDialog').html(),
                             btn: ['保存', '取消'],
@@ -230,12 +230,12 @@
                                 if (checkAddForm() === false) {
                                     return false;
                                 }
-                                var url ="/book_stadium_online/user/systemManagerAdd.do";
-                                var postData = '{"username":"' + $('#add_user_name').val() + '","password":"' + $('#add_user_password').val() + '","gender":"' + $('input[name=add_user_gender]:checked').val()
-                                    + '","address":"' + $('#add_user_address').val() + '","phoneNumber":"' + $('#add_user_phoneNumber').val() + '"}';
+                                var url ="/book_stadium_online/stadiumManager/systemManagerAdd.do";
+                                var postData = '{"username":"' + $('#add_stadiumManager_name').val() + '","password":"' + $('#add_stadiumManager_password').val() + '","gender":"' + $('input[name=add_stadiumManager_gender]:checked').val()
+                                    + '","address":"' + $('#add_stadiumManager_address').val() + '","phoneNumber":"' + $('#add_stadiumManager_phoneNumber').val() + '"}';
                                 $.ajax({
                                     "url" : url,
-                                    "data" : {"userData":postData},
+                                    "data" : {"stadiumManagerData":postData},
                                     "type" : "POST",
                                     "dataType" : "json",
                                     "beforeSend": function (request) {
@@ -249,7 +249,7 @@
                                         if (json.code === 200) {
                                             layer.close(index);
                                             // 成功后，表格重载
-                                            layui.table.reload('userAccountTable');
+                                            layui.table.reload('stadiumManagerAccountTable');
                                         }
                                     },
                                     "error" : function () {
@@ -507,35 +507,35 @@
          * @returns {boolean}
          */
         function checkAddForm() {
-            if ($('#add_user_name').val().length === 0) {
+            if ($('#add_stadiumManager_name').val().length === 0) {
                 layer.open({
                     title: "提示信息",
                     content: "请输入添加账号的用户名！"
                 });
                 return false;
             }
-            if ($('#add_user_password').val().length === 0) {
+            if ($('#add_stadiumManager_password').val().length === 0) {
                 layer.open({
                     title: "提示信息",
                     content: "请输入添加账号的密码！"
                 });
                 return false;
             }
-            if ($('#add_user_password').val() !== $('#add_user_rePassword').val()) {
+            if ($('#add_stadiumManager_password').val() !== $('#add_stadiumManager_rePassword').val()) {
                 layer.open({
                     title: "提示信息",
                     content: "两次输入的密码不一致！"
                 });
                 return false;
             }
-            if ($('#add_user_address').val().length === 0) {
+            if ($('#add_stadiumManager_address').val().length === 0) {
                 layer.open({
                     title: "提示信息",
                     content: "请输入添加账号的地址！"
                 });
                 return false;
             }
-            if ($('#add_user_phoneNumber').val().length === 0) {
+            if ($('#add_stadiumManager_phoneNumber').val().length === 0) {
                 layer.open({
                     title: "提示信息",
                     content: "请输入添加账号的电话号码！"
