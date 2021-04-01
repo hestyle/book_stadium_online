@@ -449,11 +449,11 @@
                         layer.close(index);
                     });
                 } else if (layEvent === 'delete') {
-                    layer.confirm('确定删除用户账号 ' + data.username + '？<label style="display:block; color: red;">删除后该用户账号将无法登录，且删除操作无法撤销！</label>', function(index){
-                        var url ="/book_stadium_online/user/systemManagerDeleteById.do";
+                    layer.confirm('确定删除场馆管理员账号 ' + data.username + '？<label style="display:block; color: red;">删除后该场馆管理员账号将无法登录，且删除操作无法撤销！</label>', function(index){
+                        var url ="/book_stadium_online/stadiumManager/systemManagerDeleteById.do";
                         $.ajax({
                             "url" : url,
-                            "data" : {"userId":data.id},
+                            "data" : {"stadiumManagerId":data.id},
                             "type" : "POST",
                             "dataType" : "json",
                             "beforeSend": function (request) {
@@ -466,7 +466,7 @@
                                 });
                                 if (json.code === 200) {
                                     // 刷新整个表格
-                                    layui.table.reload('userAccountTable');
+                                    layui.table.reload('stadiumManagerAccountTable');
                                 }
                             },
                             "error" : function () {
@@ -546,7 +546,7 @@
         }
 
         /**
-         * 检查重置user密码的表单
+         * 检查重置stadiumManager密码的表单
          * @returns {boolean}
          */
         function checkResetPasswordForm() {
