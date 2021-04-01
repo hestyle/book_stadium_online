@@ -73,6 +73,23 @@
             </div>
         </form>
     </script>
+    <!--Stadium表删除单条数据操作-->
+    <script type="text/html" id="deleteStadiumDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="deleteStadiumDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">提示：</label>
+                <div class="layui-input-inline">
+                    <label class="layui-form-label" style="width: 140%;color: red;alignment: left;">删除后，已经预约了该场馆的预约操作将取消，且删除操作不可恢复！</label>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">删除原因</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteStadiumReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
     <!--单条数据的插入操作-->
     <script type="text/html" id="addDialog">
         <form id="add_form" class="layui-form" action="" style="padding: 20px;" lay-filter="addDialogForm">
@@ -638,6 +655,59 @@
                             });
                         },
                         yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }  else if (layEvent === 'deleteStadium') {
+                    layer.open({
+                        type: 1,
+                        title: '删除场馆',
+                        area: ['450px', '80%'],
+                        content: $('#deleteStadiumDialog').html(),
+                        btn: ['删除', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            if ($('#deleteStadiumReason').val().length === 0) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入删除该场馆的原因！"
+                                });
+                                return false;
+                            }
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/stadium/systemManagerDeleteById.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"stadiumId":data.id, "deleteReason":$('#deleteStadiumReason').val()},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        layui.table.reload('stadiumTable');
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
                             layer.close(index);
                         }
                     });
