@@ -135,4 +135,21 @@ public class StadiumManagerController extends BaseController {
         Integer count = stadiumManagerService.getCount(usernameKey);
         return new ResponseResult<List<StadiumManager>>(SUCCESS, count, stadiumManagerList, "查询成功!");
     }
+
+    @PostMapping("/systemManagerAdd.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerAdd(@RequestParam(name = "stadiumManagerData") String stadiumManagerData, HttpSession session) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        StadiumManager stadiumManager = null;
+        // 从userData读取user对象
+        try {
+            stadiumManager = objectMapper.readValue(stadiumManagerData, StadiumManager.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("StadiumManager 添加失败，数据格式错误！data = " + stadiumManagerData);
+            throw new RequestParamException("StadiumManager 添加失败，数据格式错误！");
+        }
+        stadiumManagerService.register(stadiumManager);
+        return new ResponseResult<>(SUCCESS, stadiumManager.getUsername() + " 添加成功！");
+    }
 }
