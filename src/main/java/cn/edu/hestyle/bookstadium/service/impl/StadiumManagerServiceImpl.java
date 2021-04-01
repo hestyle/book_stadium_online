@@ -15,6 +15,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -320,6 +321,40 @@ public class StadiumManagerServiceImpl implements IStadiumManagerService {
             throw new ModifyFailedException("密码更新保存失败，数据库发生未知异常！");
         }
         logger.info("StadiumManager 账号密码更改保存成功！data = " + stadiumManager);
+    }
+
+    @Override
+    public List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize) {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<StadiumManager> stadiumManagerList = null;
+        try {
+            stadiumManagerList = stadiumManagerMapper.findByPage((pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return stadiumManagerList;
+    }
+
+    @Override
+    public Integer getCount() {
+        Integer count = null;
+        try {
+            count = stadiumManagerMapper.getCount();
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("User 查询失败，数据库发生未知异常！");
+            throw new FindFailedException("操作失败，数据库发生未知异常！");
+        }
+        return count;
     }
 
     /**

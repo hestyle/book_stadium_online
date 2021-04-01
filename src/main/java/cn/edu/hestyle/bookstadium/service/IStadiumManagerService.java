@@ -4,6 +4,7 @@ import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.service.exception.*;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * StadiumManager 业务层接口
@@ -66,4 +67,18 @@ public interface IStadiumManagerService {
      * @throws ModifyFailedException    更新错误
      */
     void changePassword(Integer stadiumManagerId, String beforePassword, String newPassword) throws ModifyFailedException;
+
+    /**
+     * systemManager分页查询StadiumManager
+     * @param pageIndex             pageIndex
+     * @param pageSize              pageSize
+     * @return                      List StadiumManager
+     */
+    List<StadiumManager> systemManagerFindByPage(Integer pageIndex, Integer pageSize);
+
+    /**
+     * 获取StadiumManager数量
+     * @return                      User数量
+     */
+    Integer getCount();
 }

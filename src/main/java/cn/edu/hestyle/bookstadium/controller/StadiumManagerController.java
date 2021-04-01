@@ -1,8 +1,8 @@
 package cn.edu.hestyle.bookstadium.controller;
 
-import cn.edu.hestyle.bookstadium.controller.exception.NotLoginException;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestParamException;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
+import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.util.FileUploadProcessUtil;
@@ -123,5 +123,15 @@ public class StadiumManagerController extends BaseController {
         String filePath = FileUploadProcessUtil.saveFile(file, UPLOAD_DIR_NAME,  FILE_MAX_SIZE, FILE_CONTENT_TYPES);
         logger.warn("StadiumManager stadiumManagerId = " + stadiumManagerId + "上传文件 url = " + filePath + "成功！");
         return new ResponseResult<String>(SUCCESS, "上传成功", filePath);
+    }
+
+    @PostMapping("/systemManagerFindByPage.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<List<StadiumManager>> handleSystemManagerFindByPage(@RequestParam(name = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                              @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                              HttpSession session) {
+        List<StadiumManager> stadiumManagerList = stadiumManagerService.systemManagerFindByPage(pageIndex, pageSize);
+        Integer count = stadiumManagerService.getCount();
+        return new ResponseResult<List<StadiumManager>>(SUCCESS, count, stadiumManagerList, "查询成功!");
     }
 }

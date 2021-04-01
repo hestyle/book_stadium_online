@@ -66,4 +66,38 @@
 		WHERE
 			`id` = #{id}
 	</update>
+	<!--分页查找StadiumManager(未删除)-->
+	<!--List<StadiumManager> findByPage(Integer beginIndex, Integer pageSize);-->
+	<select id="findByPage" resultType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
+		SELECT
+		`id` as `id`,
+		`username` as `username`,
+		`avatar_path` as `avatarPath`,
+		`gender` as `gender`,
+		`address` as `address`,
+		`phone_number` as `phoneNumber`,
+		`credit_score` as `creditScore`,
+		`is_authenticate` as `isAuthenticate`,
+		`is_delete` as `isDelete`,
+		`created_user` as `createdUser`,
+		`created_time` as `createdTime`,
+		`modified_user` as `modifiedUser`,
+		`modified_time` as `modifiedTime`
+		FROM
+			`t_stadium_manager`
+		WHERE
+			`is_delete` != 1
+		LIMIT
+			#{beginIndex}, #{pageSize}
+	</select>
+	<!--获取StadiumManager的数量(未删除)-->
+	<!--Integer getCount();-->
+	<select id="getCount" resultType="java.lang.Integer">
+		SELECT
+			COUNT(`id`)
+		FROM
+			`t_stadium_manager`
+		WHERE
+			`is_delete` != 1
+	</select>
 </mapper>
