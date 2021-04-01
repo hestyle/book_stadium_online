@@ -184,7 +184,7 @@
     <!--场馆评论单条数据的操作栏-->
     <script type="text/html" id="stadiumCommentTableBarTemplet">
         <a class="layui-btn layui-btn-xs layui-btn-normal" lay-event="lookStadiumCommentDetail">查看</a>
-        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</a>
+        <a class="layui-btn layui-btn-xs layui-btn-danger" lay-event="deleteStadiumComment">删除</a>
     </script>
     <script type="text/html" id="stadiumCommentUsernameTemplet">
         {{d.commentUser.username}}
@@ -242,9 +242,48 @@
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 15%;">我的回复</label>
+                <label class="layui-form-label" style="width: 15%;">场馆管理员回复</label>
                 <div class="layui-input-inline">
                     <textarea id="lookStadiumCommentManagerReply" name="description" placeholder="无" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--StadiumComment删除操作-->
+    <script type="text/html" id="deleteStadiumCommentDialog">
+        <form class="layui-form" action="" style="padding: 20px;" lay-filter="deleteStadiumCommentDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">删除原因</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteStadiumCommentReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">用户名</label>
+                <div class="layui-input-inline">
+                    <input id="deleteStadiumCommentUsername" type="text" placeholder="发表评价的用户名" autocomplete="off" class="layui-input" style="width: 140%;" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价内容</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteStadiumCommentContent" placeholder="评价的内容" class="layui-textarea" style="width: 140%;" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价星级</label>
+                <div id="deleteStadiumCommentStarCount" class="layui-input-inline" style="width: 65%;"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">评价时间</label>
+                <div class="layui-input-inline">
+                    <input id="deleteStadiumCommentCommentedTime" placeholder="评价时间" class="layui-input" style="width: 140%;" disabled />
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">场馆管理员回复</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteStadiumCommentManagerReply" name="description" placeholder="无" class="layui-textarea" style="width: 140%;" disabled></textarea>
                 </div>
             </div>
         </form>
@@ -619,31 +658,41 @@
                             layer.close(index);
                         }
                     });
-                } else if (layEvent === 'replyStadiumComment') {
+                } else if (layEvent === 'deleteStadiumComment') {
                     layer.open({
                         type: 1,
-                        title: '场馆评论回复',
-                        area: ['450px'],
-                        content: $('#replyStadiumCommentDialog').html(),
-                        btn: ['回复', '取消'],
+                        title: '删除场馆评论',
+                        area: ['450px', '80%'],
+                        content: $('#deleteStadiumCommentDialog').html(),
+                        btn: ['删除', '取消'],
                         success: function (index, layero) {
                             // 填充行数据
                             form.render();
-                            $('#replyStadiumCommentContent').val(data.content);
+                            form.val("deleteStadiumCommentDialogForm", data);
+                            $('#deleteStadiumCommentUsername').val(data.commentUser.username);
+                            $('#deleteStadiumCommentContent').val(data.content);
                             for (var i = 0; i < parseInt(data.starCount); ++i) {
-                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
+                                $('#deleteStadiumCommentStarCount').append('<img src="/book_stadium_online/image/star.svg" style="width: 20px;height: 20px;"/>');
                             }
                             for (var i = parseInt(data.starCount); i < 5; ++i) {
-                                $('#replyStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
+                                $('#deleteStadiumCommentStarCount').append('<img src="/book_stadium_online/image/starEmpty.svg" style="width: 20px;height: 20px;"/>');
                             }
+                            $('#deleteStadiumCommentCommentedTime').val(data.commentedTime);
+                            $('#deleteStadiumCommentManagerReply').val(data.managerReply);
                         },
                         yes: function (index, layero) {
+                            if ($('#deleteStadiumCommentReason').val().length === 0) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入删除该场馆评论的原因！"
+                                });
+                                return false;
+                            }
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/stadiumComment/managerReply.do";
-                            var postData = '{"id":'+ data.id + ',"managerReply":"' + $('#replyStadiumCommentManagerReply').val() + '"}';
+                            var url ="/book_stadium_online/stadiumComment/systemManagerDeleteById.do";
                             $.ajax({
                                 "url" : url,
-                                "data" : {"stadiumCommentData":postData},
+                                "data" : {"stadiumCommentId":data.id, "deleteReason":$('#deleteStadiumCommentReason').val()},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
@@ -656,10 +705,7 @@
                                     });
                                     if (json.code === 200) {
                                         // 更新成功，则关闭重置窗口
-                                        obj.update({
-                                            managerReply: $('#replyStadiumCommentManagerReply').val(),
-                                            toolBar_field: ''
-                                        });
+                                        layui.table.reload('stadiumComment_table');
                                         layer.close(index);
                                     }
                                 },
