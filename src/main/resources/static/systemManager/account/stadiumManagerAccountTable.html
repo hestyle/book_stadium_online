@@ -387,11 +387,11 @@
                         }
                     });
                 } else if (layEvent === 'addToBlack') {
-                    layer.confirm('是否拉黑' + data.username + '？<label style="display:block; color: red;">拉黑后，该用户将无法登录！</label>', function(index){
-                        var url ="/book_stadium_online/user/systemManagerAddToBlack.do";
+                    layer.confirm('是否拉黑' + data.username + '？<label style="display:block; color: red;">拉黑后，该场馆管理员账号将无法登录！</label>', function(index){
+                        var url ="/book_stadium_online/stadiumManager/systemManagerAddToBlack.do";
                         $.ajax({
                             "url" : url,
-                            "data" : {"userId":data.id},
+                            "data" : {"stadiumManagerId":data.id},
                             "type" : "POST",
                             "dataType" : "json",
                             "beforeSend": function (request) {
@@ -404,7 +404,7 @@
                                 });
                                 if (json.code === 200) {
                                     // 刷新整个表格
-                                    layui.table.reload('userAccountTable');
+                                    layui.table.reload('stadiumManagerAccountTable');
                                 }
                             },
                             "error" : function () {
