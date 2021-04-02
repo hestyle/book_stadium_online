@@ -18,6 +18,13 @@ public interface IComplaintService {
     void systemManagerHandle(Complaint complaint);
 
     /**
+     * systemManager通过id删除Complaint
+     * @param complaintId   complaintId
+     * @param deleteReason  deleteReason
+     */
+    void systemManagerDeleteById(Integer complaintId, String deleteReason);
+
+    /**
      * 分页查询Complaint（未删除）
      * @param pageIndex     pageIndex
      * @param pageSize      pageSize

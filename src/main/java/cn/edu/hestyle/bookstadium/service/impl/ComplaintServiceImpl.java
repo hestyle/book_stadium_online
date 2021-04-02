@@ -6,6 +6,7 @@ import cn.edu.hestyle.bookstadium.mapper.NoticeMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IComplaintService;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,9 @@ public class ComplaintServiceImpl implements IComplaintService {
     /** 被投诉人处理title、content */
     private static final String RESPONDENT_HANDLE_TITLE = "投诉处理";
     private static final String RESPONDENT_HANDLE_CONTENT = "您的账号被其他用户投诉【%s...】，积分奖惩【%s】，奖惩描述【%s】";
+    /** （未处理）投诉删除title、content */
+    private static final String RESPONDENT_DELETE_TITLE = "投诉删除";
+    private static final String RESPONDENT_DELETE_CONTENT = "您的投诉【%s】已被系统删除，删除原因【%s】";
     private static final Logger logger = LoggerFactory.getLogger(ComplaintServiceImpl.class);
 
     @Resource
@@ -232,6 +236,58 @@ public class ComplaintServiceImpl implements IComplaintService {
             throw new FindFailedException("操作失败，数据库发生未知错误！");
         }
         logger.warn("Complaint 更新成功！complaintModify = " + complaintModify);
+    }
+
+    @Override
+    @Transactional
+    public void systemManagerDeleteById(Integer complaintId, String deleteReason) {
+        if (complaintId == null) {
+            logger.warn("Complaint 删除失败，未指定需要处理的投诉！");
+            throw new DeleteFailedException("操作失败，未指定需要删除的投诉！");
+        }
+        Complaint complaint = null;
+        try {
+            complaint = complaintMapper.findById(complaintId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 查找失败，数据库发生未知错误！complaintId = " + complaintId);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        if (complaint == null) {
+            logger.warn("Complaint 删除失败，不存在该投诉！complaintId = " + complaintId);
+            throw new FindFailedException("操作失败，不存在该投诉！");
+        }
+        if (deleteReason == null || deleteReason.length() == 0) {
+            logger.warn("Complaint 删除失败，未设置删除原因！");
+            throw new FindFailedException("操作失败，未设置删除原因！");
+        }
+        if (complaint.getHasHandled() != 0) {
+            // 当前complaint未处理，通知投诉人
+            Notice complainantNotice = new Notice();
+            complainantNotice.setToAccountType(complaint.getComplainantAccountType());
+            complainantNotice.setAccountId(complaint.getComplainantAccountId());
+            complainantNotice.setTitle(RESPONDENT_DELETE_TITLE);
+            complainantNotice.setContent(String.format(RESPONDENT_DELETE_CONTENT, complaint.getTitle(), deleteReason));
+            complainantNotice.setGeneratedTime(new Date());
+            complainantNotice.setIsDelete(0);
+            try {
+                noticeMapper.add(complainantNotice);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Notice 添加失败，数据库发生未知错误！complainantNotice = " + complainantNotice);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            logger.warn("Notice 添加成功！complainantNotice = " + complainantNotice);
+        }
+        complaint.setIsDelete(1);
+        try {
+            complaintMapper.update(complaint);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 更新失败，数据库发生未知错误！complaint = " + complaint);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        logger.warn("Complaint 更新成功！complaint = " + complaint);
     }
 
     @Override
