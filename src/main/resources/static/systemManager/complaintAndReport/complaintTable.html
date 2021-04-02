@@ -39,44 +39,75 @@
         {{#  } }}
         <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="complaintDelete">删除</a>
     </script>
-    <!--单条数据的添加操作-->
-    <script type="text/html" id="addDialog">
-        <form id="add_form" class="layui-form" action="" style="padding: 20px;width: 450px;" lay-filter="addDialogForm">
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">用户名</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_name" type="text" name="username" placeholder="请输入注册账号的用户名~" autocomplete="off" class="layui-input">
+    <!--complaintHandle操作-->
+    <script type="text/html" id="complaintHandleDialog">
+        <form id="complaintHandleForm" class="layui-form" action="" style="padding: 20px;width: 800px;" lay-filter="complaintHandleDialogForm">
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 30%;">
+                    <label id="complaintHandleComplainantUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="complaintHandleComplainantAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label style="display: block;text-align: center;margin-top: 10px;">投诉</label>
+                    <div style="display: flex;justify-content: center;">
+                        <img src="/book_stadium_online/image/arrow_red.png" style="width: 40px;height: 25px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label id="complaintHandleRespondentUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="complaintHandleRespondentAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">密码</label>
+                <label class="layui-form-label" style="width: 20%;">标题</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_password" type="password" name="password" placeholder="请输入注册账号的密码~" class="layui-input">
+                    <input id="complaintHandleTitle" type="text" placeholder="投诉标题" class="layui-input" disabled>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">重复密码</label>
+                <label class="layui-form-label" style="width: 20%;">描述</label>
                 <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_rePassword" type="password" name="rePassword" placeholder="请再次输入注册账号的密码~" class="layui-input">
+                    <textarea id="complaintHandleDescription"  placeholder="投诉描述" class="layui-textarea" disabled></textarea>
                 </div>
             </div>
             <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">性别</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input type="radio" name="add_user_gender" value="男" title="男" checked>
-                    <input type="radio" name="add_user_gender" value="女" title="女">
-                </div>
+                <label class="layui-form-label" style="width: 20%;">图片</label>
+                <div class="layui-input-inline" id="complaintHandleImages" style="width: 70%;"></div>
             </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">地址</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_address" type="text" name="address" placeholder="请输入地址~" autocomplete="off" class="layui-input">
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;">
+                    <label style="display: block;text-align: center;">投诉人奖惩</label>
+                    <div class="layui-form-item" id="complainantHandleCreditScoreDiv">
+                        <label id="complainantHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="complainantHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="complainantHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="layui-form-item">
-                <label class="layui-form-label" style="width: 20%;">电话号码</label>
-                <div class="layui-input-inline" style="width: 70%;">
-                    <input id="add_user_phoneNumber" type="tel" name="phoneNumber" placeholder="请输入电话号码~" autocomplete="off" class="layui-input">
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;">
+                    <label style="display: block;text-align: center;">被投诉人奖惩</label>
+                    <div class="layui-form-item" id="respondentHandleCreditScoreDiv">
+                        <label id="respondentHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="respondentHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="respondentHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -196,62 +227,6 @@
                     };
                 }
             });
-            //监听事件
-            table.on('toolbar(test)', function (obj) {
-                var checkStatus = table.checkStatus(obj.config.id);
-                switch (obj.event) {
-                    case 'add':
-                        layer.open({
-                            type: 1,
-                            title: '添加用户账号',
-                            area:['520px','80%'],
-                            content: $('#addDialog').html(),
-                            btn: ['保存', '取消'],
-                            success: function (index, layero) {
-                                form.render();
-                            },
-                            yes: function (index, layero) {
-                                if (checkAddForm() === false) {
-                                    return false;
-                                }
-                                var url ="/book_stadium_online/user/systemManagerAdd.do";
-                                var postData = '{"username":"' + $('#add_user_name').val() + '","password":"' + $('#add_user_password').val() + '","gender":"' + $('input[name=add_user_gender]:checked').val()
-                                    + '","address":"' + $('#add_user_address').val() + '","phoneNumber":"' + $('#add_user_phoneNumber').val() + '"}';
-                                $.ajax({
-                                    "url" : url,
-                                    "data" : {"userData":postData},
-                                    "type" : "POST",
-                                    "dataType" : "json",
-                                    "beforeSend": function (request) {
-                                        request.setRequestHeader("token", $.cookie("systemManagerToken"))
-                                    },
-                                    "success" : function (json) {
-                                        layer.open({
-                                            title: "提示信息",
-                                            content: json.message
-                                        });
-                                        if (json.code === 200) {
-                                            layer.close(index);
-                                            // 成功后，表格重载
-                                            layui.table.reload('complaintTable');
-                                        }
-                                    },
-                                    "error" : function () {
-                                        // 弹出中间提示框
-                                        layer.open({
-                                            title: "提示信息",
-                                            content: "保存失败，出现未知异常！"
-                                        });
-                                    }
-                                });
-                            },
-                            btn2: function (index, layero) {
-                                //return false 开启该代码可禁止点击该按钮关闭
-                            }
-                        });
-                        break;
-                }
-            });
 
             //监听工具条
             table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
@@ -259,41 +234,36 @@
                 var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
                 var tr = obj.tr; //获得当前行 tr 的DOM对象
 
-                if (layEvent === 'editUserAccount') {
+                if (layEvent === 'complaintHandle') {
                     layer.open({
                         type: 1,
-                        title: '编辑用户账号',
-                        area:['520px','80%'],
-                        content: $('#editDialog').html(),
+                        title: '处理投诉【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#complaintHandleDialog').html(),
                         btn: ['保存', '取消'],
                         success: function (index, layero) {
-                            console.log(data);
-                            if (data.username !== null) {
-                                $('#edit_user_name').val(data.username)
-                            }
-                            if (data.gender !== null) {
-                                if (data.gender === '男') {
-                                    $('#edit_user_gender_man').attr("checked", "checked");
-                                } else {
-                                    $('#edit_user_gender_woman').attr("checked", "checked");
+                            $('#complaintHandleComplainantUsername').text(data.complainantUsername);
+                            $('#complaintHandleComplainantAvatar').attr('src', data.complainantAvatarPath);
+                            $('#complaintHandleRespondentUsername').text(data.respondentUsername);
+                            $('#complaintHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#complaintHandleTitle').val(data.title);
+                            $('#complaintHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#complaintHandleImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
                                 }
-                            }
-                            if (data.address !== null) {
-                                $('#edit_user_address').val(data.address)
-                            }
-                            if (data.phoneNumber !== null) {
-                                $('#edit_user_phoneNumber').val(data.phoneNumber)
                             }
                             form.render();
                         },
                         yes: function (index, layero) {
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/user/systemManagerModify.do";
-                            var postData = '{"id":'+ data.id + ',"gender":"' + $('input[name=edit_user_gender]:checked').val() + '","address":"' + $('#edit_user_address').val()
-                                + '","phoneNumber":"' + $('#edit_user_phoneNumber').val() + '"}';
+                            var url ="/book_stadium_online/complaint/systemManagerHandle.do";
+                            var postData = '{"id":'+ data.id + ',"complainantHandleCreditScore":"' + $('#complainantHandleCreditScore').val() + '","complainantHandleDescription":"' + $('#complainantHandleDescription').val()
+                                + '","respondentHandleCreditScore":"' + $('#respondentHandleCreditScore').val() + '","respondentHandleDescription":"' + $('#respondentHandleDescription').val() + '"}';
                             $.ajax({
                                 "url" : url,
-                                "data" : {"userData":postData},
+                                "data" : {"complaintData":postData},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
@@ -305,11 +275,7 @@
                                         content: json.message
                                     });
                                     if (json.code === 200) {
-                                        obj.update({
-                                            gender: $('input[name=edit_user_gender]:checked').val()
-                                            ,address: $('#edit_user_address').val()
-                                            ,phoneNumber: $('#edit_user_phoneNumber').val()
-                                        });
+                                        layui.table.reload('complaintTable');
                                         layer.close(index);
                                     }
                                 },
@@ -487,64 +453,21 @@
         }
 
         /**
-         * 检查添加user时的表单
+         * 检查ComplaintHandle时的表单
          * @returns {boolean}
          */
-        function checkAddForm() {
-            if ($('#add_user_name').val().length === 0) {
+        function checkComplaintHandleForm() {
+            if ($('#complainantHandleDescription').val().length === 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请输入添加账号的用户名！"
+                    content: "请输入投诉人处理描述！"
                 });
                 return false;
             }
-            if ($('#add_user_password').val().length === 0) {
+            if (Number($('#respondentHandleCreditScore').val()) !== 0) {
                 layer.open({
                     title: "提示信息",
-                    content: "请输入添加账号的密码！"
-                });
-                return false;
-            }
-            if ($('#add_user_password').val() !== $('#add_user_rePassword').val()) {
-                layer.open({
-                    title: "提示信息",
-                    content: "两次输入的密码不一致！"
-                });
-                return false;
-            }
-            if ($('#add_user_address').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "请输入添加账号的地址！"
-                });
-                return false;
-            }
-            if ($('#add_user_phoneNumber').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "请输入添加账号的电话号码！"
-                });
-                return false;
-            }
-            return true;
-        }
-
-        /**
-         * 检查重置user密码的表单
-         * @returns {boolean}
-         */
-        function checkResetPasswordForm() {
-            if ($('#reset_password_new').val().length === 0) {
-                layer.open({
-                    title: "提示信息",
-                    content: "请输入新密码！"
-                });
-                return false;
-            }
-            if ($('#reset_password_new').val() !== $('#reset_password_renew').val()) {
-                layer.open({
-                    title: "提示信息",
-                    content: "两次输入的密码不一致！"
+                    content: "请输入被投诉人处理描述！"
                 });
                 return false;
             }
