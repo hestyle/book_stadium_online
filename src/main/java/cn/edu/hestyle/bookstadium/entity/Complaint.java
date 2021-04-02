@@ -41,14 +41,17 @@ public class Complaint {
     private Date complainedTime;
     /** 是否已处理 */
     private Integer hasHandled;
-    /** 处罚账号类型 */
-    private Integer punishAccountType;
-    /** 处罚账号对应的id，可能是用户id，也可能是动态、评论id */
-    private Integer punishAccountId;
-    /** 处罚账号减分数 */
-    private Integer punishCreditScore;
-    /** punishDescription */
-    private String punishDescription;
+    /** 投诉处理时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
+    private Date handledTime;
+    /** complainant处理分数 */
+    private Integer complainantHandleCreditScore;
+    /** complainant处理描述 */
+    private String complainantHandleDescription;
+    /** respondent处理分数 */
+    private Integer respondentHandleCreditScore;
+    /** respondent处理描述 */
+    private String respondentHandleDescription;
     /** 是否删除，0未删除，1已删除 */
     private Integer isDelete;
 
@@ -132,36 +135,44 @@ public class Complaint {
         this.hasHandled = hasHandled;
     }
 
-    public Integer getPunishAccountType() {
-        return punishAccountType;
+    public Date getHandledTime() {
+        return handledTime;
     }
 
-    public void setPunishAccountType(Integer punishAccountType) {
-        this.punishAccountType = punishAccountType;
+    public void setHandledTime(Date handledTime) {
+        this.handledTime = handledTime;
     }
 
-    public Integer getPunishAccountId() {
-        return punishAccountId;
+    public Integer getComplainantHandleCreditScore() {
+        return complainantHandleCreditScore;
     }
 
-    public void setPunishAccountId(Integer punishAccountId) {
-        this.punishAccountId = punishAccountId;
+    public void setComplainantHandleCreditScore(Integer complainantHandleCreditScore) {
+        this.complainantHandleCreditScore = complainantHandleCreditScore;
     }
 
-    public Integer getPunishCreditScore() {
-        return punishCreditScore;
+    public String getComplainantHandleDescription() {
+        return complainantHandleDescription;
     }
 
-    public void setPunishCreditScore(Integer punishCreditScore) {
-        this.punishCreditScore = punishCreditScore;
+    public void setComplainantHandleDescription(String complainantHandleDescription) {
+        this.complainantHandleDescription = complainantHandleDescription;
     }
 
-    public String getPunishDescription() {
-        return punishDescription;
+    public Integer getRespondentHandleCreditScore() {
+        return respondentHandleCreditScore;
     }
 
-    public void setPunishDescription(String punishDescription) {
-        this.punishDescription = punishDescription;
+    public void setRespondentHandleCreditScore(Integer respondentHandleCreditScore) {
+        this.respondentHandleCreditScore = respondentHandleCreditScore;
+    }
+
+    public String getRespondentHandleDescription() {
+        return respondentHandleDescription;
+    }
+
+    public void setRespondentHandleDescription(String respondentHandleDescription) {
+        this.respondentHandleDescription = respondentHandleDescription;
     }
 
     public Integer getIsDelete() {
@@ -185,10 +196,11 @@ public class Complaint {
                 ", imagePaths='" + imagePaths + '\'' +
                 ", complainedTime=" + complainedTime +
                 ", hasHandled=" + hasHandled +
-                ", punishAccountType=" + punishAccountType +
-                ", punishAccountId=" + punishAccountId +
-                ", punishCreditScore=" + punishCreditScore +
-                ", punishDescription='" + punishDescription + '\'' +
+                ", handledTime=" + handledTime +
+                ", complainantHandleCreditScore=" + complainantHandleCreditScore +
+                ", complainantHandleDescription='" + complainantHandleDescription + '\'' +
+                ", respondentHandleCreditScore=" + respondentHandleCreditScore +
+                ", respondentHandleDescription='" + respondentHandleDescription + '\'' +
                 ", isDelete=" + isDelete +
                 '}';
     }
@@ -209,10 +221,11 @@ public class Complaint {
         complaintVO.setImagePaths(imagePaths);
         complaintVO.setComplainedTime(complainedTime);
         complaintVO.setHasHandled(hasHandled);
-        complaintVO.setPunishAccountType(punishAccountType);
-        complaintVO.setPunishAccountId(punishAccountId);
-        complaintVO.setPunishCreditScore(punishCreditScore);
-        complaintVO.setPunishDescription(punishDescription);
+        complaintVO.setHandledTime(handledTime);
+        complaintVO.setComplainantHandleCreditScore(complainantHandleCreditScore);
+        complaintVO.setComplainantHandleDescription(complainantHandleDescription);
+        complaintVO.setRespondentHandleCreditScore(respondentHandleCreditScore);
+        complaintVO.setRespondentHandleDescription(respondentHandleDescription);
         complaintVO.setIsDelete(isDelete);
         return complaintVO;
     }

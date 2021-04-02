@@ -1,10 +1,8 @@
 package cn.edu.hestyle.bookstadium.service.impl;
 
-import cn.edu.hestyle.bookstadium.entity.Complaint;
-import cn.edu.hestyle.bookstadium.entity.ComplaintVO;
-import cn.edu.hestyle.bookstadium.entity.StadiumManager;
-import cn.edu.hestyle.bookstadium.entity.User;
+import cn.edu.hestyle.bookstadium.entity.*;
 import cn.edu.hestyle.bookstadium.mapper.ComplaintMapper;
+import cn.edu.hestyle.bookstadium.mapper.NoticeMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IComplaintService;
@@ -12,9 +10,11 @@ import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -24,14 +24,215 @@ import java.util.List;
  */
 @Service
 public class ComplaintServiceImpl implements IComplaintService {
+    /** 投诉人处理title、content */
+    private static final String COMPLAINANT_HANDLE_TITLE = "投诉处理";
+    private static final String COMPLAINANT_HANDLE_CONTENT = "系统已处理您的投诉【%s】，积分奖惩【%s】，奖惩描述【%s】";
+    /** 被投诉人处理title、content */
+    private static final String RESPONDENT_HANDLE_TITLE = "投诉处理";
+    private static final String RESPONDENT_HANDLE_CONTENT = "您的账号被其他用户投诉【%s...】，积分奖惩【%s】，奖惩描述【%s】";
     private static final Logger logger = LoggerFactory.getLogger(ComplaintServiceImpl.class);
 
+    @Resource
+    private NoticeMapper noticeMapper;
     @Resource
     private UserMapper userMapper;
     @Resource
     private StadiumManagerMapper stadiumManagerMapper;
     @Resource
     private ComplaintMapper complaintMapper;
+
+    @Override
+    @Transactional
+    public void systemManagerHandle(Complaint complaint) {
+        if (complaint == null || complaint.getId() == null) {
+            logger.warn("Complaint 处理失败，未指定需要处理的投诉！");
+            throw new FindFailedException("操作失败，未指定需要处理的投诉！");
+        }
+        Complaint complaintModify = null;
+        try {
+            complaintModify = complaintMapper.findById(complaint.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 查找失败，数据库发生未知错误！complaintId = " + complaint.getId());
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        if (complaintModify == null) {
+            logger.warn("Complaint 处理失败，不存在该投诉！complaint = " + complaint);
+            throw new FindFailedException("操作失败，不存在该投诉！");
+        }
+        if (complaintModify.getHasHandled() != 0) {
+            logger.warn("Complaint 尝试处理已经处理的投诉！complaintModify = " + complaintModify);
+            throw new FindFailedException("操作失败，该投诉已经处理！");
+        }
+        // 投诉人处理
+        Integer complainantHandleCreditScore = complaint.getComplainantHandleCreditScore();
+        if (complainantHandleCreditScore == null) {
+            logger.warn("Complaint 未填写投诉人的积分奖惩！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写投诉人的积分奖惩！");
+        }
+        String complainantHandleDescription = complaint.getComplainantHandleDescription();
+        if (complainantHandleDescription == null || complainantHandleDescription.length() == 0) {
+            logger.warn("Complaint 未填写投诉人的处理描述！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写投诉人的处理描述！");
+        }
+        // Complainant积分更新
+        complaintModify.setComplainantHandleCreditScore(complainantHandleCreditScore);
+        complaintModify.setComplainantHandleDescription(complainantHandleDescription);
+        if (!complainantHandleCreditScore.equals(0)) {
+            // 投诉人的积分发生了变化，更新user/stadiumManager表
+            if (complaintModify.getComplainantAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_USER)) {
+                User complainantUser = null;
+                try {
+                    complainantUser = userMapper.findById(complaintModify.getComplainantAccountId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.warn("User 查找失败，数据库发生未知错误！complainantUserId = " + complaintModify.getComplainantAccountId());
+                    throw new FindFailedException("操作失败，数据库发生未知错误！");
+                }
+                if (complainantUser != null) {
+                    complainantUser.setCreditScore(complainantUser.getCreditScore() + complaintModify.getComplainantHandleCreditScore());
+                    complainantUser.setModifiedUser("System");
+                    complainantUser.setModifiedTime(new Date());
+                    try {
+                        userMapper.update(complainantUser);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("User 更新失败，数据库发生未知错误！complainantUser = " + complainantUser);
+                        throw new FindFailedException("操作失败，数据库发生未知错误！");
+                    }
+                    logger.warn("User 更新成功！complainantUser = " + complainantUser);
+                }
+            } else if (complaintModify.getComplainantAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_STADIUM_MANAGER)) {
+                StadiumManager complainantStadiumManager = null;
+                try {
+                    complainantStadiumManager = stadiumManagerMapper.findById(complaintModify.getComplainantAccountId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.warn("StadiumManager 查找失败，数据库发生未知错误！complainantStadiumManager = " + complaintModify.getComplainantAccountId());
+                    throw new FindFailedException("操作失败，数据库发生未知错误！");
+                }
+                if (complainantStadiumManager != null) {
+                    complainantStadiumManager.setCreditScore(complainantStadiumManager.getCreditScore() + complaintModify.getComplainantHandleCreditScore());
+                    complainantStadiumManager.setModifiedUser("System");
+                    complainantStadiumManager.setModifiedTime(new Date());
+                    try {
+                        stadiumManagerMapper.update(complainantStadiumManager);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("StadiumManager 更新失败，数据库发生未知错误！complainantStadiumManager = " + complainantStadiumManager);
+                        throw new FindFailedException("操作失败，数据库发生未知错误！");
+                    }
+                    logger.warn("StadiumManager 更新成功！complainantStadiumManager = " + complainantStadiumManager);
+                }
+            }
+        }
+        // 发送投诉处理通知
+        Notice complainantNotice = new Notice();
+        complainantNotice.setToAccountType(complaintModify.getComplainantAccountType());
+        complainantNotice.setAccountId(complaintModify.getComplainantAccountId());
+        complainantNotice.setTitle(COMPLAINANT_HANDLE_TITLE);
+        complainantNotice.setContent(String.format(COMPLAINANT_HANDLE_CONTENT, complaintModify.getTitle(), complaintModify.getComplainantHandleCreditScore(), complaintModify.getComplainantHandleDescription()));
+        complainantNotice.setGeneratedTime(new Date());
+        complainantNotice.setIsDelete(0);
+        try {
+            noticeMapper.add(complainantNotice);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Notice 添加失败，数据库发生未知错误！complainantNotice = " + complainantNotice);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        // 被投诉人处理
+        Integer respondentHandleCreditScore = complaint.getRespondentHandleCreditScore();
+        if (respondentHandleCreditScore == null) {
+            logger.warn("Complaint 未填写被投诉人的积分奖惩！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写被投诉人的积分奖惩！");
+        }
+        String respondentHandleDescription = complaint.getRespondentHandleDescription();
+        if (!respondentHandleCreditScore.equals(0) && (respondentHandleDescription == null || respondentHandleDescription.length() == 0)) {
+            logger.warn("Complaint 未填写被投诉人的处理描述！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写被投诉人的处理描述！");
+        }
+        // Complainant积分更新
+        complaintModify.setRespondentHandleCreditScore(respondentHandleCreditScore);
+        complaintModify.setRespondentHandleDescription(respondentHandleDescription);
+        if (!respondentHandleCreditScore.equals(0)) {
+            // 被投诉人的积分发生了变化，更新user/stadiumManager表
+            if (complaintModify.getRespondentAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_USER)) {
+                User respondentUser = null;
+                try {
+                    respondentUser = userMapper.findById(complaintModify.getRespondentAccountId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.warn("User 查找失败，数据库发生未知错误！respondentUserId = " + complaintModify.getRespondentAccountId());
+                    throw new FindFailedException("操作失败，数据库发生未知错误！");
+                }
+                if (respondentUser != null) {
+                    respondentUser.setCreditScore(respondentUser.getCreditScore() + complaintModify.getRespondentHandleCreditScore());
+                    respondentUser.setModifiedUser("System");
+                    respondentUser.setModifiedTime(new Date());
+                    try {
+                        userMapper.update(respondentUser);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("User 更新失败，数据库发生未知错误！respondentUser = " + respondentUser);
+                        throw new FindFailedException("操作失败，数据库发生未知错误！");
+                    }
+                    logger.warn("User 更新成功！respondentUser = " + respondentUser);
+                }
+            } else if (complaintModify.getRespondentAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_STADIUM_MANAGER)) {
+                StadiumManager respondentStadiumManager = null;
+                try {
+                    respondentStadiumManager = stadiumManagerMapper.findById(complaintModify.getRespondentAccountId());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.warn("StadiumManager 查找失败，数据库发生未知错误！respondentStadiumManagerId = " + complaintModify.getRespondentAccountId());
+                    throw new FindFailedException("操作失败，数据库发生未知错误！");
+                }
+                if (respondentStadiumManager != null) {
+                    respondentStadiumManager.setCreditScore(respondentStadiumManager.getCreditScore() + complaintModify.getRespondentAccountId());
+                    respondentStadiumManager.setModifiedUser("System");
+                    respondentStadiumManager.setModifiedTime(new Date());
+                    try {
+                        stadiumManagerMapper.update(respondentStadiumManager);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        logger.warn("StadiumManager 更新失败，数据库发生未知错误！respondentStadiumManager = " + respondentStadiumManager);
+                        throw new FindFailedException("操作失败，数据库发生未知错误！");
+                    }
+                    logger.warn("StadiumManager 更新成功！respondentStadiumManager = " + respondentStadiumManager);
+                }
+            }
+        }
+        if (respondentHandleDescription != null && respondentHandleDescription.length() != 0) {
+            // 发送被投诉处理通知
+            Notice respondentNotice = new Notice();
+            respondentNotice.setToAccountType(complaintModify.getRespondentAccountType());
+            respondentNotice.setAccountId(complaintModify.getRespondentAccountId());
+            respondentNotice.setTitle(RESPONDENT_HANDLE_TITLE);
+            respondentNotice.setContent(String.format(RESPONDENT_HANDLE_CONTENT, complaintModify.getDescription(), complaintModify.getRespondentHandleCreditScore(), complaintModify.getRespondentHandleDescription()));
+            respondentNotice.setGeneratedTime(new Date());
+            respondentNotice.setIsDelete(0);
+            try {
+                noticeMapper.add(respondentNotice);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Notice 添加失败，数据库发生未知错误！respondentNotice = " + respondentNotice);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            logger.warn("Notice 添加成功！respondentNotice = " + respondentNotice);
+        }
+        // 更新
+        complaintModify.setHasHandled(1);
+        complaintModify.setHandledTime(new Date());
+        try {
+            complaintMapper.update(complaintModify);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 更新失败，数据库发生未知错误！complaintModify = " + complaintModify);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        logger.warn("Complaint 更新成功！complaintModify = " + complaintModify);
+    }
 
     @Override
     public List<ComplaintVO> systemManagerFindAllByPage(Integer pageIndex, Integer pageSize, String titleKey) {
@@ -142,36 +343,6 @@ public class ComplaintServiceImpl implements IComplaintService {
             if (respondentStadiumManager != null) {
                 complaintVO.setRespondentUsername(respondentStadiumManager.getUsername());
                 complaintVO.setRespondentAvatarPath(respondentStadiumManager.getAvatarPath());
-            }
-        }
-        if (complaintVO.getPunishAccountType() != null) {
-            // 填充被处罚账号信息
-            if (complaintVO.getPunishAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_USER)) {
-                User punishUser = null;
-                try {
-                    punishUser = userMapper.findById(complaintVO.getPunishAccountId());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    logger.warn("User 查找失败，数据库发生未知错误！punishUserId = " + complaintVO.getPunishAccountId());
-                    throw new FindFailedException("查找失败，数据库发生未知错误！");
-                }
-                if (punishUser != null) {
-                    complaintVO.setPunishUsername(punishUser.getUsername());
-                    complaintVO.setPunishAvatarPath(punishUser.getAvatarPath());
-                }
-            } else if (complaintVO.getPunishAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_STADIUM_MANAGER)) {
-                StadiumManager punishStadiumManager = null;
-                try {
-                    punishStadiumManager = stadiumManagerMapper.findById(complaintVO.getPunishAccountId());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    logger.warn("StadiumManager 查找失败，数据库发生未知错误！punishStadiumManagerId = " + complaintVO.getPunishAccountId());
-                    throw new FindFailedException("查找失败，数据库发生未知错误！");
-                }
-                if (punishStadiumManager != null) {
-                    complaintVO.setPunishUsername(punishStadiumManager.getUsername());
-                    complaintVO.setPunishAvatarPath(punishStadiumManager.getAvatarPath());
-                }
             }
         }
         return complaintVO;

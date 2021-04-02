@@ -1,5 +1,6 @@
 package cn.edu.hestyle.bookstadium.service;
 
+import cn.edu.hestyle.bookstadium.entity.Complaint;
 import cn.edu.hestyle.bookstadium.entity.ComplaintVO;
 
 import java.util.List;
@@ -10,6 +11,12 @@ import java.util.List;
  * @date 2021/4/2 10:54 上午
  */
 public interface IComplaintService {
+    /**
+     * systemManager处理complaint
+     * @param complaint     complaint
+     */
+    void systemManagerHandle(Complaint complaint);
+
     /**
      * 分页查询Complaint（未删除）
      * @param pageIndex     pageIndex

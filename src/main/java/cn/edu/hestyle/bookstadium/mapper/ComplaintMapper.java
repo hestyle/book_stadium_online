@@ -14,6 +14,19 @@ import java.util.List;
 public interface ComplaintMapper {
 
     /**
+     * 更新complaint(has_handled、handled_time、complainant_handle_credit_score等字段)
+     * @param complaint         complaint
+     */
+    void update(Complaint complaint);
+
+    /**
+     * 通过complaintId查找
+     * @param complaintId       complaintId
+     * @return                  Complaint
+     */
+    Complaint findById(Integer complaintId);
+
+    /**
      * 查找所有的Complaint（未删除）
      * @param beginIndex        beginIndex
      * @param pageSize          pageSize

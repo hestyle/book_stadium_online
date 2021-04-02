@@ -2,6 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ComplaintMapper">
+    <!--更新complaint(has_handled、handled_time、complainant_handle_credit_score等字段)-->
+    <!--void update(Complaint complaint);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Complaint">
+        UPDATE `t_complaint` SET
+            `has_handled` = #{hasHandled},
+            `handled_time` = #{handledTime},
+            `complainant_handle_credit_score` = #{complainantHandleCreditScore},
+            `complainant_handle_description` = #{complainantHandleDescription},
+            `respondent_handle_credit_score` = #{respondentHandleCreditScore},
+            `respondent_handle_description` = #{respondentHandleDescription},
+            `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过complaintId查找-->
+    <!--Complaint findById(Integer complaintId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Complaint">
+        SELECT
+            `id` as `id`,
+            `complainant_account_type` as `complainantAccountType`,
+            `complainant_account_id` as `complainantAccountId`,
+            `respondent_account_type` as `respondentAccountType`,
+            `respondent_account_id` as `respondentAccountId`,
+            `title` as  `title`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `complained_time` as `complainedTime`,
+            `has_handled` as `hasHandled`,
+            `handled_time` as `handledTime`,
+            `complainant_handle_credit_score` as `complainantHandleCreditScore`,
+            `complainant_handle_description` as `complainantHandleDescription`,
+            `respondent_handle_credit_score` as `respondentHandleCreditScore`,
+            `respondent_handle_description` as `respondentHandleDescription`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_complaint`
+        WHERE
+            `id` = #{complaintId} AND `is_delete` = 0
+    </select>
     <!--查找所有的Complaint（未删除）-->
     <!--List<Complaint> findAllByPage(Integer beginIndex, Integer pageSize, String titleKey);-->
     <select id="findAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.Complaint">
@@ -16,10 +55,11 @@
             `image_paths` as `imagePaths`,
             `complained_time` as `complainedTime`,
             `has_handled` as `hasHandled`,
-            `punish_account_type` as `punishAccountType`,
-            `punish_account_id` as `punishAccountId`,
-            `punish_credit_score` as `punishCreditScore`,
-            `punish_description` as `punishDescription`,
+            `handled_time` as `handledTime`,
+            `complainant_handle_credit_score` as `complainantHandleCreditScore`,
+            `complainant_handle_description` as `complainantHandleDescription`,
+            `respondent_handle_credit_score` as `respondentHandleCreditScore`,
+            `respondent_handle_description` as `respondentHandleDescription`,
             `is_delete` as `isDelete`
         FROM
             `t_complaint`

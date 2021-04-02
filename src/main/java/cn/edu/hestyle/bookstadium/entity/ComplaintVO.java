@@ -40,18 +40,17 @@ public class ComplaintVO {
     private Date complainedTime;
     /** 是否已处理 */
     private Integer hasHandled;
-    /** 处罚账号类型 */
-    private Integer punishAccountType;
-    /** 处罚账号对应的id，可能是用户id，也可能是动态、评论id */
-    private Integer punishAccountId;
-    /** 处罚账号username */
-    private String punishUsername;
-    /** 处罚账号avatarPath */
-    private String punishAvatarPath;
-    /** 处罚账号减分数 */
-    private Integer punishCreditScore;
-    /** punishDescription */
-    private String punishDescription;
+    /** 投诉处理时间 */
+    @JsonFormat(pattern = ResponseResult.DATETIME_FORMAT, timezone = "GMT+8")
+    private Date handledTime;
+    /** complainant处理分数 */
+    private Integer complainantHandleCreditScore;
+    /** complainant处理描述 */
+    private String complainantHandleDescription;
+    /** respondent处理分数 */
+    private Integer respondentHandleCreditScore;
+    /** respondent处理描述 */
+    private String respondentHandleDescription;
     /** 是否删除，0未删除，1已删除 */
     private Integer isDelete;
 
@@ -167,52 +166,44 @@ public class ComplaintVO {
         this.hasHandled = hasHandled;
     }
 
-    public Integer getPunishAccountType() {
-        return punishAccountType;
+    public Date getHandledTime() {
+        return handledTime;
     }
 
-    public void setPunishAccountType(Integer punishAccountType) {
-        this.punishAccountType = punishAccountType;
+    public void setHandledTime(Date handledTime) {
+        this.handledTime = handledTime;
     }
 
-    public Integer getPunishAccountId() {
-        return punishAccountId;
+    public Integer getComplainantHandleCreditScore() {
+        return complainantHandleCreditScore;
     }
 
-    public void setPunishAccountId(Integer punishAccountId) {
-        this.punishAccountId = punishAccountId;
+    public void setComplainantHandleCreditScore(Integer complainantHandleCreditScore) {
+        this.complainantHandleCreditScore = complainantHandleCreditScore;
     }
 
-    public String getPunishUsername() {
-        return punishUsername;
+    public String getComplainantHandleDescription() {
+        return complainantHandleDescription;
     }
 
-    public void setPunishUsername(String punishUsername) {
-        this.punishUsername = punishUsername;
+    public void setComplainantHandleDescription(String complainantHandleDescription) {
+        this.complainantHandleDescription = complainantHandleDescription;
     }
 
-    public String getPunishAvatarPath() {
-        return punishAvatarPath;
+    public Integer getRespondentHandleCreditScore() {
+        return respondentHandleCreditScore;
     }
 
-    public void setPunishAvatarPath(String punishAvatarPath) {
-        this.punishAvatarPath = punishAvatarPath;
+    public void setRespondentHandleCreditScore(Integer respondentHandleCreditScore) {
+        this.respondentHandleCreditScore = respondentHandleCreditScore;
     }
 
-    public Integer getPunishCreditScore() {
-        return punishCreditScore;
+    public String getRespondentHandleDescription() {
+        return respondentHandleDescription;
     }
 
-    public void setPunishCreditScore(Integer punishCreditScore) {
-        this.punishCreditScore = punishCreditScore;
-    }
-
-    public String getPunishDescription() {
-        return punishDescription;
-    }
-
-    public void setPunishDescription(String punishDescription) {
-        this.punishDescription = punishDescription;
+    public void setRespondentHandleDescription(String respondentHandleDescription) {
+        this.respondentHandleDescription = respondentHandleDescription;
     }
 
     public Integer getIsDelete() {
@@ -240,12 +231,11 @@ public class ComplaintVO {
                 ", imagePaths='" + imagePaths + '\'' +
                 ", complainedTime=" + complainedTime +
                 ", hasHandled=" + hasHandled +
-                ", punishAccountType=" + punishAccountType +
-                ", punishAccountId=" + punishAccountId +
-                ", punishUsername='" + punishUsername + '\'' +
-                ", punishAvatarPath='" + punishAvatarPath + '\'' +
-                ", punishCreditScore=" + punishCreditScore +
-                ", punishDescription='" + punishDescription + '\'' +
+                ", handledTime=" + handledTime +
+                ", complainantHandleCreditScore=" + complainantHandleCreditScore +
+                ", complainantHandleDescription='" + complainantHandleDescription + '\'' +
+                ", respondentHandleCreditScore=" + respondentHandleCreditScore +
+                ", respondentHandleDescription='" + respondentHandleDescription + '\'' +
                 ", isDelete=" + isDelete +
                 '}';
     }
