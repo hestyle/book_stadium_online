@@ -94,7 +94,7 @@
                         </div>
                     </div>
                 </div>
-                <div style="width: 48%;border:1px solid #000;border-radius:5px;">
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;margin-left: 5px;">
                     <label style="display: block;text-align: center;">被投诉人奖惩</label>
                     <div class="layui-form-item" id="respondentHandleCreditScoreDiv">
                         <label id="respondentHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
@@ -293,47 +293,46 @@
                             layer.close(index);
                         }
                     });
-                } else if (layEvent === 'resetPassword') {
+                } else if (layEvent === 'complaintCheck') {
                     layer.open({
                         type: 1,
-                        title: '重置用户' + data.username + " 登录密码",
-                        area:['520px','60%'],
-                        content: $('#resetPasswordDialog').html(),
-                        btn: ['保存', '取消'],
-                        yes: function (index, layero) {
-                            if (checkResetPasswordForm() === false) {
-                                return false;
-                            }
-                            // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/user/systemManagerResetPassword.do";
-                            var postData = {"userId":data.id, "newPassword":$('#reset_password_new').val()};
-                            $.ajax({
-                                "url" : url,
-                                "data" : postData,
-                                "type" : "POST",
-                                "dataType" : "json",
-                                "beforeSend": function (request) {
-                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
-                                },
-                                "success" : function (json) {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: json.message
-                                    });
-                                    if (json.code === 200) {
-                                        layer.close(index);
-                                    }
-                                },
-                                "error" : function () {
-                                    // 弹出中间提示框
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: "保存失败，出现未知异常！"
-                                    });
+                        title: '处理投诉【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#complaintHandleDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            $('#complaintHandleComplainantUsername').text(data.complainantUsername);
+                            $('#complaintHandleComplainantAvatar').attr('src', data.complainantAvatarPath);
+                            $('#complaintHandleRespondentUsername').text(data.respondentUsername);
+                            $('#complaintHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#complaintHandleTitle').val(data.title);
+                            $('#complaintHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#complaintHandleImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
                                 }
-                            });
+                            }
+                            if (data.complainantHandleCreditScore !== null) {
+                                $('#complainantHandleCreditScore').val(data.complainantHandleCreditScore);
+                            }
+                            if (data.complainantHandleDescription !== null) {
+                                $('#complainantHandleDescription').val(data.complainantHandleDescription);
+                            }
+                            if (data.respondentHandleCreditScore !== null) {
+                                $('#respondentHandleCreditScore').val(data.respondentHandleCreditScore);
+                            }
+                            if (data.respondentHandleDescription !== null) {
+                                $('#respondentHandleDescription').val(data.respondentHandleDescription);
+                            }
+                            $("#complaintHandleTitle").attr("readonly","readonly");
+                            $("#complainantHandleCreditScore").attr("readonly","readonly");
+                            $("#complainantHandleDescription").attr("readonly","readonly");
+                            $("#respondentHandleCreditScore").attr("readonly","readonly");
+                            $("#respondentHandleDescription").attr("readonly","readonly");
+                            form.render();
                         },
-                        btn2: function (index, layero) {
+                        yes: function (index, layero) {
                             layer.close(index);
                         }
                     });
