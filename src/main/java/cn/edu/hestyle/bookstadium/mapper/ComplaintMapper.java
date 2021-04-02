@@ -19,11 +19,11 @@ public interface ComplaintMapper {
      * @param pageSize          pageSize
      * @return                  List Complaint
      */
-    List<Complaint> findAllByPage(Integer beginIndex, Integer pageSize);
+    List<Complaint> findAllByPage(Integer beginIndex, Integer pageSize, String titleKey);
 
     /**
      * 获取所有未删除的Complaint数量
      * @return                  未删除的Complaint数量
      */
-    Integer getAllCount();
+    Integer getAllCount(String titleKey);
 }

@@ -16,11 +16,11 @@ public interface IComplaintService {
      * @param pageSize      pageSize
      * @return              List ComplaintVO
      */
-    List<ComplaintVO> systemManagerFindAllByPage(Integer pageIndex, Integer pageSize);
+    List<ComplaintVO> systemManagerFindAllByPage(Integer pageIndex, Integer pageSize, String titleKey);
 
     /**
      * 获取所有未删除的Complaint数量
      * @return              未删除的Complaint数量
      */
-    Integer getAllCount();
+    Integer getAllCount(String titleKey);
 }

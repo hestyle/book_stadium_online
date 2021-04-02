@@ -28,11 +28,12 @@ public class ComplaintController extends BaseController {
 
     @PostMapping("/systemManagerFindAllByPage.do")
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
-    public ResponseResult<List<ComplaintVO>> handleSystemManagerFindAllByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+    public ResponseResult<List<ComplaintVO>> handleSystemManagerFindAllByPage(@RequestParam(value = "titleKey", defaultValue = "") String titleKey,
+                                                                              @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
                                                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                                                                               HttpSession session) {
-        List<ComplaintVO> complaintVOList = complaintService.systemManagerFindAllByPage(pageIndex, pageSize);
-        Integer count = complaintService.getAllCount();
+        List<ComplaintVO> complaintVOList = complaintService.systemManagerFindAllByPage(pageIndex, pageSize, titleKey);
+        Integer count = complaintService.getAllCount(titleKey);
         return new ResponseResult<List<ComplaintVO>>(SUCCESS, count, complaintVOList, "查询成功！");
     }
 }

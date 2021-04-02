@@ -3,7 +3,7 @@
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ComplaintMapper">
     <!--查找所有的Complaint（未删除）-->
-    <!--List<Complaint> findAllByPage(Integer beginIndex, Integer pageSize);-->
+    <!--List<Complaint> findAllByPage(Integer beginIndex, Integer pageSize, String titleKey);-->
     <select id="findAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.Complaint">
         SELECT
             `id` as `id`,
@@ -25,13 +25,16 @@
             `t_complaint`
         WHERE
             `is_delete` = 0
+        <if test="titleKey != null and titleKey.length != 0">
+            AND `title` LIKE CONCAT('%', #{titleKey}, '%')
+        </if>
         ORDER BY
             `complained_time` DESC
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
     <!--获取所有未删除的Complaint数量-->
-    <!--Integer getAllCount();-->
+    <!--Integer getAllCount(String titleKey);-->
     <select id="getAllCount" resultType="java.lang.Integer">
         SELECT
             COUNT(`id`)
@@ -39,5 +42,8 @@
             `t_complaint`
         WHERE
             `is_delete` = 0
+        <if test="titleKey != null and titleKey.length != 0">
+            AND `title` LIKE CONCAT('%', #{titleKey}, '%')
+        </if>
     </select>
 </mapper>

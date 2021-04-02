@@ -34,7 +34,7 @@ public class ComplaintServiceImpl implements IComplaintService {
     private ComplaintMapper complaintMapper;
 
     @Override
-    public List<ComplaintVO> systemManagerFindAllByPage(Integer pageIndex, Integer pageSize) {
+    public List<ComplaintVO> systemManagerFindAllByPage(Integer pageIndex, Integer pageSize, String titleKey) {
         // 检查页码是否合法
         if (pageIndex < 1) {
             throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
@@ -43,9 +43,13 @@ public class ComplaintServiceImpl implements IComplaintService {
         if (pageSize < 1) {
             throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
         }
+        // 去除titleKey中的特殊字符
+        if (titleKey != null && titleKey.length() != 0) {
+            titleKey = titleKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         List<Complaint> complaintList = null;
         try {
-            complaintList = complaintMapper.findAllByPage((pageIndex - 1) * pageSize, pageSize);
+            complaintList = complaintMapper.findAllByPage((pageIndex - 1) * pageSize, pageSize, titleKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Complaint 查找失败，数据库发生未知错误！pageIndex = " + pageIndex + "，pageSize = " + pageSize);
@@ -61,10 +65,14 @@ public class ComplaintServiceImpl implements IComplaintService {
     }
 
     @Override
-    public Integer getAllCount() {
+    public Integer getAllCount(String titleKey) {
+        // 去除titleKey中的特殊字符
+        if (titleKey != null && titleKey.length() != 0) {
+            titleKey = titleKey.replaceAll("%", "").replaceAll("'", "").replaceAll("\\?", "");
+        }
         Integer count = 0;
         try {
-            count = complaintMapper.getAllCount();
+            count = complaintMapper.getAllCount(titleKey);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("Complaint 数量查找失败，数据库发生未知错误！");
