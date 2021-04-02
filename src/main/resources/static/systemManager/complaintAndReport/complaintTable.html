@@ -24,9 +24,9 @@
     <body>
         <div class="div-search">
             <div class="layui-inline">
-                <input class="layui-input" id="usernameKey" autocomplete="off" placeholder="请输入用户名关键字" style="width: 300px;">
+                <input class="layui-input" id="titleKey" autocomplete="off" placeholder="请输入投诉标题关键字" style="width: 300px;">
             </div>
-            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchUserButton">搜索</button>
+            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchComplaintButton">搜索</button>
         </div>
         <table id="complaintTable" lay-filter="test"></table>
     </body>
@@ -466,21 +466,21 @@
                 }
             });
 
-            $('#searchUserButton').on('click', function () {
-                if ($('#usernameKey').val().length === 0) {
+            $('#searchComplaintButton').on('click', function () {
+                if ($('#titleKey').val().length === 0) {
                     layer.open({
                         title: '提示信息',
-                        content: "请输入用户名关键字！"
+                        content: "请输入投诉标题关键字！"
                     });
                     return false;
                 }
-                var usernameKey = $('#usernameKey').val();
+                var titleKey = $('#titleKey').val();
                 layui.table.reload('complaintTable', {
                     page: {
                         curr: 1
                     }
                     ,where: {
-                        usernameKey: usernameKey
+                        titleKey: titleKey
                     }
                 });
             });
