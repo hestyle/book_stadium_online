@@ -162,9 +162,10 @@
     <!--complaint表 ImagePaths col模板-->
     <script type="text/html" id="complaintImagePathsTemplate">
         {{#  if(d.imagePaths !== null && d.imagePaths.length !== 0){ }}
-            <img src="{{d.avatarPath}}" style="width: 30px;height: 30px;"/>
-        {{#  } else { }}
-            <label>无</label>
+            {{#  var imagePaths = d.imagePaths.split(','); }}
+            {{#  for (var i in imagePaths) { }}
+                <img src="{{imagePaths[i]}}" style="width: 15px;height: 35px;margin-right: 5px">
+            {{#  } }}
         {{#  } }}
     </script>
     <!--complaint表 HasHandled col模板-->
