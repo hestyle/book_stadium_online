@@ -62,7 +62,7 @@
 	<update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.StadiumManager">
 		UPDATE `t_stadium_manager` SET
 			`password` = #{password}, `gender` = #{gender}, `address` = #{address}, `phone_number` = #{phoneNumber}, `is_delete` = #{isDelete}, `avatar_path` = #{avatarPath},
-			`is_authenticate` = #{isAuthenticate}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}, `token` = #{token}
+			`is_authenticate` = #{isAuthenticate}, `credit_score` = #{creditScore}, `modified_user` = #{modifiedUser}, `modified_time` = #{modifiedTime}, `token` = #{token}
 		WHERE
 			`id` = #{id}
 	</update>

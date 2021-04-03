@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>举报内容列表</title>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
+</head>
+    <style>
+        .layui-form-checked[lay-skin=primary] i {
+            border-color: #FF0000;
+            background-color: #FF0000;
+        }
+        .layui-laypage .layui-laypage-curr .layui-laypage-em {
+            background-color: #0090FF;
+        }
+    </style>
+    <body>
+        <div class="div-search">
+            <div class="layui-inline">
+                <input class="layui-input" id="titleKey" autocomplete="off" placeholder="请输入举报标题关键字" style="width: 300px;">
+            </div>
+            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchReportButton">搜索</button>
+        </div>
+        <table id="reportTable" lay-filter="test"></table>
+    </body>
+    <!--每条数据的操作栏-->
+    <script type="text/html" id="barDemo">
+        {{#  if(d.hasHandled === 0){ }}
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="reportHandle">处理</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="reportCheck">查看</a>
+        {{#  } }}
+        <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="reportDelete">删除</a>
+    </script>
+    <!--reportHandle操作-->
+    <script type="text/html" id="reportHandleDialog">
+        <form id="reportHandleForm" class="layui-form" action="" style="padding: 20px;width: 800px;" lay-filter="reportHandleDialogForm">
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 30%;">
+                    <label id="reportHandleReporterUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="reportHandleReporterAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label style="display: block;text-align: center;margin-top: 10px;">举报</label>
+                    <div style="display: flex;justify-content: center;">
+                        <img src="/book_stadium_online/image/arrow_red.png" style="width: 40px;height: 25px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label id="reportHandleRespondentUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="reportHandleRespondentAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">举报标题</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="reportHandleTitle" type="text" placeholder="举报标题" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">举报描述</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <textarea id="reportHandleDescription"  placeholder="举报描述" class="layui-textarea" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">举报图片</label>
+                <div class="layui-input-inline" id="reportHandleImages" style="width: 70%;"></div>
+            </div>
+            <div id="reportSportMoment" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+                <label style="display: block;text-align: center;">举报的用户动态</label>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">内容</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportSportMomentContent"  placeholder="动态的文字内容" class="layui-textarea" readonly></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">图片</label>
+                    <div id="reportSportMomentImages" class="layui-input-inline" style="width: 60%;"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">发表时间</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <input id="reportSportMomentSentTime" type="text" placeholder="动态的发表时间" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div>
+            <div id="reportSportMomentComment" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+                <label style="display: block;text-align: center;">举报的用户动态评论</label>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">内容</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportSportMomentCommentContent"  placeholder="评论的文字内容" class="layui-textarea" readonly></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">发表时间</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <input id="reportSportMomentCommentCommentedTime" type="text" placeholder="评论的发表时间" class="layui-input" readonly>
+                    </div>
+                </div>
+            </div>
+            <div id="reportStadium" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+                <label style="display: block;text-align: center;">举报的体育场馆</label>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆名称</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <input id="reportStadiumName" type="text" placeholder="场馆名称" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆地址</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <input id="reportStadiumAddress" type="text" placeholder="场馆地址" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆描述</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportStadiumDescription"  placeholder="场馆描述" class="layui-textarea" readonly></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆图片</label>
+                    <div class="layui-input-inline" style="width: 60%;" id="reportStadiumImages"></div>
+                </div>
+            </div>
+            <div id="reportStadiumComment" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+                <label style="display: block;text-align: center;">举报的体育场馆评论</label>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆评论内容</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportStadiumCommentContent"  placeholder="评论的文字内容" class="layui-textarea" readonly></textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">发表时间</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <input id="reportStadiumCommentCommentedTime" type="text" placeholder="评论的发表时间" class="layui-input" readonly>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">场馆管理员回复</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportStadiumCommentManagerReply" type="text" placeholder="场馆管理员回复" class="layui-textarea" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;">
+                    <label style="display: block;text-align: center;">举报人奖惩</label>
+                    <div class="layui-form-item" id="reportHandleCreditScoreDiv">
+                        <label id="reportHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="reporterHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="reporterHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;margin-left: 5px;">
+                    <label style="display: block;text-align: center;">被举报人奖惩</label>
+                    <div class="layui-form-item" id="respondentHandleCreditScoreDiv">
+                        <label id="respondentHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="respondentHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="respondentHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="reportContentHandleReusltDiv" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+                <label id="reportContentTypeTitle" style="display: block;text-align: center;">举报的内容类型标题</label>
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">处理</label>
+                    <div class="layui-input-inline" style="width: 60%;" id="reportContentHandleDiv">
+                        <input type="radio" id="reportContentHandleNo" name="reportContentHandle" value="0" title="暂不处理" checked>
+                        <input type="radio" id="reportContentHandleDelete" name="reportContentHandle" value="1" title="删除">
+                    </div>
+                    <label id="reportStadiumHandleTips" style="color: red;display: none;">体育场馆删除操作会影响已经预约的用户，请在 体育场馆场馆管理->体育场馆列表 页面进行删除操作！</label>
+                </div>
+                <div id="reportContentHandleDescriptionDiv" class="layui-form-item">
+                    <label class="layui-form-label" style="width: 20%;">处理描述</label>
+                    <div class="layui-input-inline" style="width: 60%;">
+                        <textarea id="reportContentHandleDescription"  placeholder="请输入被举报内容处理描述" class="layui-textarea"></textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--report删除数据操作-->
+    <script type="text/html" id="deleteReportDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="deleteReportDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">提示：</label>
+                <div class="layui-input-inline">
+                    <label style="width: 140%;color: red;text-align: left;">举报删除后无法处理，且无法恢复！</label>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">删除原因</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteReportReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--report表 ImagePaths col模板-->
+    <script type="text/html" id="reportImagePathsTemplate">
+        {{#  if(d.imagePaths !== null && d.imagePaths.length !== 0){ }}
+            {{#  var imagePaths = d.imagePaths.split(','); }}
+            {{#  for (var i in imagePaths) { }}
+                <img src="{{imagePaths[i]}}" style="width: 15px;height: 35px;margin-right: 5px">
+            {{#  } }}
+        {{#  } }}
+    </script>
+    <!--report表 HasHandled col模板-->
+    <script type="text/html" id="reportHasHandledTemplate">
+        {{#  if(d.hasHandled === 0){ }}
+            <label style="color: red;">待处理</label>
+        {{#  } else if (d.hasHandled === 1) { }}
+            <label style="color: black;">已处理</label>
+        {{#  } }}
+    </script>
+    <script>
+        layui.config({
+            base: '../../plugins/soulTable/',
+            version: 'v1.5.20'
+        }).extend({
+            soulTable: 'soulTable/soulTable.slim'
+        });
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable', 'laydate'];
+        function mounted() {
+            table.render({
+                elem: '#reportTable'
+                , height: 500
+                , defaultToolbar: ['print', 'exports']
+                , method: 'POST'
+                , cols: [[
+                    {title: '<a class="" style="font-size: 20px; color:black;">举报内容表</a>',align: 'center', colspan: 10} //rowspan即纵向跨越的单元格数
+                ],[ //表头
+                    {field: 'id', title: 'id', width: 75, sort: true}
+                    , {field: 'reporterUsername', title: '举报人', width: 125}
+                    , {field: 'respondentUsername', title: '被举报人', width: 140}
+                    , {field: 'title', title: '标题', width: 120}
+                    , {field: 'description', title: '描述', width: 180}
+                    , {field: 'imagePaths', title: '截图', width: 100, templet: '#reportImagePathsTemplate'}
+                    , {field: 'reportedTime', title: '投诉时间', width: 170, sort: true}
+                    , {field: 'hasHandled', title: '状态', width: 80, sort: true, templet: '#reportHasHandledTemplate'}
+                    , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                ]]
+                , page: true
+                , url: "/book_stadium_online/report/systemManagerFindAllByPage.do"
+                , headers: {
+                    token: $.cookie("systemManagerToken")
+                }
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , response: {
+                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                    ,statusCode: 200 //规定成功的状态码，默认：0
+                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                }
+                , parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "message": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+
+            //监听工具条
+            table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'reportHandle') {
+                    layer.open({
+                        type: 1,
+                        title: '举报投诉【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#reportHandleDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            $('#reportHandleReporterUsername').text(data.reporterUsername);
+                            $('#reportHandleReporterAvatar').attr('src', data.reporterAvatarPath);
+                            $('#reportHandleRespondentUsername').text(data.respondentUsername);
+                            $('#reportHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#reportHandleTitle').val(data.title);
+                            $('#reportHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#reportHandleImages').append('<img src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
+                                }
+                            }
+                            if (data.reportContentType === 3) {
+                                // 举报的运动动态
+                                $('#reportSportMoment').show();
+                                $('#reportSportMomentComment').hide();
+                                $('#reportStadium').hide();
+                                $('#reportStadiumComment').hide();
+                                var sportMoment = data.reportContentObject;
+                                $('#reportSportMomentContent').val(sportMoment.content);
+                                if (sportMoment.imagePaths !== null && sportMoment.imagePaths.length !== 0) {
+                                    var imagePaths = sportMoment.imagePaths.split(',');
+                                    for (var i in imagePaths) {
+                                        $('#reportSportMomentImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                    }
+                                }
+                                $('#reportSportMomentSentTime').val(sportMoment.sentTime);
+                                $('#reportContentTypeTitle').text("处理举报的运动动态");
+                            } else if (data.reportContentType === 4) {
+                                // 举报的运动动态评论
+                                $('#reportSportMoment').hide();
+                                $('#reportSportMomentComment').show();
+                                $('#reportStadium').hide();
+                                $('#reportStadiumComment').hide();
+                                var sportMomentComment = data.reportContentObject;
+                                $('#reportSportMomentCommentContent').val(sportMomentComment.content);
+                                $('#reportSportMomentCommentCommentedTime').val(sportMomentComment.commentedTime);
+                                $('#reportContentTypeTitle').text("处理举报的运动评论");
+                            } else if (data.reportContentType === 5) {
+                                // 举报的体育场馆
+                                $('#reportSportMoment').hide();
+                                $('#reportSportMomentComment').hide();
+                                $('#reportStadium').show();
+                                $('#reportStadiumComment').hide();
+                                var stadium = data.reportContentObject;
+                                $('#reportStadiumName').val(stadium.name);
+                                $('#reportStadiumAddress').val(stadium.address);
+                                $('#reportStadiumDescription').val(stadium.description);
+                                if (stadium.imagePaths !== null && stadium.imagePaths.length !== 0) {
+                                    var imagePaths = stadium.imagePaths.split(',');
+                                    for (var i in imagePaths) {
+                                        $('#reportStadiumImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                    }
+                                }
+                                $('#reportContentTypeTitle').text("处理举报的体育场馆");
+                                $('#reportContentHandleDiv').hide();
+                                $('#reportStadiumHandleTips').show();
+                                $('#reportContentHandleDescriptionDiv').hide();
+                            } else if (data.reportContentType === 6) {
+                                // 举报的体育场馆评论
+                                $('#reportSportMoment').hide();
+                                $('#reportSportMomentComment').hide();
+                                $('#reportStadium').hide();
+                                $('#reportStadiumComment').show();
+                                var stadiumComment = data.reportContentObject;
+                                $('#reportStadiumCommentContent').val(stadiumComment.content);
+                                $('#reportStadiumCommentCommentedTime').val(stadiumComment.commentedTime);
+                                $('#reportStadiumCommentManagerReply').val(stadiumComment.managerReply);
+                                $('#reportContentTypeTitle').text("处理举报的体育场馆评论");
+                            }
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/report/systemManagerHandle.do";
+                            var postData = '{"id":'+ data.id + ',"reporterHandleCreditScore":"' + $('#reporterHandleCreditScore').val() + '","reporterHandleDescription":"' + $('#reporterHandleDescription').val()
+                                + '","respondentHandleCreditScore":"' + $('#respondentHandleCreditScore').val() + '","respondentHandleDescription":"' + $('#respondentHandleDescription').val()
+                                + '","reportContentDelete":"' + $('input[name="reportContentHandle"]:checked').val() + '","reportContentHandleDescription":"' + $('#reportContentHandleDescription').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"reportData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        layui.table.reload('reportTable');
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'reportCheck') {
+                    layer.open({
+                        type: 1,
+                        title: '查看举报【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#reportHandleDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            $('#reportHandleReporterUsername').text(data.reporterUsername);
+                            $('#reportHandleReporterAvatar').attr('src', data.reporterAvatarPath);
+                            $('#reportHandleRespondentUsername').text(data.respondentUsername);
+                            $('#reportHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#reportHandleTitle').val(data.title);
+                            $('#reportHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#reportHandleImages').append('<img src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
+                                }
+                            }
+                            $("#reportHandleTitle").attr("readonly","readonly");
+                            $("#reporterHandleCreditScore").val(data.reporterHandleCreditScore);
+                            $("#reporterHandleCreditScore").attr("readonly","readonly");
+                            $("#reporterHandleDescription").val(data.reporterHandleDescription);
+                            $("#reporterHandleDescription").attr("readonly","readonly");
+                            $("#respondentHandleCreditScore").val(data.respondentHandleCreditScore);
+                            $("#respondentHandleCreditScore").attr("readonly","readonly");
+                            $("#respondentHandleDescription").val(data.respondentHandleCreditScore);
+                            $("#respondentHandleDescription").attr("readonly","readonly");
+                            if (data.reportContentObject != null) {
+                                $('#reportContentHandleReusltDiv').hide();
+                                if (data.reportContentType === 3) {
+                                    // 举报的运动动态
+                                    $('#reportSportMoment').show();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').hide();
+                                    var sportMoment = data.reportContentObject;
+                                    $('#reportSportMomentContent').val(sportMoment.content);
+                                    if (sportMoment.imagePaths !== null && sportMoment.imagePaths.length !== 0) {
+                                        var imagePaths = sportMoment.imagePaths.split(',');
+                                        for (var i in imagePaths) {
+                                            $('#reportSportMomentImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                        }
+                                    }
+                                    $('#reportSportMomentSentTime').val(sportMoment.sentTime);
+                                    $('#reportContentTypeTitle').text("处理举报的运动动态");
+                                } else if (data.reportContentType === 4) {
+                                    // 举报的运动动态评论
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').show();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').hide();
+                                    var sportMomentComment = data.reportContentObject;
+                                    $('#reportSportMomentCommentContent').val(sportMomentComment.content);
+                                    $('#reportSportMomentCommentCommentedTime').val(sportMomentComment.commentedTime);
+                                    $('#reportContentTypeTitle').text("处理举报的运动评论");
+                                } else if (data.reportContentType === 5) {
+                                    // 举报的体育场馆
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').show();
+                                    $('#reportStadiumComment').hide();
+                                    var stadium = data.reportContentObject;
+                                    $('#reportStadiumName').val(stadium.name);
+                                    $('#reportStadiumAddress').val(stadium.address);
+                                    $('#reportStadiumDescription').val(stadium.description);
+                                    if (stadium.imagePaths !== null && stadium.imagePaths.length !== 0) {
+                                        var imagePaths = stadium.imagePaths.split(',');
+                                        for (var i in imagePaths) {
+                                            $('#reportStadiumImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                        }
+                                    }
+                                    $('#reportContentTypeTitle').text("处理举报的体育场馆");
+                                    $('#reportContentHandleDiv').hide();
+                                    $('#reportStadiumHandleTips').show();
+                                    $('#reportContentHandleDescriptionDiv').hide();
+                                } else if (data.reportContentType === 6) {
+                                    // 举报的体育场馆评论
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').show();
+                                    var stadiumComment = data.reportContentObject;
+                                    $('#reportStadiumCommentContent').val(stadiumComment.content);
+                                    $('#reportStadiumCommentCommentedTime').val(stadiumComment.commentedTime);
+                                    $('#reportStadiumCommentManagerReply').val(stadiumComment.managerReply);
+                                    $('#reportContentTypeTitle').text("处理举报的体育场馆评论");
+                                }
+                            } else {
+                                if (data.reportContentDelete === 1) {
+                                    $('#reportContentHandleNo').attr("disabled", "disabled");
+                                    $('#reportContentHandleDelete').attr("checked", "true");
+                                } else {
+                                    $('#reportContentHandleNo').attr("checked", "true");
+                                    $('#reportContentHandleDelete').attr("disabled", "disabled");
+                                }
+                                $('#reportContentHandleDescription').val(data.reportContentHandleDescription);
+                                $('#reportContentHandleDescription').attr("readonly","readonly");
+                            }
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'reportDelete') {
+                    layer.open({
+                        type: 1,
+                        title: '删除举报【' + data.title + '】提示',
+                        area: ['450px', '80%'],
+                        content: $('#deleteReportDialog').html(),
+                        btn: ['删除', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            if ($('#deleteReportReason').val().length === 0) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入删除该举报的原因！"
+                                });
+                                return false;
+                            }
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/report/systemManagerDeleteById.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"reportId":data.id, "deleteReason":$('#deleteReportReason').val()},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        layui.table.reload('reportTable');
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }
+            });
+
+            $('#searchReportButton').on('click', function () {
+                if ($('#titleKey').val().length === 0) {
+                    layer.open({
+                        title: '提示信息',
+                        content: "请输入举报标题关键字！"
+                    });
+                    return false;
+                }
+                var titleKey = $('#titleKey').val();
+                layui.table.reload('reportTable', {
+                    page: {
+                        curr: 1
+                    }
+                    ,where: {
+                        titleKey: titleKey
+                    }
+                });
+            });
+        }
+    </script>
+</html>
