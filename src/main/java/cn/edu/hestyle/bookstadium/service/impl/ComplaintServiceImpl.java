@@ -345,7 +345,7 @@ public class ComplaintServiceImpl implements IComplaintService {
             logger.warn("Complaint 删除失败，未设置删除原因！");
             throw new FindFailedException("操作失败，未设置删除原因！");
         }
-        if (complaint.getHasHandled() != 0) {
+        if (complaint.getHasHandled() == 0) {
             // 当前complaint未处理，通知投诉人
             Notice complainantNotice = new Notice();
             complainantNotice.setToAccountType(complaint.getComplainantAccountType() - 1);
