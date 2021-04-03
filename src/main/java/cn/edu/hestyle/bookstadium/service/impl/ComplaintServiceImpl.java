@@ -216,7 +216,7 @@ public class ComplaintServiceImpl implements IComplaintService {
         }
         // 发送投诉处理通知
         Notice complainantNotice = new Notice();
-        complainantNotice.setToAccountType(complaintModify.getComplainantAccountType());
+        complainantNotice.setToAccountType(complaintModify.getComplainantAccountType() - 1);
         complainantNotice.setAccountId(complaintModify.getComplainantAccountId());
         complainantNotice.setTitle(COMPLAINANT_HANDLE_TITLE);
         complainantNotice.setContent(String.format(COMPLAINANT_HANDLE_CONTENT, complaintModify.getTitle(), complaintModify.getComplainantHandleCreditScore(), complaintModify.getComplainantHandleDescription()));
@@ -294,7 +294,7 @@ public class ComplaintServiceImpl implements IComplaintService {
         if (respondentHandleDescription != null && respondentHandleDescription.length() != 0) {
             // 发送被投诉处理通知
             Notice respondentNotice = new Notice();
-            respondentNotice.setToAccountType(complaintModify.getRespondentAccountType());
+            respondentNotice.setToAccountType(complaintModify.getRespondentAccountType() - 1);
             respondentNotice.setAccountId(complaintModify.getRespondentAccountId());
             respondentNotice.setTitle(RESPONDENT_HANDLE_TITLE);
             respondentNotice.setContent(String.format(RESPONDENT_HANDLE_CONTENT, complaintModify.getDescription(), complaintModify.getRespondentHandleCreditScore(), complaintModify.getRespondentHandleDescription()));
@@ -348,7 +348,7 @@ public class ComplaintServiceImpl implements IComplaintService {
         if (complaint.getHasHandled() != 0) {
             // 当前complaint未处理，通知投诉人
             Notice complainantNotice = new Notice();
-            complainantNotice.setToAccountType(complaint.getComplainantAccountType());
+            complainantNotice.setToAccountType(complaint.getComplainantAccountType() - 1);
             complainantNotice.setAccountId(complaint.getComplainantAccountId());
             complainantNotice.setTitle(RESPONDENT_DELETE_TITLE);
             complainantNotice.setContent(String.format(RESPONDENT_DELETE_CONTENT, complaint.getTitle(), deleteReason));
