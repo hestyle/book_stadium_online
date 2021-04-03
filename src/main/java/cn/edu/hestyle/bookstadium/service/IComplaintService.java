@@ -11,6 +11,14 @@ import java.util.List;
  * @date 2021/4/2 10:54 上午
  */
 public interface IComplaintService {
+
+    /**
+     * user投诉其他用户
+     * @param userId        userId
+     * @param complaint     complaint
+     */
+    void userComplain(Integer userId, Complaint complaint);
+
     /**
      * systemManager处理complaint
      * @param complaint     complaint

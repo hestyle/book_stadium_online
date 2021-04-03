@@ -6,14 +6,17 @@ import cn.edu.hestyle.bookstadium.mapper.NoticeMapper;
 import cn.edu.hestyle.bookstadium.mapper.StadiumManagerMapper;
 import cn.edu.hestyle.bookstadium.mapper.UserMapper;
 import cn.edu.hestyle.bookstadium.service.IComplaintService;
+import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +28,12 @@ import java.util.List;
  */
 @Service
 public class ComplaintServiceImpl implements IComplaintService {
+    /** 投诉title的最大长度 */
+    private static final Integer COMPLAINANT_TITLE_MAX_LENGTH = 50;
+    /** 投诉description的最大长度 */
+    private static final Integer COMPLAINANT_DESCRIPTION_MAX_LENGTH = 500;
+    /** 投诉image的最大数量 */
+    private static final Integer COMPLAINANT_IMAGE_MAX_COUNT = 3;
     /** 投诉人处理title、content */
     private static final String COMPLAINANT_HANDLE_TITLE = "投诉处理";
     private static final String COMPLAINANT_HANDLE_CONTENT = "系统已处理您的投诉【%s】，积分奖惩【%s】，奖惩描述【%s】";
@@ -44,6 +53,81 @@ public class ComplaintServiceImpl implements IComplaintService {
     private StadiumManagerMapper stadiumManagerMapper;
     @Resource
     private ComplaintMapper complaintMapper;
+
+    @Override
+    public void userComplain(Integer userId, Complaint complaint) {
+        if (complaint.getRespondentAccountType() == null || complaint.getRespondentAccountId() == 0) {
+            logger.warn("Complaint 添加失败，未指定需要投诉的用户！");
+            throw new FindFailedException("操作失败，未指定需要投诉的用户！");
+        }
+        // 检查投诉人
+        if (complaint.getRespondentAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_USER)) {
+            User respondentUser = null;
+            try {
+                respondentUser = userMapper.findById(complaint.getRespondentAccountId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查找失败，数据库发生未知错误！respondentUserId = " + complaint.getRespondentAccountId());
+                throw new FindFailedException("查找失败，数据库发生未知错误！");
+            }
+        } else if (complaint.getRespondentAccountType().equals(Complaint.COMPLAIN_ACCOUNT_TYPE_STADIUM_MANAGER)) {
+            StadiumManager respondentStadiumManager = null;
+            try {
+                respondentStadiumManager = stadiumManagerMapper.findById(complaint.getRespondentAccountId());
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumManager 查找失败，数据库发生未知错误！respondentStadiumManagerId = " + complaint.getRespondentAccountId());
+                throw new FindFailedException("查找失败，数据库发生未知错误！");
+            }
+        } else {
+            logger.warn("Complaint 添加失败，投诉用户类型非法！complaint = " + complaint);
+            throw new FindFailedException("操作失败，投诉用户类型非法！");
+        }
+        // 检查title
+        String complaintTitle = complaint.getTitle();
+        if (complaintTitle == null || complaintTitle.length() == 0) {
+            logger.warn("Complaint 添加失败，未填写投诉标题！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写投诉标题！");
+        } else if (complaintTitle.length() > COMPLAINANT_TITLE_MAX_LENGTH) {
+            logger.warn("Complaint 添加失败，投诉标题超过了" + COMPLAINANT_TITLE_MAX_LENGTH + "个字符！complaint = " + complaint);
+            throw new FindFailedException("操作失败，投诉标题超过了" + COMPLAINANT_TITLE_MAX_LENGTH + "个字符！");
+        }
+        // 检查description
+        String complaintDescription = complaint.getDescription();
+        if (complaintDescription == null || complaintDescription.length() == 0) {
+            logger.warn("Complaint 添加失败，未填写投诉描述！complaint = " + complaint);
+            throw new FindFailedException("操作失败，未填写投诉描述！");
+        } else if (complaintTitle.length() > COMPLAINANT_DESCRIPTION_MAX_LENGTH) {
+            logger.warn("Complaint 添加失败，投诉描述超过了" + COMPLAINANT_DESCRIPTION_MAX_LENGTH + "个字符！complaint = " + complaint);
+            throw new FindFailedException("操作失败，投诉描述超过了" + COMPLAINANT_DESCRIPTION_MAX_LENGTH + "个字符！");
+        }
+        // 检查imagePaths
+        try {
+            checkImagePaths(complaint.getImagePaths());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 添加失败，image path列表格式错误！complaint = " + complaint);
+            throw new AddFailedException("添加失败，投诉图片格式错误！");
+        }
+        complaint.setComplainantAccountType(Complaint.COMPLAIN_ACCOUNT_TYPE_USER);
+        complaint.setComplainantAccountId(userId);
+        complaint.setComplainedTime(new Date());
+        complaint.setHasHandled(0);
+        complaint.setHandledTime(null);
+        complaint.setComplainantHandleCreditScore(null);
+        complaint.setComplainantHandleDescription(null);
+        complaint.setRespondentHandleCreditScore(null);
+        complaint.setRespondentHandleDescription(null);
+        complaint.setIsDelete(0);
+        try {
+            complaintMapper.add(complaint);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Complaint 添加失败，数据库发生未知错误！complaint = " + complaint);
+            throw new AddFailedException("添加失败，数据库发生未知错误！");
+        }
+        logger.warn("Complaint 添加成功！complaint = " + complaint);
+    }
 
     @Override
     @Transactional
@@ -402,5 +486,40 @@ public class ComplaintServiceImpl implements IComplaintService {
             }
         }
         return complaintVO;
+    }
+
+    /**
+     * 检查imagePaths的合法性
+     * @param imagePathsString      以逗号间隔的image path
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkImagePaths(String imagePathsString) throws Exception {
+        if (imagePathsString == null || imagePathsString.length() == 0) {
+            return true;
+        }
+        String[] imagePaths = imagePathsString.split(",");
+        for (String imagePath : imagePaths) {
+            if (imagePath == null || imagePath.length() == 0) {
+                throw new Exception(imagePath + "文件不存在！");
+            }
+            try {
+                String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/complaint";
+                String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+                String filePath = pathNameTruth + imagePath.substring(imagePath.lastIndexOf('/'));
+                File file = new File(filePath);
+                if (!file.exists()) {
+                    throw new Exception(imagePath + "文件不存在！");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new Exception(imagePath + "文件不存在！");
+            }
+        }
+        if (imagePaths.length > COMPLAINANT_IMAGE_MAX_COUNT) {
+            throw new Exception("投诉最多上传" + COMPLAINANT_IMAGE_MAX_COUNT + "张照片！");
+        }
+        logger.info("Complaint imagePaths = " + imagePathsString + " 通过检查！");
+        return false;
     }
 }

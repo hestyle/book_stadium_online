@@ -12,6 +12,11 @@ import java.util.List;
  */
 @Mapper
 public interface ComplaintMapper {
+    /**
+     * 添加Complaint
+     * @param complaint         Complaint
+     */
+    void add(Complaint complaint);
 
     /**
      * 更新complaint(has_handled、handled_time、complainant_handle_credit_score等字段)
