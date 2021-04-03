@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>举报内容列表</title>
+    <script src="../../js/jquery.min.js"></script>
+    <script src="../../layui/layui.all.js"></script>
+    <script src="../../js/common.js"></script>
+    <script src="../../js/jquery.cookie.js"></script>
+    <script src="../../plugins/soulTable/soulTable.js"></script>
+    <link rel="stylesheet" href="../../layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../plugins/soulTable/soulTable.css">
+</head>
+    <style>
+        .layui-form-checked[lay-skin=primary] i {
+            border-color: #FF0000;
+            background-color: #FF0000;
+        }
+        .layui-laypage .layui-laypage-curr .layui-laypage-em {
+            background-color: #0090FF;
+        }
+    </style>
+    <body>
+        <div class="div-search">
+            <div class="layui-inline">
+                <input class="layui-input" id="titleKey" autocomplete="off" placeholder="请输入投诉标题关键字" style="width: 300px;">
+            </div>
+            <button class="layui-btn layui-btn-normal" data-type="reload" id="searchComplaintButton">搜索</button>
+        </div>
+        <table id="reportTable" lay-filter="test"></table>
+    </body>
+    <!--每条数据的操作栏-->
+    <script type="text/html" id="barDemo">
+        {{#  if(d.hasHandled === 0){ }}
+        <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="complaintHandle">处理</a>
+        {{#  } else { }}
+        <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="complaintCheck">查看</a>
+        {{#  } }}
+        <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="complaintDelete">删除</a>
+    </script>
+    <!--complaintHandle操作-->
+    <script type="text/html" id="complaintHandleDialog">
+        <form id="complaintHandleForm" class="layui-form" action="" style="padding: 20px;width: 800px;" lay-filter="complaintHandleDialogForm">
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 30%;">
+                    <label id="complaintHandleComplainantUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="complaintHandleComplainantAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label style="display: block;text-align: center;margin-top: 10px;">投诉</label>
+                    <div style="display: flex;justify-content: center;">
+                        <img src="/book_stadium_online/image/arrow_red.png" style="width: 40px;height: 25px;">
+                    </div>
+                </div>
+                <div style="width: 30%;">
+                    <label id="complaintHandleRespondentUsername" style="display: block;text-align: center;">用户名</label>
+                    <div style="display: flex;justify-content: center;margin-top: 5px;">
+                        <img id="complaintHandleRespondentAvatar" src="" style="width: 50px;height: 50px;">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">标题</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <input id="complaintHandleTitle" type="text" placeholder="投诉标题" class="layui-input" disabled>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">描述</label>
+                <div class="layui-input-inline" style="width: 70%;">
+                    <textarea id="complaintHandleDescription"  placeholder="投诉描述" class="layui-textarea" disabled></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 20%;">图片</label>
+                <div class="layui-input-inline" id="complaintHandleImages" style="width: 70%;"></div>
+            </div>
+            <div class="layui-form-item" style="display: flex;justify-content: center;">
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;">
+                    <label style="display: block;text-align: center;">投诉人奖惩</label>
+                    <div class="layui-form-item" id="complainantHandleCreditScoreDiv">
+                        <label id="complainantHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="complainantHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="complainantHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div style="width: 48%;border:1px solid #000;border-radius:5px;margin-left: 5px;">
+                    <label style="display: block;text-align: center;">被投诉人奖惩</label>
+                    <div class="layui-form-item" id="respondentHandleCreditScoreDiv">
+                        <label id="respondentHandleCreditScoreTitle" class="layui-form-label" style="width: 20%;">积分奖惩</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <input id="respondentHandleCreditScore" type="number" placeholder="请输入积分数" class="layui-input" value="0">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label" style="width: 20%;">奖惩描述</label>
+                        <div class="layui-input-inline" style="width: 60%;">
+                            <textarea id="respondentHandleDescription"  placeholder="请输入奖惩描述" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--complaint删除数据操作-->
+    <script type="text/html" id="deleteComplaintDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="deleteComplaintDialogForm">
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">提示：</label>
+                <div class="layui-input-inline">
+                    <label style="width: 140%;color: red;text-align: left;">投诉删除后无法处理，且无法恢复！</label>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label" style="width: 15%;">删除原因</label>
+                <div class="layui-input-inline">
+                    <textarea id="deleteComplaintReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
+                </div>
+            </div>
+        </form>
+    </script>
+    <!--report表 ImagePaths col模板-->
+    <script type="text/html" id="reportImagePathsTemplate">
+        {{#  if(d.imagePaths !== null && d.imagePaths.length !== 0){ }}
+            {{#  var imagePaths = d.imagePaths.split(','); }}
+            {{#  for (var i in imagePaths) { }}
+                <img src="{{imagePaths[i]}}" style="width: 15px;height: 35px;margin-right: 5px">
+            {{#  } }}
+        {{#  } }}
+    </script>
+    <!--report表 HasHandled col模板-->
+    <script type="text/html" id="reportHasHandledTemplate">
+        {{#  if(d.hasHandled === 0){ }}
+            <label style="color: red;">待处理</label>
+        {{#  } else if (d.hasHandled === 1) { }}
+            <label style="color: black;">已处理</label>
+        {{#  } }}
+    </script>
+    <script>
+        layui.config({
+            base: '../../plugins/soulTable/',
+            version: 'v1.5.20'
+        }).extend({
+            soulTable: 'soulTable/soulTable.slim'
+        });
+        layuiModules=['table', 'layer', 'form', 'upload', 'soulTable', 'laydate'];
+        function mounted() {
+            table.render({
+                elem: '#reportTable'
+                , height: 500
+                , defaultToolbar: ['print', 'exports']
+                , method: 'POST'
+                , cols: [[
+                    {title: '<a class="" style="font-size: 20px; color:black;">举报内容表</a>',align: 'center', colspan: 10} //rowspan即纵向跨越的单元格数
+                ],[ //表头
+                    {field: 'id', title: 'id', width: 75, sort: true}
+                    , {field: 'reporterUsername', title: '举报人', width: 125}
+                    , {field: 'respondentUsername', title: '被举报人', width: 140}
+                    , {field: 'title', title: '标题', width: 120}
+                    , {field: 'description', title: '描述', width: 180}
+                    , {field: 'imagePaths', title: '截图', width: 100, templet: '#reportImagePathsTemplate'}
+                    , {field: 'reportedTime', title: '投诉时间', width: 170, sort: true}
+                    , {field: 'hasHandled', title: '状态', width: 80, sort: true, templet: '#reportHasHandledTemplate'}
+                    , {fixed: 'right', align: 'left', toolbar: '#barDemo'} //这里的toolbar值是模板元素的选择器
+                ]]
+                , page: true
+                , url: "/book_stadium_online/report/systemManagerFindAllByPage.do"
+                , headers: {
+                    token: $.cookie("systemManagerToken")
+                }
+                , request: {
+                    pageName: 'pageIndex' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                , response: {
+                    statusName: 'code' //规定数据状态的字段名称，默认：code
+                    ,statusCode: 200 //规定成功的状态码，默认：0
+                    ,msgName: 'message' //规定状态信息的字段名称，默认：msg
+                    ,countName: 'count' //规定数据总数的字段名称，默认：count
+                    ,dataName: 'data' //规定数据列表的字段名称，默认：data
+                }
+                , parseData: function(res){ //res 即为原始返回的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "message": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+
+            //监听工具条
+            table.on('tool(test)', function (obj) { //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+                var data = obj.data; //获得当前行数据
+                var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+                var tr = obj.tr; //获得当前行 tr 的DOM对象
+
+                if (layEvent === 'complaintHandle') {
+                    layer.open({
+                        type: 1,
+                        title: '处理投诉【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#complaintHandleDialog').html(),
+                        btn: ['保存', '取消'],
+                        success: function (index, layero) {
+                            $('#complaintHandleComplainantUsername').text(data.complainantUsername);
+                            $('#complaintHandleComplainantAvatar').attr('src', data.complainantAvatarPath);
+                            $('#complaintHandleRespondentUsername').text(data.respondentUsername);
+                            $('#complaintHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#complaintHandleTitle').val(data.title);
+                            $('#complaintHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#complaintHandleImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
+                                }
+                            }
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            // 检查表单的完整性
+                            if (checkComplaintHandleForm() === false) {
+                                return false;
+                            }
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/complaint/systemManagerHandle.do";
+                            var postData = '{"id":'+ data.id + ',"complainantHandleCreditScore":"' + $('#complainantHandleCreditScore').val() + '","complainantHandleDescription":"' + $('#complainantHandleDescription').val()
+                                + '","respondentHandleCreditScore":"' + $('#respondentHandleCreditScore').val() + '","respondentHandleDescription":"' + $('#respondentHandleDescription').val() + '"}';
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"complaintData":postData},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        layui.table.reload('reportTable');
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "保存失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'complaintCheck') {
+                    layer.open({
+                        type: 1,
+                        title: '处理投诉【' + data.title + '】',
+                        area:['860px','80%'],
+                        content: $('#complaintHandleDialog').html(),
+                        btn: ['关闭'],
+                        success: function (index, layero) {
+                            $('#complaintHandleComplainantUsername').text(data.complainantUsername);
+                            $('#complaintHandleComplainantAvatar').attr('src', data.complainantAvatarPath);
+                            $('#complaintHandleRespondentUsername').text(data.respondentUsername);
+                            $('#complaintHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#complaintHandleTitle').val(data.title);
+                            $('#complaintHandleDescription').val(data.description);
+                            if (data.imagePaths !== null && data.imagePaths.length !== 0) {
+                                var imagePaths = data.imagePaths.split(',');
+                                for (var i in imagePaths) {
+                                    $('#complaintHandleImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
+                                }
+                            }
+                            if (data.complainantHandleCreditScore !== null) {
+                                $('#complainantHandleCreditScore').val(data.complainantHandleCreditScore);
+                            }
+                            if (data.complainantHandleDescription !== null) {
+                                $('#complainantHandleDescription').val(data.complainantHandleDescription);
+                            }
+                            if (data.respondentHandleCreditScore !== null) {
+                                $('#respondentHandleCreditScore').val(data.respondentHandleCreditScore);
+                            }
+                            if (data.respondentHandleDescription !== null) {
+                                $('#respondentHandleDescription').val(data.respondentHandleDescription);
+                            }
+                            $("#complaintHandleTitle").attr("readonly","readonly");
+                            $("#complainantHandleCreditScore").attr("readonly","readonly");
+                            $("#complainantHandleDescription").attr("readonly","readonly");
+                            $("#respondentHandleCreditScore").attr("readonly","readonly");
+                            $("#respondentHandleDescription").attr("readonly","readonly");
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                } else if (layEvent === 'complaintDelete') {
+                    layer.open({
+                        type: 1,
+                        title: '删除投诉【' + data.title + '】提示',
+                        area: ['450px', '80%'],
+                        content: $('#deleteComplaintDialog').html(),
+                        btn: ['删除', '取消'],
+                        success: function (index, layero) {
+                            // 填充行数据
+                            form.render();
+                        },
+                        yes: function (index, layero) {
+                            if ($('#deleteComplaintReason').val().length === 0) {
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "请输入删除该投诉的原因！"
+                                });
+                                return false;
+                            }
+                            // 更新缓存，同步到服务器
+                            var url ="/book_stadium_online/complaint/systemManagerDeleteById.do";
+                            $.ajax({
+                                "url" : url,
+                                "data" : {"complaintId":data.id, "deleteReason":$('#deleteComplaintReason').val()},
+                                "type" : "POST",
+                                "dataType" : "json",
+                                "beforeSend": function (request) {
+                                    request.setRequestHeader("token", $.cookie("systemManagerToken"))
+                                },
+                                "success" : function (json) {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message
+                                    });
+                                    if (json.code === 200) {
+                                        // 更新成功，则关闭重置窗口
+                                        layui.table.reload('reportTable');
+                                        layer.close(index);
+                                    }
+                                },
+                                "error" : function () {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: "删除失败，出现未知异常！"
+                                    });
+                                }
+                            });
+                        },
+                        btn2: function (index, layero) {
+                            layer.close(index);
+                        }
+                    });
+                }
+            });
+
+            $('#searchComplaintButton').on('click', function () {
+                if ($('#titleKey').val().length === 0) {
+                    layer.open({
+                        title: '提示信息',
+                        content: "请输入投诉标题关键字！"
+                    });
+                    return false;
+                }
+                var titleKey = $('#titleKey').val();
+                layui.table.reload('reportTable', {
+                    page: {
+                        curr: 1
+                    }
+                    ,where: {
+                        titleKey: titleKey
+                    }
+                });
+            });
+        }
+
+        /**
+         * 检查ComplaintHandle时的表单
+         * @returns {boolean}
+         */
+        function checkComplaintHandleForm() {
+            if ($('#complainantHandleDescription').val().length === 0) {
+                layer.open({
+                    title: "提示信息",
+                    content: "请输入投诉人处理描述！"
+                });
+                return false;
+            }
+            if (Number($('#respondentHandleCreditScore').val()) !== 0) {
+                if ($('#respondentHandleDescription').val().length === 0) {
+                    layer.open({
+                        title: "提示信息",
+                        content: "请输入被投诉人处理描述！"
+                    });
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+</html>
