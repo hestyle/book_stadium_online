@@ -15,10 +15,11 @@ public class Report {
     public static final Integer REPORT_ACCOUNT_TYPE_USER = 1;
     public static final Integer REPORT_ACCOUNT_TYPE_STADIUM_MANAGER = 2;
     /** 内容类型 */
-    public static final Integer REPORT_CONTENT_TYPE_STADIUM = 3;
-    public static final Integer REPORT_CONTENT_TYPE_STADIUM_COMMENT = 4;
-    public static final Integer REPORT_CONTENT_TYPE_SPORT_MOMENT = 5;
-    public static final Integer REPORT_CONTENT_TYPE_SPORT_MOMENT_COMMENT = 6;
+    public static final Integer REPORT_CONTENT_TYPE_SPORT_MOMENT = 3;
+    public static final Integer REPORT_CONTENT_TYPE_SPORT_MOMENT_COMMENT = 4;
+    public static final Integer REPORT_CONTENT_TYPE_STADIUM = 5;
+    public static final Integer REPORT_CONTENT_TYPE_STADIUM_COMMENT = 6;
+
 
     /** id */
     private Integer id;

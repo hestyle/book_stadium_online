@@ -1,5 +1,6 @@
 package cn.edu.hestyle.bookstadium.service;
 
+import cn.edu.hestyle.bookstadium.entity.Report;
 import cn.edu.hestyle.bookstadium.entity.ReportVO;
 
 import java.util.List;
@@ -10,6 +11,12 @@ import java.util.List;
  * @date 2021/4/3 4:17 下午
  */
 public interface IReportService {
+    /**
+     * systemManager处理举报
+     * @param report            report
+     */
+    void systemManagerHandle(Report report);
+
     /**
      * 分页查询Report（未删除）
      * @param pageIndex     pageIndex

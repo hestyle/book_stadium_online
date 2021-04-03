@@ -12,6 +12,20 @@ import java.util.List;
  */
 @Mapper
 public interface ReportMapper {
+
+    /**
+     * 更新report(has_handled、handled_time等字段)
+     * @param report            report
+     */
+    void update(Report report);
+
+    /**
+     * 通过reportId查找
+     * @param reportId          reportId
+     * @return                  Report
+     */
+    Report findById(Integer reportId);
+
     /**
      * 查找所有的Report（未删除）
      * @param beginIndex        beginIndex

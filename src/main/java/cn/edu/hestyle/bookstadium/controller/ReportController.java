@@ -1,10 +1,15 @@
 package cn.edu.hestyle.bookstadium.controller;
 
+import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
+import cn.edu.hestyle.bookstadium.entity.Report;
 import cn.edu.hestyle.bookstadium.entity.ReportVO;
 import cn.edu.hestyle.bookstadium.entity.SystemManager;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IReportService;
 import cn.edu.hestyle.bookstadium.util.ResponseResult;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,9 +27,27 @@ import java.util.List;
 @RestController
 @RequestMapping("/report")
 public class ReportController extends BaseController {
+    private static final Logger logger = LoggerFactory.getLogger(ReportController.class);
 
     @Autowired
     private IReportService reportService;
+
+    @PostMapping("/systemManagerHandle.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerHandle(@RequestParam(value = "reportData") String reportData, HttpSession session) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Report report = null;
+        try {
+            report = objectMapper.readValue(reportData, Report.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Report 处理失败，数据格式错误！reportData = " + reportData);
+            throw new RequestException("Report 处理失败，数据格式错误！");
+        }
+        reportService.systemManagerHandle(report);
+        return new ResponseResult<Void>(SUCCESS, "处理成功！");
+    }
+
 
     @PostMapping("/systemManagerFindAllByPage.do")
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})

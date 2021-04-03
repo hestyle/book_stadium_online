@@ -2,6 +2,51 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ReportMapper">
+    <!--更新report(has_handled、handled_time等字段)-->
+    <!--void update(Report report);-->
+    <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Report">
+        UPDATE `t_report` SET
+            `has_handled` = #{hasHandled},
+            `handled_time` = #{handledTime},
+            `reporter_handle_credit_score` = #{reporterHandleCreditScore},
+            `reporter_handle_description` = #{reporterHandleDescription},
+            `respondent_handle_credit_score` = #{respondentHandleCreditScore},
+            `respondent_handle_description` = #{respondentHandleDescription},
+            `report_content_delete` = #{reportContentDelete},
+            `report_content_handle_description` = #{reportContentHandleDescription},
+            `is_delete` = #{isDelete}
+        WHERE
+            `id` = #{id}
+    </update>
+    <!--通过reportId查找-->
+    <!--Report findById(Integer reportId);-->
+    <select id="findById" resultType="cn.edu.hestyle.bookstadium.entity.Report">
+        SELECT
+            `id` as `id`,
+            `reporter_account_type` as `reporterAccountType`,
+            `reporter_account_id` as `reporterAccountId`,
+            `report_content_type` as `reportContentType`,
+            `report_content_id` as `reportContentId`,
+            `respondent_account_type` as `respondentAccountType`,
+            `respondent_account_id` as `respondentAccountId`,
+            `title` as  `title`,
+            `description` as `description`,
+            `image_paths` as `imagePaths`,
+            `reported_time` as `reportedTime`,
+            `has_handled` as `hasHandled`,
+            `handled_time` as `handledTime`,
+            `reporter_handle_credit_score` as `reporterHandleCreditScore`,
+            `reporter_handle_description` as `reporterHandleDescription`,
+            `respondent_handle_credit_score` as `respondentHandleCreditScore`,
+            `respondent_handle_description` as `respondentHandleDescription`,
+            `report_content_delete` as `reportContentDelete`,
+            `report_content_handle_description` as `reportContentHandleDescription`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_report`
+        WHERE
+            `id` = #{reportId} AND `is_delete` = 0
+    </select>
     <!--查找所有的Report（未删除）-->
     <!--List<Report> findAllByPage(Integer beginIndex, Integer pageSize, String titleKey);-->
     <select id="findAllByPage" resultType="cn.edu.hestyle.bookstadium.entity.Report">
@@ -9,7 +54,7 @@
             `id` as `id`,
             `reporter_account_type` as `reporterAccountType`,
             `reporter_account_id` as `reporterAccountId`,
-            `report_content_type` as `reportAontentType`,
+            `report_content_type` as `reportContentType`,
             `report_content_id` as `reportContentId`,
             `respondent_account_type` as `respondentAccountType`,
             `respondent_account_id` as `respondentAccountId`,
