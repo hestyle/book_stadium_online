@@ -37,7 +37,7 @@
         {{#  } else { }}
         <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="reportCheck">查看</a>
         {{#  } }}
-        <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="complaintDelete">删除</a>
+        <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="reportDelete">删除</a>
     </script>
     <!--reportHandle操作-->
     <script type="text/html" id="reportHandleDialog">
@@ -209,19 +209,19 @@
             </div>
         </form>
     </script>
-    <!--complaint删除数据操作-->
-    <script type="text/html" id="deleteComplaintDialog">
-        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="deleteComplaintDialogForm">
+    <!--report删除数据操作-->
+    <script type="text/html" id="deleteReportDialog">
+        <form class="layui-form" action="" style="padding: 20px;width: 400px;" lay-filter="deleteReportDialogForm">
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">提示：</label>
                 <div class="layui-input-inline">
-                    <label style="width: 140%;color: red;text-align: left;">投诉删除后无法处理，且无法恢复！</label>
+                    <label style="width: 140%;color: red;text-align: left;">举报删除后无法处理，且无法恢复！</label>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label" style="width: 15%;">删除原因</label>
                 <div class="layui-input-inline">
-                    <textarea id="deleteComplaintReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
+                    <textarea id="deleteReportReason" placeholder="请输入删除的原因~" class="layui-textarea" style="width: 140%;"></textarea>
                 </div>
             </div>
         </form>
@@ -525,30 +525,30 @@
                             layer.close(index);
                         }
                     });
-                } else if (layEvent === 'complaintDelete') {
+                } else if (layEvent === 'reportDelete') {
                     layer.open({
                         type: 1,
-                        title: '删除投诉【' + data.title + '】提示',
+                        title: '删除举报【' + data.title + '】提示',
                         area: ['450px', '80%'],
-                        content: $('#deleteComplaintDialog').html(),
+                        content: $('#deleteReportDialog').html(),
                         btn: ['删除', '取消'],
                         success: function (index, layero) {
                             // 填充行数据
                             form.render();
                         },
                         yes: function (index, layero) {
-                            if ($('#deleteComplaintReason').val().length === 0) {
+                            if ($('#deleteReportReason').val().length === 0) {
                                 layer.open({
                                     title: "提示信息",
-                                    content: "请输入删除该投诉的原因！"
+                                    content: "请输入删除该举报的原因！"
                                 });
                                 return false;
                             }
                             // 更新缓存，同步到服务器
-                            var url ="/book_stadium_online/complaint/systemManagerDeleteById.do";
+                            var url ="/book_stadium_online/report/systemManagerDeleteById.do";
                             $.ajax({
                                 "url" : url,
-                                "data" : {"complaintId":data.id, "deleteReason":$('#deleteComplaintReason').val()},
+                                "data" : {"reportId":data.id, "deleteReason":$('#deleteReportReason').val()},
                                 "type" : "POST",
                                 "dataType" : "json",
                                 "beforeSend": function (request) {
