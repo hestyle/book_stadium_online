@@ -35,7 +35,7 @@
         {{#  if(d.hasHandled === 0){ }}
         <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="reportHandle">处理</a>
         {{#  } else { }}
-        <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="complaintCheck">查看</a>
+        <a class="layui-btn layui-btn-xs" style="background-color: #1BC98E;" lay-event="reportCheck">查看</a>
         {{#  } }}
         <a class="layui-btn layui-btn-xs" style="background-color: #FF0000;" lay-event="complaintDelete">删除</a>
     </script>
@@ -190,13 +190,13 @@
                     </div>
                 </div>
             </div>
-            <div class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
+            <div id="reportContentHandleReusltDiv" class="layui-form-item" style="border:1px solid #000;border-radius:5px;">
                 <label id="reportContentTypeTitle" style="display: block;text-align: center;">举报的内容类型标题</label>
                 <div class="layui-form-item">
                     <label class="layui-form-label" style="width: 20%;">处理</label>
                     <div class="layui-input-inline" style="width: 60%;" id="reportContentHandleDiv">
-                        <input type="radio" name="reportContentHandle" value="0" title="暂不处理" checked>
-                        <input type="radio" name="reportContentHandle" value="1" title="删除">
+                        <input type="radio" id="reportContentHandleNo" name="reportContentHandle" value="0" title="暂不处理" checked>
+                        <input type="radio" id="reportContentHandleDelete" name="reportContentHandle" value="1" title="删除">
                     </div>
                     <label id="reportStadiumHandleTips" style="color: red;display: none;">体育场馆删除操作会影响已经预约的用户，请在 体育场馆场馆管理->体育场馆列表 页面进行删除操作！</label>
                 </div>
@@ -419,43 +419,106 @@
                             layer.close(index);
                         }
                     });
-                } else if (layEvent === 'complaintCheck') {
+                } else if (layEvent === 'reportCheck') {
                     layer.open({
                         type: 1,
-                        title: '处理投诉【' + data.title + '】',
+                        title: '查看举报【' + data.title + '】',
                         area:['860px','80%'],
-                        content: $('#complaintHandleDialog').html(),
+                        content: $('#reportHandleDialog').html(),
                         btn: ['关闭'],
                         success: function (index, layero) {
-                            $('#complaintHandleComplainantUsername').text(data.complainantUsername);
-                            $('#complaintHandleComplainantAvatar').attr('src', data.complainantAvatarPath);
-                            $('#complaintHandleRespondentUsername').text(data.respondentUsername);
-                            $('#complaintHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
-                            $('#complaintHandleTitle').val(data.title);
-                            $('#complaintHandleDescription').val(data.description);
+                            $('#reportHandleReporterUsername').text(data.reporterUsername);
+                            $('#reportHandleReporterAvatar').attr('src', data.reporterAvatarPath);
+                            $('#reportHandleRespondentUsername').text(data.respondentUsername);
+                            $('#reportHandleRespondentAvatar').attr('src', data.respondentAvatarPath);
+                            $('#reportHandleTitle').val(data.title);
+                            $('#reportHandleDescription').val(data.description);
                             if (data.imagePaths !== null && data.imagePaths.length !== 0) {
                                 var imagePaths = data.imagePaths.split(',');
                                 for (var i in imagePaths) {
-                                    $('#complaintHandleImages').append('<img class="loginIcon" src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
+                                    $('#reportHandleImages').append('<img src="' + imagePaths[i] + '" style="width: 40px;height: 80px;margin-right: 10px">');
                                 }
                             }
-                            if (data.complainantHandleCreditScore !== null) {
-                                $('#complainantHandleCreditScore').val(data.complainantHandleCreditScore);
-                            }
-                            if (data.complainantHandleDescription !== null) {
-                                $('#complainantHandleDescription').val(data.complainantHandleDescription);
-                            }
-                            if (data.respondentHandleCreditScore !== null) {
-                                $('#respondentHandleCreditScore').val(data.respondentHandleCreditScore);
-                            }
-                            if (data.respondentHandleDescription !== null) {
-                                $('#respondentHandleDescription').val(data.respondentHandleDescription);
-                            }
-                            $("#complaintHandleTitle").attr("readonly","readonly");
-                            $("#complainantHandleCreditScore").attr("readonly","readonly");
-                            $("#complainantHandleDescription").attr("readonly","readonly");
+                            $("#reportHandleTitle").attr("readonly","readonly");
+                            $("#reporterHandleCreditScore").val(data.reporterHandleCreditScore);
+                            $("#reporterHandleCreditScore").attr("readonly","readonly");
+                            $("#reporterHandleDescription").val(data.reporterHandleDescription);
+                            $("#reporterHandleDescription").attr("readonly","readonly");
+                            $("#respondentHandleCreditScore").val(data.respondentHandleCreditScore);
                             $("#respondentHandleCreditScore").attr("readonly","readonly");
+                            $("#respondentHandleDescription").val(data.respondentHandleCreditScore);
                             $("#respondentHandleDescription").attr("readonly","readonly");
+                            if (data.reportContentObject != null) {
+                                $('#reportContentHandleReusltDiv').hide();
+                                if (data.reportContentType === 3) {
+                                    // 举报的运动动态
+                                    $('#reportSportMoment').show();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').hide();
+                                    var sportMoment = data.reportContentObject;
+                                    $('#reportSportMomentContent').val(sportMoment.content);
+                                    if (sportMoment.imagePaths !== null && sportMoment.imagePaths.length !== 0) {
+                                        var imagePaths = sportMoment.imagePaths.split(',');
+                                        for (var i in imagePaths) {
+                                            $('#reportSportMomentImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                        }
+                                    }
+                                    $('#reportSportMomentSentTime').val(sportMoment.sentTime);
+                                    $('#reportContentTypeTitle').text("处理举报的运动动态");
+                                } else if (data.reportContentType === 4) {
+                                    // 举报的运动动态评论
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').show();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').hide();
+                                    var sportMomentComment = data.reportContentObject;
+                                    $('#reportSportMomentCommentContent').val(sportMomentComment.content);
+                                    $('#reportSportMomentCommentCommentedTime').val(sportMomentComment.commentedTime);
+                                    $('#reportContentTypeTitle').text("处理举报的运动评论");
+                                } else if (data.reportContentType === 5) {
+                                    // 举报的体育场馆
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').show();
+                                    $('#reportStadiumComment').hide();
+                                    var stadium = data.reportContentObject;
+                                    $('#reportStadiumName').val(stadium.name);
+                                    $('#reportStadiumAddress').val(stadium.address);
+                                    $('#reportStadiumDescription').val(stadium.description);
+                                    if (stadium.imagePaths !== null && stadium.imagePaths.length !== 0) {
+                                        var imagePaths = stadium.imagePaths.split(',');
+                                        for (var i in imagePaths) {
+                                            $('#reportStadiumImages').append('<img src="' + imagePaths[i] + '" style="width: 50px;height: 50px;margin-right: 10px">');
+                                        }
+                                    }
+                                    $('#reportContentTypeTitle').text("处理举报的体育场馆");
+                                    $('#reportContentHandleDiv').hide();
+                                    $('#reportStadiumHandleTips').show();
+                                    $('#reportContentHandleDescriptionDiv').hide();
+                                } else if (data.reportContentType === 6) {
+                                    // 举报的体育场馆评论
+                                    $('#reportSportMoment').hide();
+                                    $('#reportSportMomentComment').hide();
+                                    $('#reportStadium').hide();
+                                    $('#reportStadiumComment').show();
+                                    var stadiumComment = data.reportContentObject;
+                                    $('#reportStadiumCommentContent').val(stadiumComment.content);
+                                    $('#reportStadiumCommentCommentedTime').val(stadiumComment.commentedTime);
+                                    $('#reportStadiumCommentManagerReply').val(stadiumComment.managerReply);
+                                    $('#reportContentTypeTitle').text("处理举报的体育场馆评论");
+                                }
+                            } else {
+                                if (data.reportContentDelete === 1) {
+                                    $('#reportContentHandleNo').attr("disabled", "disabled");
+                                    $('#reportContentHandleDelete').attr("checked", "true");
+                                } else {
+                                    $('#reportContentHandleNo').attr("checked", "true");
+                                    $('#reportContentHandleDelete').attr("disabled", "disabled");
+                                }
+                                $('#reportContentHandleDescription').val(data.reportContentHandleDescription);
+                                $('#reportContentHandleDescription').attr("readonly","readonly");
+                            }
                             form.render();
                         },
                         yes: function (index, layero) {
