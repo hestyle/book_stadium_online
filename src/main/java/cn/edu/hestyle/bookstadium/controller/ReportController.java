@@ -48,6 +48,14 @@ public class ReportController extends BaseController {
         return new ResponseResult<Void>(SUCCESS, "处理成功！");
     }
 
+    @PostMapping("/systemManagerDeleteById.do")
+    @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})
+    public ResponseResult<Void> handleSystemManagerDeleteById(@RequestParam(value = "reportId") Integer reportId,
+                                                              @RequestParam(value = "deleteReason") String deleteReason,
+                                                              HttpSession session) {
+        reportService.systemManagerDeleteById(reportId, deleteReason);
+        return new ResponseResult<Void>(SUCCESS, "操作成功！");
+    }
 
     @PostMapping("/systemManagerFindAllByPage.do")
     @JwtToken(required = true, authorizedRoles = {SystemManager.SYSTEM_MANAGER_ROLE})

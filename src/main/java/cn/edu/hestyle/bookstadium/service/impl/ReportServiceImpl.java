@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.*;
 import cn.edu.hestyle.bookstadium.mapper.*;
 import cn.edu.hestyle.bookstadium.service.IReportService;
+import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,8 +32,8 @@ public class ReportServiceImpl implements IReportService {
     private static final String REPORT_CONTENT_DELETE_TITLE = "举报内容删除";
     private static final String REPORT_CONTENT_DELETE_CONTENT = "您的【%s】【%s】被其他用户举报【%s】已被系统删除，删除原因【%s】";
     /** （未处理）投诉删除title、content */
-    private static final String RESPONDENT_DELETE_TITLE = "举报删除";
-    private static final String RESPONDENT_DELETE_CONTENT = "您的投诉【%s】已被系统删除，删除原因【%s】";
+    private static final String REPORT_DELETE_TITLE = "举报删除";
+    private static final String REPORT_DELETE_CONTENT = "您的举报【%s】已被系统删除，删除原因【%s】";
 
     private static final Logger logger = LoggerFactory.getLogger(ReportServiceImpl.class);
 
@@ -348,6 +349,58 @@ public class ReportServiceImpl implements IReportService {
             throw new FindFailedException("操作失败，数据库发生未知错误！");
         }
         logger.warn("Report 更新成功！reportModify = " + reportModify);
+    }
+
+    @Override
+    @Transactional
+    public void systemManagerDeleteById(Integer reportId, String deleteReason) {
+        if (reportId == null) {
+            logger.warn("Report 删除失败，未指定需要删除的举报！");
+            throw new DeleteFailedException("操作失败，未指定需要删除的投诉！");
+        }
+        Report report = null;
+        try {
+            report = reportMapper.findById(reportId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Report 查找失败，数据库发生未知错误！reportId = " + reportId);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        if (report == null) {
+            logger.warn("Report 删除失败，不存在该投诉！reportId = " + reportId);
+            throw new FindFailedException("操作失败，不存在该投诉！");
+        }
+        if (deleteReason == null || deleteReason.length() == 0) {
+            logger.warn("Report 删除失败，未设置删除原因！");
+            throw new FindFailedException("操作失败，未设置删除原因！");
+        }
+        if (report.getIsDelete() == 0 && report.getHasHandled() == 0) {
+            // 当前report未处理，通知投诉人
+            Notice reporterNotice = new Notice();
+            reporterNotice.setToAccountType(report.getReporterAccountType() - 1);
+            reporterNotice.setAccountId(report.getReporterAccountId());
+            reporterNotice.setTitle(REPORT_DELETE_TITLE);
+            reporterNotice.setContent(String.format(REPORT_DELETE_CONTENT, report.getTitle(), deleteReason));
+            reporterNotice.setGeneratedTime(new Date());
+            reporterNotice.setIsDelete(0);
+            try {
+                noticeMapper.add(reporterNotice);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Notice 添加失败，数据库发生未知错误！reporterNotice = " + reporterNotice);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            logger.warn("Notice 添加成功！reporterNotice = " + reporterNotice);
+        }
+        report.setIsDelete(1);
+        try {
+            reportMapper.update(report);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Report 更新失败，数据库发生未知错误！report = " + report);
+            throw new FindFailedException("操作失败，数据库发生未知错误！");
+        }
+        logger.warn("Report 更新成功！report = " + report);
     }
 
     @Override

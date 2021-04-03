@@ -18,6 +18,13 @@ public interface IReportService {
     void systemManagerHandle(Report report);
 
     /**
+     * systemManager通过id删除Report
+     * @param reportId      reportId
+     * @param deleteReason  deleteReason
+     */
+    void systemManagerDeleteById(Integer reportId, String deleteReason);
+
+    /**
      * 分页查询Report（未删除）
      * @param pageIndex     pageIndex
      * @param pageSize      pageSize
