@@ -24,7 +24,7 @@ public class Complaint {
     private Integer id;
     /** 投诉人账号类型 */
     private Integer complainantAccountType;
-    /** 投诉人账号id，可能是用户id，也可能是动态、评论id */
+    /** 投诉人账号id，user/stadiumManager id */
     private Integer complainantAccountId;
     /** 被投诉人账号类型User、StadiumManager等 */
     private Integer respondentAccountType;
