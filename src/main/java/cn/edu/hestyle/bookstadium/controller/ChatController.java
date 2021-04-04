@@ -2,6 +2,7 @@ package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.ChatVO;
+import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IChatService;
@@ -64,4 +65,13 @@ public class ChatController extends BaseController {
         return new ResponseResult<List<ChatVO>>(SUCCESS, "查询成功！", chatVOList);
     }
 
+    @PostMapping("/stadiumManagerFindByPage.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
+    public ResponseResult<List<ChatVO>> handleStadiumManagerFindByPage(@RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
+                                                                       @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                       HttpSession session) {
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        List<ChatVO> chatVOList = chatService.stadiumManagerFindByPage(stadiumManagerId, pageIndex, pageSize);
+        return new ResponseResult<List<ChatVO>>(SUCCESS, "查询成功！", chatVOList);
+    }
 }

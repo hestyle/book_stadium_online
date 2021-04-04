@@ -34,4 +34,13 @@ public interface IChatService {
      * @return              List ChatVO
      */
     List<ChatVO> userFindByPage(Integer userId, Integer pageIndex, Integer pageSize);
+
+    /**
+     * stadiumManager分页查找
+     * @param stadiumManagerId  stadiumManagerId
+     * @param pageIndex         pageIndex
+     * @param pageSize          pageSize
+     * @return                  List ChatVO
+     */
+    List<ChatVO> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize);
 }

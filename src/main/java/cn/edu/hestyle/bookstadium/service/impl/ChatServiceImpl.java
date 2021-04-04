@@ -206,6 +206,30 @@ public class ChatServiceImpl implements IChatService {
         return chatVOList;
     }
 
+    @Override
+    public List<ChatVO> stadiumManagerFindByPage(Integer stadiumManagerId, Integer pageIndex, Integer pageSize) {
+        // 检查页码是否合法
+        if (pageIndex < 1) {
+            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+        List<Chat> chatList = null;
+        try {
+            chatList = chatMapper.stadiumManagerFindByPage(stadiumManagerId, (pageIndex - 1) * pageSize, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Chat 查找失败，数据库发生未知错误！stadiumManagerId = " + stadiumManagerId + "，pageIndex = " + pageIndex + "，pageSize = " + pageSize);
+            throw new FindFailedException("查找失败，数据库发生未知错误！");
+        }
+        logger.warn("Chat 查找成功！stadiumManagerId = " + stadiumManagerId + "，chatList = " + chatList);
+        List<ChatVO> chatVOList = chatListToChatVOList(chatList);
+        logger.warn("ChatVO 查找成功！stadiumManagerId = " + stadiumManagerId + "，chatVOList = " + chatVOList);
+        return chatVOList;
+    }
+
     /**
      * chatList 转 chatVOList
      * @param chatList      chatList

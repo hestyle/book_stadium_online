@@ -55,4 +55,13 @@ public interface ChatMapper {
      * @return                  List Chat
      */
     List<Chat> userFindByPage(Integer userId, Integer beginIndex, Integer pageSize);
+
+    /**
+     * stadiumManager分页查找Chat
+     * @param stadiumManagerId  stadiumManagerId
+     * @param beginIndex        beginIndex
+     * @param pageSize          pageSize
+     * @return                  List Chat
+     */
+    List<Chat> stadiumManagerFindByPage(Integer stadiumManagerId, Integer beginIndex, Integer pageSize);
 }
