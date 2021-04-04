@@ -9,10 +9,44 @@
         <script src="../js/jquery.getUrlParam.js"></script>
         <script src="../layui/layui.all.js"></script>
         <script src="../js/common.js"></script>
+        <script src="../plugins/dropload/dropload.min.js"></script>
+        <link rel="stylesheet" href="../plugins/dropload/dropload.css">
         <link rel="stylesheet" href="../layui/css/layui.css">
         <link rel="stylesheet" href="../css/style.css">
         <title>在线预约体育场馆管理系统</title>
     </head>
+    <style>
+        .userConsultation {
+            width: 90px;
+            height: 36px;
+            position: fixed;
+            bottom: 20px;
+            right: 25px;
+            z-index: 100;
+            background: white;
+            border-radius: 2px;
+            -webkit-box-shadow: #666 0px 0px 10px;
+            -moz-box-shadow: #666 0px 0px 10px;
+            box-shadow: #666 0px 0px 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .userConsultationMessageDiv {
+            width: 240px;
+            height: 480px;
+            position: fixed;
+            bottom: 15px;
+            right: 20px;
+            z-index: 101;
+            background: white;
+            border-radius: 2px;
+            -webkit-box-shadow: #666 0px 0px 10px;
+            -moz-box-shadow: #666 0px 0px 10px;
+            box-shadow: #666 0px 0px 10px;
+            display: none;
+        }
+    </style>
     <body>
         <!--上方标题栏-->
         <div class="parentTop">
@@ -33,6 +67,20 @@
         <!--主要内容区-->
         <div class="parentMain">
             <iframe id="iframeParent"></iframe>
+        </div>
+        <!--用户咨询-->
+        <div class="userConsultation">
+            <div style="text-align: center;font-size: 16px;">用户咨询</div>
+        </div>
+        <!--用户咨询消息列表-->
+        <div class="userConsultationMessageDiv">
+            <div style="width: 240px;height: 30px;display: flex;justify-content: center;align-items: center;border-bottom:1px solid #000;">
+                <div style="text-align: center;font-size: 15px;">用户咨询</div>
+                <img id="userConsultationMessageDivCloseImg" src="/book_stadium_online/image/close.png" style="width: 16px;height: 16px;position: absolute;right: 5px;top: 7px;">
+            </div>
+            <div id="userConsultationMessageListDiv" style="width: 240px;height: 450px;overflow-y:auto;">
+                <div id="chatVOListDiv"></div>
+            </div>
         </div>
 
         <!--设置弹框-->
@@ -72,7 +120,17 @@
                 </div>
             </form>
         </script>
+        <!--聊天弹框-->
+        <script type="text/html" id="chattingDialog">
+            <form class="layui-form" id="chattingDialogForm" style="margin-left:10px;padding-right:10px;width: 480px;height: 340px;">
+                <div id="chatMessageDiv" style="width: 100%;height: 260px;overflow-y:auto;"></div>
+                <textarea name="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;"></textarea>
+            </form>
+        </script>
         <script>
+            var nextPage = 1;
+            var PAGE_SIZE = 10;
+            var chatVOData = [];
             var stadiumManagerInfo;
             layuiModules=['layer', 'form', 'element', 'upload'];
             function mounted() {
@@ -105,6 +163,16 @@
                 initRouter();
                 // 设置StadiumManagerInfo（登录的账号信息）
                 setStadiumManagerInfo();
+                // 显示用户咨询窗口
+                //$('#userConsultationMessageFrame').attr('src', "/book_stadium_online/plugins/pullToRefresh/index.html");
+                $('.userConsultationMessageDiv').hide();
+                $('.userConsultation').click(function () {
+                    $('.userConsultationMessageDiv').show();
+                });
+                // 隐藏用户咨询窗口
+                $('#userConsultationMessageDivCloseImg').click(function() {
+                    $('.userConsultationMessageDiv').hide();
+                });
                 // 显示设置弹框
                 $('.loginUserInfo').click(function () {
                     if ($('.dialogMenu').css('display') === 'block') {
@@ -295,6 +363,121 @@
                     $('.dialogMenu').css('display', 'none');
                     //location.href = '#/manager/base_info.html';
                 });
+
+                // dropload调用
+                $('#userConsultationMessageListDiv').dropload({
+                    scrollArea: window,
+                    distance: 50,
+                    autoLoad: true,
+                    threshold: 320,
+                    loadUpFn : function(me){
+                        alert("上拉加载！");
+                    },
+                    loadDownFn : function(me){
+                        if (nextPage === -1) {
+                            // -1页，说明没有更多数据了
+                            me.lock('down');
+                            me.noData();
+                            me.resetload();
+                            return;
+                        }
+                        $.ajax({
+                            "url": '/book_stadium_online/chat/stadiumManagerFindByPage.do',
+                            "data" : {"pageIndex":nextPage, "pageSize":PAGE_SIZE},
+                            "type": 'POST',
+                            "dataType" : "json",
+                            "beforeSend": function (request) {
+                                request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                            },
+                            success: function(data){
+                                if (data.code === 200) {
+                                    var chatVOs = data.data;
+                                    if (chatVOs == null || chatVOs.length === 0) {
+                                        // 没有更多数据了
+                                        nextPage = -1;
+                                        me.lock('down');
+                                        me.noData();
+                                        me.resetload();
+                                        return;
+                                    }
+                                    var chatVODivString = '';
+                                    for(var i = 0; i < chatVOs.length; i++) {
+                                        var chatVO = chatVOs[i];
+                                        var username = 'null';
+                                        var avatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                                        var lastMessageContent = '';
+                                        var unreadCount = 0;
+                                        if (chatVO.chatType === 1) {
+                                            username = chatVO.fromAccountUsername;
+                                            if (chatVO.fromAccountAvatarPath != null && chatVO.fromAccountAvatarPath.length !== 0) {
+                                                avatarPath = chatVO.fromAccountAvatarPath;
+                                            }
+                                            if (chatVO.toUnreadCount != null) {
+                                                unreadCount = chatVO.toUnreadCount;
+                                            }
+                                        } else if (chatVO.chatType === 2) {
+                                            username = chatVO.toAccountUsername;
+                                            if (chatVO.toAccountAvatarPath != null && chatVO.toAccountAvatarPath.length !== 0) {
+                                                avatarPath = chatVO.toAccountAvatarPath;
+                                            }
+                                            if (chatVO.fromUnreadCount != null) {
+                                                unreadCount = chatVO.fromUnreadCount;
+                                            }
+                                        }
+                                        if (chatVO.lastChatMessage != null) {
+                                            lastMessageContent = chatVO.lastChatMessage.content;
+                                        }
+                                        if (unreadCount !== 0) {
+                                            chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;" onclick="chatAction(' + chatVOData.length + ')">\n' +
+                                                '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
+                                                '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
+                                                '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
+                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: flex;justify-content: center;align-items: center;">\n' +
+                                                '                        <div style="color: white;">' + unreadCount + '</div>\n' +
+                                                '                    </div>\n' +
+                                                '                </div>';
+                                        } else {
+                                            chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;" onclick="chatAction(' + chatVOData.length + ')">\n' +
+                                                '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
+                                                '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
+                                                '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
+                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: flex;justify-content: center;align-items: center;">\n' +
+                                                '                        <div style="color: white;display: none;">' + unreadCount + '</div>\n' +
+                                                '                    </div>\n' +
+                                                '                </div>';
+                                        }
+                                        chatVOData.push(chatVO);
+                                    }
+                                    // 更新下一页
+                                    if (chatVOs.length < PAGE_SIZE) {
+                                        nextPage = -1;
+                                        // me.lock('down');
+                                    } else {
+                                        nextPage += 1;
+                                    }
+                                    chatVOData = chatVOData.concat(chatVOs);
+                                    // 更新视图
+                                    $("#chatVOListDiv").append(chatVODivString);
+                                    me.resetload();
+                                } else {
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: data.message
+                                    });
+                                }
+                            },
+                            error: function(){
+                                me.lock('down');
+                                me.noData();
+                                me.resetload();
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "服务器连接异常！"
+                                });
+                            }
+                        });
+                    }
+                });
             }
 
             /**
@@ -376,6 +559,82 @@
                             title: "提示信息",
                             content: "服务器连接异常！"
                         });
+                    }
+                });
+            }
+
+            /**
+             * 聊天窗口界面
+             * @param chatVOIndex   chatVOIndex
+             */
+            function chatAction(chatVOIndex) {
+                var chatVO = chatVOData[chatVOIndex];
+                var username = 'null';
+                var avatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                if (chatVO.chatType === 1) {
+                    username = chatVO.fromAccountUsername;
+                    if (chatVO.fromAccountAvatarPath != null && chatVO.fromAccountAvatarPath.length !== 0) {
+                        avatarPath = chatVO.fromAccountAvatarPath;
+                    }
+                } else if (chatVO.chatType === 2) {
+                    username = chatVO.toAccountUsername;
+                    if (chatVO.toAccountAvatarPath != null && chatVO.toAccountAvatarPath.length !== 0) {
+                        avatarPath = chatVO.toAccountAvatarPath;
+                    }
+                }
+                // 弹出聊天窗口
+                layer.open({
+                    type: 1,
+                    area: ['500px', '450px'],
+                    title: '<img src="' + avatarPath + '" style="height: 40px;width: 40px;display: inline">  ' + username,
+                    content: $('#chattingDialog').html(),
+                    btn: ['发送', '关闭'],
+                    yes: function (index1, layero) {
+                        if ($('input[name=newPassword]').val() !== $('input[name=reNewPassword]').val()) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: "两次输入的新密码不一致！"
+                            });
+                            return;
+                        }
+                        // var url ="/book_stadium_online/stadiumManager/changePassword.do";
+                        // var data = $("#dialogModifySelfPasswordForm").serialize();
+                        // $.ajax({
+                        //     "url" : url,
+                        //     "data" : data,
+                        //     "type" : "POST",
+                        //     "dataType" : "json",
+                        //     "beforeSend": function (request) {
+                        //         request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                        //     },
+                        //     "success" : function (json) {
+                        //         // 弹出中间提示框
+                        //         layer.open({
+                        //             title: "提示信息",
+                        //             content: json.message,
+                        //             yes: function (index2, layero) {
+                        //                 if (json.code === 200) {
+                        //                     layer.close(index1);
+                        //                 } else if (json.code === 401) {
+                        //                     // code==401说明未登录(BaseController.java定义)
+                        //                     location.href = "/book_stadium_online/stadiumManager/login.html"
+                        //                 }
+                        //                 layer.close(index2);
+                        //             }
+                        //         });
+                        //     },
+                        //     "error" : function () {
+                        //         // 弹出中间提示框
+                        //         layer.open({
+                        //             title: "提示信息",
+                        //             content: "出现异常！"
+                        //         });
+                        //     }
+                        //});
+                    },
+                    cancel: function (index2, layero) {
+                        layer.close(index2);
                     }
                 });
             }
