@@ -11,6 +11,14 @@ import java.util.List;
  * @date 2021/4/3 4:17 下午
  */
 public interface IReportService {
+
+    /**
+     * user进行report
+     * @param userId        userId
+     * @param report        report
+     */
+    void userReport(Integer userId, Report report);
+
     /**
      * systemManager处理举报
      * @param report            report

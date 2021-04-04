@@ -97,7 +97,7 @@ public class ComplaintServiceImpl implements IComplaintService {
         if (complaintDescription == null || complaintDescription.length() == 0) {
             logger.warn("Complaint 添加失败，未填写投诉描述！complaint = " + complaint);
             throw new FindFailedException("操作失败，未填写投诉描述！");
-        } else if (complaintTitle.length() > COMPLAINANT_DESCRIPTION_MAX_LENGTH) {
+        } else if (complaintDescription.length() > COMPLAINANT_DESCRIPTION_MAX_LENGTH) {
             logger.warn("Complaint 添加失败，投诉描述超过了" + COMPLAINANT_DESCRIPTION_MAX_LENGTH + "个字符！complaint = " + complaint);
             throw new FindFailedException("操作失败，投诉描述超过了" + COMPLAINANT_DESCRIPTION_MAX_LENGTH + "个字符！");
         }

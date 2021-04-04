@@ -3,14 +3,17 @@ package cn.edu.hestyle.bookstadium.service.impl;
 import cn.edu.hestyle.bookstadium.entity.*;
 import cn.edu.hestyle.bookstadium.mapper.*;
 import cn.edu.hestyle.bookstadium.service.IReportService;
+import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.DeleteFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ResourceUtils;
 
 import javax.annotation.Resource;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,6 +25,12 @@ import java.util.List;
  */
 @Service
 public class ReportServiceImpl implements IReportService {
+    /** 举报title的最大长度 */
+    private static final Integer REPORT_TITLE_MAX_LENGTH = 50;
+    /** 举报description的最大长度 */
+    private static final Integer REPORT_DESCRIPTION_MAX_LENGTH = 500;
+    /** 举报image的最大数量 */
+    private static final Integer REPORT_IMAGE_MAX_COUNT = 3;
     /** 举报人处理title、content */
     private static final String REPORTER_HANDLE_TITLE = "举报处理";
     private static final String REPORTER_HANDLE_CONTENT = "系统已处理您的举报【%s】，积分奖惩【%s】，奖惩描述【%s】";
@@ -53,6 +62,145 @@ public class ReportServiceImpl implements IReportService {
     private SportMomentMapper sportMomentMapper;
     @Resource
     private SportMomentCommentMapper sportMomentCommentMapper;
+
+    @Override
+    public void userReport(Integer userId, Report report) {
+        if (report == null) {
+            logger.warn("Report 添加失败，未指定需要举报的内容！");
+            throw new AddFailedException("操作失败，未指定需要举报的内容！");
+        }
+        Report reportAddition = new Report();
+        // 举报人信息
+        reportAddition.setReporterAccountType(Report.REPORT_ACCOUNT_TYPE_USER);
+        reportAddition.setReporterAccountId(userId);
+        Integer reportContentType = report.getReportContentType();
+        if (reportContentType == null) {
+            logger.warn("Report 添加失败，未指定需要举报的内容的类型！report = " + report);
+            throw new AddFailedException("操作失败，未指定需要举报的内容的类型！");
+        }
+        Integer reportContentId = report.getReportContentId();
+        if (reportContentId == null) {
+            logger.warn("Report 添加失败，未指定需要举报的内容id！report = " + report);
+            throw new AddFailedException("操作失败，未指定需要举报的内容！");
+        }
+        // 判断举报类型，以及举报的内容是否存在，进而确定被举报人信息
+        if (reportContentType.equals(Report.REPORT_CONTENT_TYPE_SPORT_MOMENT)) {
+            // 举报SportMoment
+            SportMoment sportMoment = null;
+            try {
+                sportMoment = sportMomentMapper.findById(reportContentId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("SportMoment 查找失败，数据库发生未知错误！sportMomentId = " + reportContentId);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            if (sportMoment == null || sportMoment.getIsDelete() != 0) {
+                logger.warn("Report 添加失败，举报不存在的sportMoment！report = " + report);
+                throw new FindFailedException("操作失败，举报不存在的运动动态！");
+            } else {
+                // 被举报人信息
+                reportAddition.setRespondentAccountType(Report.REPORT_ACCOUNT_TYPE_USER);
+                reportAddition.setRespondentAccountId(sportMoment.getUserId());
+            }
+        } else if (reportContentType.equals(Report.REPORT_CONTENT_TYPE_SPORT_MOMENT_COMMENT)) {
+            // 举报SportMomentComment
+            SportMomentComment sportMomentComment = null;
+            try {
+                sportMomentComment = sportMomentCommentMapper.findById(reportContentId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("SportMomentComment 查找失败，数据库发生未知错误！sportMomentCommentId = " + reportContentId);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            if (sportMomentComment == null || sportMomentComment.getIsDelete() != 0) {
+                logger.warn("Report 添加失败，举报不存在的sportMomentComment！report = " + report);
+                throw new FindFailedException("操作失败，举报不存在的运动动态评论！");
+            } else {
+                // 被举报人信息
+                reportAddition.setRespondentAccountType(Report.REPORT_ACCOUNT_TYPE_USER);
+                reportAddition.setRespondentAccountId(sportMomentComment.getUserId());
+            }
+        } else if (reportContentType.equals(Report.REPORT_CONTENT_TYPE_STADIUM)) {
+            // 举报Stadium
+            Stadium stadium = null;
+            try {
+                stadium = stadiumMapper.findById(reportContentId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Stadium 查找失败，数据库发生未知错误！stadiumId = " + reportContentId);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            if (stadium == null || stadium.getIsDelete() != 0) {
+                logger.warn("Report 添加失败，举报不存在的stadium！report = " + report);
+                throw new FindFailedException("操作失败，举报不存在的体育场馆！");
+            } else {
+                // 被举报人信息
+                reportAddition.setRespondentAccountType(Report.REPORT_ACCOUNT_TYPE_STADIUM_MANAGER);
+                reportAddition.setRespondentAccountId(stadium.getStadiumManagerId());
+            }
+        } else if (reportContentType.equals(Report.REPORT_CONTENT_TYPE_STADIUM_COMMENT)) {
+            // 举报StadiumComment
+            StadiumComment stadiumComment = null;
+            try {
+                stadiumComment = stadiumCommentMapper.findByStadiumCommentId(reportContentId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("StadiumComment 查找失败，数据库发生未知错误！stadiumCommentId = " + reportContentId);
+                throw new FindFailedException("操作失败，数据库发生未知错误！");
+            }
+            if (stadiumComment == null || stadiumComment.getIsDelete() != 0) {
+                logger.warn("Report 添加失败，举报不存在的stadiumComment！report = " + report);
+                throw new FindFailedException("操作失败，举报不存在的体育场馆评论！");
+            } else {
+                // 被举报人信息
+                reportAddition.setRespondentAccountType(Report.REPORT_ACCOUNT_TYPE_USER);
+                reportAddition.setRespondentAccountId(stadiumComment.getUserId());
+            }
+        }
+        // 被举报内容信息
+        reportAddition.setReportContentType(reportContentType);
+        reportAddition.setReportContentId(reportContentId);
+        // 检查title
+        String reportTitle = report.getTitle();
+        if (reportTitle == null || reportTitle.length() == 0) {
+            logger.warn("Report 添加失败，未填写投诉标题！report = " + report);
+            throw new FindFailedException("操作失败，未填写投诉标题！");
+        } else if (reportTitle.length() > REPORT_TITLE_MAX_LENGTH) {
+            logger.warn("Report 添加失败，投诉标题超过了" + REPORT_TITLE_MAX_LENGTH + "个字符！report = " + report);
+            throw new FindFailedException("操作失败，投诉标题超过了" + REPORT_TITLE_MAX_LENGTH + "个字符！");
+        }
+        // 检查description
+        String reportDescription = report.getDescription();
+        if (reportDescription == null || reportDescription.length() == 0) {
+            logger.warn("Report 添加失败，未填写投诉描述！report = " + report);
+            throw new FindFailedException("操作失败，未填写投诉描述！");
+        } else if (reportDescription.length() > REPORT_DESCRIPTION_MAX_LENGTH) {
+            logger.warn("Report 添加失败，投诉描述超过了" + REPORT_DESCRIPTION_MAX_LENGTH + "个字符！report = " + report);
+            throw new FindFailedException("操作失败，投诉描述超过了" + REPORT_DESCRIPTION_MAX_LENGTH + "个字符！");
+        }
+        // 检查imagePaths
+        try {
+            checkImagePaths(report.getImagePaths());
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Report 添加失败，image path列表格式错误！report = " + report);
+            throw new AddFailedException("添加失败，投诉图片格式错误！");
+        }
+        reportAddition.setTitle(reportTitle);
+        reportAddition.setDescription(reportDescription);
+        reportAddition.setImagePaths(report.getImagePaths());
+        reportAddition.setReportedTime(new Date());
+        reportAddition.setHasHandled(0);
+        reportAddition.setIsDelete(0);
+        try {
+            reportMapper.add(reportAddition);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Report 添加失败，数据库发生未知异常！reportAddition = " + reportAddition);
+            throw new AddFailedException("添加失败，数据库发生未知异常！");
+        }
+        logger.warn("Report 添加成功！reportAddition = " + reportAddition);
+    }
 
     @Override
     @Transactional
@@ -569,5 +717,40 @@ public class ReportServiceImpl implements IReportService {
             }
         }
         return reportVO;
+    }
+
+    /**
+     * 检查imagePaths的合法性
+     * @param imagePathsString      以逗号间隔的image path
+     * @return                      是否合法
+     * @throws Exception            image path异常
+     */
+    private boolean checkImagePaths(String imagePathsString) throws Exception {
+        if (imagePathsString == null || imagePathsString.length() == 0) {
+            return true;
+        }
+        String[] imagePaths = imagePathsString.split(",");
+        for (String imagePath : imagePaths) {
+            if (imagePath == null || imagePath.length() == 0) {
+                throw new Exception(imagePath + "文件不存在！");
+            }
+            try {
+                String pathNameTemp = ResourceUtils.getURL("classpath:").getPath() + "static/upload/image/report";
+                String pathNameTruth = pathNameTemp.replace("target", "src").replace("classes", "main/resources");
+                String filePath = pathNameTruth + imagePath.substring(imagePath.lastIndexOf('/'));
+                File file = new File(filePath);
+                if (!file.exists()) {
+                    throw new Exception(imagePath + "文件不存在！");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new Exception(imagePath + "文件不存在！");
+            }
+        }
+        if (imagePaths.length > REPORT_IMAGE_MAX_COUNT) {
+            throw new Exception("举报最多上传" + REPORT_IMAGE_MAX_COUNT + "张照片！");
+        }
+        logger.info("Complaint imagePaths = " + imagePathsString + " 通过检查！");
+        return false;
     }
 }
