@@ -123,7 +123,11 @@
         <!--聊天弹框-->
         <script type="text/html" id="chattingDialog">
             <form class="layui-form" id="chattingDialogForm" style="margin-left:10px;padding-right:10px;width: 480px;height: 340px;">
-                <div id="chatMessageDiv" style="width: 100%;height: 260px;overflow-y:auto;"></div>
+                <div id="chatMessageList" style="width: 100%;height: 260px;overflow-y:auto;text-align:center">
+                    <div id="loadBeforePageChatMessageBtn" onclick="loadBeforePageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #1E9FFF;color: white;border-radius:3px;padding: 3px 3px;">加载上一页</div>
+                    <div id="chatMessageDiv"></div>
+                    <div id="loadAfterPageChatMessageBtn" onclick="loadAfterPageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #FFB800;color: white;border-radius:3px;padding: 3px 3px;">刷新</div>
+                </div>
                 <textarea name="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;"></textarea>
             </form>
         </script>
@@ -131,7 +135,15 @@
             var nextPage = 1;
             var PAGE_SIZE = 10;
             var chatVOData = [];
+            var chattingVO = null;
+            // 当前打开的聊天窗口message data
+            var chatMessageListData = [];
             var stadiumManagerInfo;
+            var leftUsername = 'null';
+            var leftAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+            var rightUsername = 'null';
+            var rightAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+
             layuiModules=['layer', 'form', 'element', 'upload'];
             function mounted() {
                 // 菜单列表数据(通过id、pid设置父、子级关系)
@@ -441,8 +453,8 @@
                                                 '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
                                                 '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
                                                 '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
-                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: flex;justify-content: center;align-items: center;">\n' +
-                                                '                        <div style="color: white;display: none;">' + unreadCount + '</div>\n' +
+                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: none;">\n' +
+                                                '                        <div style="color: white;">' + unreadCount + '</div>\n' +
                                                 '                    </div>\n' +
                                                 '                </div>';
                                         }
@@ -568,27 +580,45 @@
              * @param chatVOIndex   chatVOIndex
              */
             function chatAction(chatVOIndex) {
-                var chatVO = chatVOData[chatVOIndex];
-                var username = 'null';
-                var avatarPath = '/book_stadium_online/image/defaultAvatar.png';
-                if (chatVO.chatType === 1) {
-                    username = chatVO.fromAccountUsername;
-                    if (chatVO.fromAccountAvatarPath != null && chatVO.fromAccountAvatarPath.length !== 0) {
-                        avatarPath = chatVO.fromAccountAvatarPath;
+                // 打开新的聊天窗口，清空消息缓存
+                chatMessageListData = [];
+                chattingVO = chatVOData[chatVOIndex];
+                leftUsername = 'null';
+                leftAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                rightUsername = 'null';
+                rightAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                if (chattingVO.chatType === 1) {
+                    // user -> stadiumManager
+                    leftUsername = chattingVO.fromAccountUsername;
+                    if (chattingVO.fromAccountAvatarPath != null && chattingVO.fromAccountAvatarPath.length !== 0) {
+                        leftAvatarPath = chattingVO.fromAccountAvatarPath;
                     }
-                } else if (chatVO.chatType === 2) {
-                    username = chatVO.toAccountUsername;
-                    if (chatVO.toAccountAvatarPath != null && chatVO.toAccountAvatarPath.length !== 0) {
-                        avatarPath = chatVO.toAccountAvatarPath;
+                    rightUsername = chattingVO.toAccountUsername;
+                    if (chattingVO.toAccountAvatarPath != null && chattingVO.toAccountAvatarPath.length !== 0) {
+                        rightAvatarPath = chattingVO.toAccountAvatarPath;
+                    }
+                } else if (chattingVO.chatType === 2) {
+                    // stadiumManager -> user
+                    rightUsername = chattingVO.fromAccountUsername;
+                    if (chattingVO.fromAccountAvatarPath != null && chattingVO.fromAccountAvatarPath.length !== 0) {
+                        rightAvatarPath = chattingVO.fromAccountAvatarPath;
+                    }
+                    leftUsername = chattingVO.toAccountUsername;
+                    if (chattingVO.toAccountAvatarPath != null && chattingVO.toAccountAvatarPath.length !== 0) {
+                        leftAvatarPath = chattingVO.toAccountAvatarPath;
                     }
                 }
                 // 弹出聊天窗口
                 layer.open({
                     type: 1,
                     area: ['500px', '450px'],
-                    title: '<img src="' + avatarPath + '" style="height: 40px;width: 40px;display: inline">  ' + username,
+                    title: '<img src="' + leftAvatarPath + '" style="height: 40px;width: 40px;display: inline">  ' + leftUsername,
                     content: $('#chattingDialog').html(),
                     btn: ['发送', '关闭'],
+                    success: function(index, layero) {
+                        loadAfterPageChatMessage();
+                        form.render();
+                    },
                     yes: function (index1, layero) {
                         if ($('input[name=newPassword]').val() !== $('input[name=reNewPassword]').val()) {
                             // 弹出中间提示框
@@ -635,6 +665,129 @@
                     },
                     cancel: function (index2, layero) {
                         layer.close(index2);
+                    }
+                });
+            }
+
+            /**
+             * chatMessage 转成 chatMessageDiv
+             * @param chatMessage           chatMessage
+             */
+            function chatMessageDiv(chatMessage) {
+                var divString = '';
+                if (chatMessage.chatType === 1) {
+                    // user -> stadiumManager的消息
+                    divString = '<div style="width: 450px;height: auto;min-height:65px;position: relative;padding: 5px 5px;">\n' +
+                        '                    <img src="' + leftAvatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 0px;left: 0px;">\n' +
+                        '                    <div style="font-size: 13px;left: 45px;top: 0px;position: absolute;">' + chatMessage.sentTime + '</div>\n' +
+                        '                    <div style="content: \'\';position: absolute;left: 40px;top: 25px;width: 0;height: 0;border-style: solid dashed dashed;border-color: #e2e2e2 transparent transparent;overflow: hidden;border-width: 10px;"></div>\n' +
+                        '                    <div style="max-width: 360px;word-wrap: normal|break-word;font-size: 13px;left: 48px;top: 20px;position: absolute;background-color: #e2e2e2;padding: 6px 10px;border-radius:4px;">' + chatMessage.content + '</div>\n' +
+                        '                </div>';
+                } else {
+                    // stadiumManager -> user的消息
+                    divString = '<div style="width: 450px;height: auto;min-height:65px;position: relative;padding: 5px 5px;">\n' +
+                        '                    <img src="' + rightAvatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 0px;right: 10px;">\n' +
+                        '                    <div style="font-size: 13px;right: 55px;top: 0px;position: absolute;">' + chatMessage.sentTime + '</div>\n' +
+                        '                    <div style="content: \'\';position: absolute;right: 50px;top: 25px;width: 0;height: 0;border-style: solid dashed dashed;border-color: #5FB878 transparent transparent;overflow: hidden;border-width: 10px;"></div>\n' +
+                        '                    <div style="max-width: 360px;word-wrap: normal|break-word;font-size: 13px;right: 58px;top: 20px;position: absolute;background-color: #5FB878;padding: 6px 10px;border-radius:4px;color: white;">' + chatMessage.content + '</div>\n' +
+                        '                </div>';
+                }
+                return divString;
+            }
+
+            /**
+             * 获取上一页chatMessage
+             */
+            function loadBeforePageChatMessage() {
+                if (chatMessageListData == null || chatMessageListData.length === 0) {
+                    $('#loadBeforePageChatMessageBtn').hide();
+                    return
+                }
+                var url ="/book_stadium_online/chatMessage/stadiumManagerFindBeforePage.do";
+                var data = {"chatId":chattingVO.id, "chatMessageId":chatMessageListData[0].id, "pageSize":PAGE_SIZE};
+                $.ajax({
+                    "url" : url,
+                    "data" : data,
+                    "type" : "POST",
+                    "dataType" : "json",
+                    "beforeSend": function (request) {
+                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                    },
+                    "success" : function (json) {
+                        if (json.code !== 200) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message,
+                            });
+                            return;
+                        }
+                        if (json.data != null && json.data.length !== 0) {
+                            var chatMessageListDataTmp = json.data;
+                            for (var i = chatMessageListDataTmp.length - 1; i >= 0; --i) {
+                                var resultString = chatMessageDiv(chatMessageListDataTmp[i]);
+                                $('#chatMessageDiv').prepend(resultString);
+                            }
+                            chatMessageListData = chatMessageListDataTmp.concat(chatMessageListData);
+                        }
+                        if (chatMessageListDataTmp === null || chatMessageListDataTmp.length < PAGE_SIZE) {
+                            // 没有更上一页的内容
+                            $('#loadBeforePageChatMessageBtn').hide();
+                        }
+                        form.render();
+                    },
+                    "error" : function () {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "出现异常！"
+                        });
+                    }
+                });
+            }
+
+            /**
+             * 获取下一页chatMessage
+             */
+            function loadAfterPageChatMessage() {
+                var url ="/book_stadium_online/chatMessage/stadiumManagerFindAfterPage.do";
+                var data = {"chatId":chattingVO.id, "pageSize":PAGE_SIZE};
+                if (chatMessageListData != null && chatMessageListData.length !== 0) {
+                    data["chatMessageId"] = chatMessageListData[chatMessageListData.length - 1].id;
+                }
+                $.ajax({
+                    "url" : url,
+                    "data" : data,
+                    "type" : "POST",
+                    "dataType" : "json",
+                    "beforeSend": function (request) {
+                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                    },
+                    "success" : function (json) {
+                        if (json.code !== 200) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: json.message,
+                            });
+                            return;
+                        }
+                        if (json.data != null && json.data.length !== 0) {
+                            var chatMessageListDataTmp = json.data;
+                            for (var i = 0; i < chatMessageListDataTmp.length; ++i) {
+                                var resultString = chatMessageDiv(chatMessageListDataTmp[i]);
+                                $('#chatMessageDiv').append(resultString);
+                            }
+                            chatMessageListData = chatMessageListData.concat(chatMessageListDataTmp);
+                        }
+                        form.render();
+                    },
+                    "error" : function () {
+                        // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "出现异常！"
+                        });
                     }
                 });
             }
