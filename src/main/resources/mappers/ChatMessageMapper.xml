@@ -5,8 +5,8 @@
     <!--添加chatMessage-->
     <!--void add(ChatMessage chatMessage);-->
     <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.ChatMessage" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO `t_chat_message`(`chat_id`, `chat_type`, `from_account_id`, `to_account_id`, `content`, `sent_time`, `is_delete`)
-        VALUES (#{chatId}, #{chatType}, #{fromAccountId}, #{toAccountId}, #{content}, #{sentTime}, #{isDelete})
+        INSERT INTO `t_chat_message`(`chat_id`, `message_type`, `from_account_id`, `to_account_id`, `content`, `sent_time`, `is_delete`)
+        VALUES (#{chatId}, #{messageType}, #{fromAccountId}, #{toAccountId}, #{content}, #{sentTime}, #{isDelete})
     </insert>
     <!--通过id查找ChatMessage-->
     <!--ChatMessage findById(Integer id);-->
@@ -14,7 +14,7 @@
         SELECT
             `id` as `id`,
             `chat_id` as `chatId`,
-            `chat_type` as `chatType`,
+            `message_type` as `messageType`,
             `from_account_id` as `fromAccountId`,
             `to_account_id` as  `toAccountId`,
             `content` as `content`,
@@ -31,7 +31,7 @@
         SELECT
             `id` as `id`,
             `chat_id` as `chatId`,
-            `chat_type` as `chatType`,
+            `message_type` as `messageType`,
             `from_account_id` as  `fromAccountId`,
             `to_account_id` as `toAccountId`,
             `content` as `content`,
@@ -52,7 +52,7 @@
         SELECT
             `id` as `id`,
             `chat_id` as `chatId`,
-            `chat_type` as `chatType`,
+            `message_type` as `messageType`,
             `from_account_id` as  `fromAccountId`,
             `to_account_id` as `toAccountId`,
             `content` as `content`,
@@ -76,7 +76,7 @@
         SELECT
             `id` as `id`,
             `chat_id` as `chatId`,
-            `chat_type` as `chatType`,
+            `message_type` as `messageType`,
             `from_account_id` as  `fromAccountId`,
             `to_account_id` as `toAccountId`,
             `content` as `content`,

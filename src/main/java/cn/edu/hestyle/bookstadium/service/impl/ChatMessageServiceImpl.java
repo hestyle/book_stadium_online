@@ -38,13 +38,13 @@ public class ChatMessageServiceImpl implements IChatMessageService {
     @Transactional
     public ChatMessage userSend(Integer userId, ChatMessage chatMessage) {
         Chat chat = sendMessageCheck(chatMessage);
-        chatMessage.setChatType(chat.getChatType());
         // 检查user是否是chat的发起者或者接受者
         if (chat.getChatType().equals(Chat.CHAT_TYPE_USER_TO_MANAGER)) {
             if (!chat.getFromAccountId().equals(userId)) {
                 logger.warn("ChatMessage 发送失败，用户无法操作非自己账号的聊天！userId = " + userId + "，chat = " + chat);
                 throw new FindFailedException("发送失败，无法操作其他用户之间的聊天！");
             }
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_USER_TO_MANAGER);
             // 当前账号是chat发起者
             chatMessage.setFromAccountId(chat.getFromAccountId());
             chatMessage.setToAccountId(chat.getToAccountId());
@@ -55,6 +55,7 @@ public class ChatMessageServiceImpl implements IChatMessageService {
                 logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
                 throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
             }
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_USER_TO_MANAGER);
             // 当前账号是chat接受者
             chatMessage.setFromAccountId(chat.getToAccountId());
             chatMessage.setToAccountId(chat.getFromAccountId());
@@ -65,12 +66,18 @@ public class ChatMessageServiceImpl implements IChatMessageService {
                 logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
                 throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
             }
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_USER_TO_USER);
             // 当前账号是chat接受者
             chatMessage.setFromAccountId(chat.getToAccountId());
             chatMessage.setToAccountId(chat.getFromAccountId());
             // chat发起者未读消息增加一条
             chat.setFromUnreadCount(chat.getFromUnreadCount() + 1);
         } else {
+            if (!chat.getFromAccountId().equals(userId)) {
+                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
+                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
+            }
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_USER_TO_USER);
             // 当前账号是chat发起者
             chatMessage.setFromAccountId(chat.getFromAccountId());
             chatMessage.setToAccountId(chat.getToAccountId());
@@ -111,7 +118,7 @@ public class ChatMessageServiceImpl implements IChatMessageService {
                 logger.warn("ChatMessage 发送失败，用户无法操作非自己账号的聊天！stadiumManagerId = " + stadiumManagerId + "，chat = " + chat);
                 throw new FindFailedException("操作失败，无法操作其他用户之间的聊天！");
             }
-            chatMessage.setChatType(Chat.CHAT_TYPE_MANAGER_TO_USER);
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_MANAGER_TO_USER);
             // 当前账号是chat接收者
             chatMessage.setFromAccountId(chat.getToAccountId());
             chatMessage.setToAccountId(chat.getFromAccountId());
@@ -122,7 +129,7 @@ public class ChatMessageServiceImpl implements IChatMessageService {
                 logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！stadiumManagerId = " + stadiumManagerId + "，chat = " + chat);
                 throw new FindFailedException("操作失败，无法查看其他用户之间的聊天！");
             }
-            chatMessage.setChatType(Chat.CHAT_TYPE_MANAGER_TO_USER);
+            chatMessage.setMessageType(ChatMessage.MESSAGE_TYPE_MANAGER_TO_USER);
             // 当前账号是chat发起者
             chatMessage.setToAccountId(chat.getToAccountId());
             chatMessage.setFromAccountId(chat.getFromAccountId());

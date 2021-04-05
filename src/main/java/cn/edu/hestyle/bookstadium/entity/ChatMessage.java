@@ -11,12 +11,17 @@ import java.util.Date;
  * @date 2021/3/24 10:47 上午
  */
 public class ChatMessage {
+    /** message类型 */
+    public static final Integer MESSAGE_TYPE_USER_TO_USER = 0;
+    public static final Integer MESSAGE_TYPE_USER_TO_MANAGER = 1;
+    public static final Integer MESSAGE_TYPE_MANAGER_TO_USER = 2;
+
     /** id */
     private Integer id;
     /** chatId */
     private Integer chatId;
     /** chatType */
-    private Integer chatType;
+    private Integer messageType;
     /** fromAccountId */
     private Integer fromAccountId;
     /** toAccountId */
@@ -45,12 +50,12 @@ public class ChatMessage {
         this.chatId = chatId;
     }
 
-    public Integer getChatType() {
-        return chatType;
+    public Integer getMessageType() {
+        return messageType;
     }
 
-    public void setChatType(Integer chatType) {
-        this.chatType = chatType;
+    public void setMessageType(Integer messageType) {
+        this.messageType = messageType;
     }
 
     public Integer getFromAccountId() {
@@ -98,7 +103,7 @@ public class ChatMessage {
         return "ChatMessage{" +
                 "id=" + id +
                 ", chatId=" + chatId +
-                ", chatType=" + chatType +
+                ", messageType=" + messageType +
                 ", fromAccountId=" + fromAccountId +
                 ", toAccountId=" + toAccountId +
                 ", content='" + content + '\'' +

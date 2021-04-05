@@ -179,6 +179,8 @@
                 $('.userConsultationMessageDiv').hide();
                 $('.userConsultation').click(function () {
                     $('.userConsultationMessageDiv').show();
+                    // 聊天列表打开的时候刷新聊天列表
+                    refreshChatVOList();
                 });
                 // 隐藏用户咨询窗口
                 $('#userConsultationMessageDivCloseImg').click(function() {
@@ -677,8 +679,13 @@
                             }
                         });
                     },
-                    cancel: function (index2, layero) {
-                        layer.close(index2);
+                    btn2: function (index, layero) {
+                        layer.close(index);
+                        // 聊天窗口关闭的时候刷新聊天列表
+                        refreshChatVOList();
+                    },
+                    cancel: function (index, layero) {
+                        layer.close(index);
                         // 聊天窗口关闭的时候刷新聊天列表
                         refreshChatVOList();
                     }
@@ -691,7 +698,7 @@
              */
             function chatMessageToDivString(chatMessage) {
                 var divString = '';
-                if (chatMessage.chatType === 1) {
+                if (chatMessage.messageType === 1) {
                     // user -> stadiumManager的消息
                     divString = '<div style="width: 450px;height: auto;min-height:65px;position: relative;padding: 5px 5px;">\n' +
                         '                    <img src="' + leftAvatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 0px;left: 0px;">\n' +
@@ -699,7 +706,7 @@
                         '                    <div style="content: \'\';position: absolute;left: 40px;top: 25px;width: 0;height: 0;border-style: solid dashed dashed;border-color: #e2e2e2 transparent transparent;overflow: hidden;border-width: 10px;"></div>\n' +
                         '                    <div style="max-width: 360px;word-wrap: normal|break-word;font-size: 13px;left: 48px;top: 20px;position: absolute;background-color: #e2e2e2;padding: 6px 10px;border-radius:4px;">' + chatMessage.content + '</div>\n' +
                         '                </div>';
-                } else {
+                } else if (chatMessage.messageType === 2) {
                     // stadiumManager -> user的消息
                     divString = '<div style="width: 450px;height: auto;min-height:65px;position: relative;padding: 5px 5px;">\n' +
                         '                    <img src="' + rightAvatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 0px;right: 10px;">\n' +
