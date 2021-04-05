@@ -42,4 +42,13 @@ public interface ChatMessageMapper {
      * @return                  List ChatMessage
      */
     List<ChatMessage> findBeforePage(Integer chatId, Integer chatMessageId, Integer pageSize);
+
+    /**
+     * 获取chatMessageId之后的message
+     * @param chatId            chatId
+     * @param chatMessageId     chatMessageId
+     * @param pageSize          页大小
+     * @return                  List ChatMessage
+     */
+    List<ChatMessage> findAfterPage(Integer chatId, Integer chatMessageId, Integer pageSize);
 }

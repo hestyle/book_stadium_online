@@ -70,4 +70,15 @@ public class ChatMessageController extends BaseController {
         List<ChatMessage> chatMessageList = chatMessageService.stadiumManagerFindBeforePage(stadiumManagerId, chatId, chatMessageId, pageSize);
         return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
     }
+
+    @PostMapping("/stadiumManagerFindAfterPage.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
+    public ResponseResult<List<ChatMessage>> handleStadiumManagerFindAfterPage(@RequestParam(value = "chatId") Integer chatId,
+                                                                               @RequestParam(value = "chatMessageId", defaultValue = "") Integer chatMessageId,
+                                                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                               HttpSession session) {
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        List<ChatMessage> chatMessageList = chatMessageService.stadiumManagerFindAfterPage(stadiumManagerId, chatId, chatMessageId, pageSize);
+        return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
+    }
 }

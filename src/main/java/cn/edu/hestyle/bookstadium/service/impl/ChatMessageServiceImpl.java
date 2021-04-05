@@ -230,6 +230,31 @@ public class ChatMessageServiceImpl implements IChatMessageService {
         return chatMessageList;
     }
 
+    @Override
+    public List<ChatMessage> stadiumManagerFindAfterPage(Integer stadiumManagerId, Integer chatId, Integer chatMessageId, Integer pageSize) {
+        // 参数检查
+        stadiumManagerFindPageCheck(stadiumManagerId, chatId, pageSize);
+        List<ChatMessage> chatMessageList = null;
+        try {
+            chatMessageList = chatMessageMapper.findAfterPage(chatId, chatMessageId, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("ChatMessage 查找失败，数据库发生未知异常！chatId = " + chatId);
+            throw new FindFailedException("查找失败，数据库发生未知异常！");
+        }
+        // 按时间升序
+        if (chatMessageList != null && chatMessageList.size() != 0) {
+            Collections.sort(chatMessageList, new Comparator<ChatMessage>() {
+                @Override
+                public int compare(ChatMessage o1, ChatMessage o2) {
+                    return o1.getSentTime().compareTo(o2.getSentTime());
+                }
+            });
+        }
+        logger.warn("ChatMessage 查找成功！chatMessageList = " + chatMessageList);
+        return chatMessageList;
+    }
+
     /**
      * stadiumManager分压查找message时参数检查
      * @param stadiumManagerId      stadiumManagerId
