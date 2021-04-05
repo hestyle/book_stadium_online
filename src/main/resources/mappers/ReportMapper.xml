@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
         "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
 <mapper namespace="cn.edu.hestyle.bookstadium.mapper.ReportMapper">
+    <!--添加report-->
+    <!--void add(Report report);-->
+    <insert id="add" parameterType="cn.edu.hestyle.bookstadium.entity.Report" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `t_report`(`reporter_account_type`, `reporter_account_id`, `report_content_type`, `report_content_id`,
+                               `respondent_account_type`, `respondent_account_id`,`title`, `description`, `image_paths`,
+                               `reported_time`, `has_handled`, `is_delete`)
+        VALUES (#{reporterAccountType}, #{reporterAccountId}, #{reportContentType}, #{reportContentId}, #{respondentAccountType}, #{respondentAccountId},
+                #{title}, #{description}, #{imagePaths}, #{reportedTime}, #{hasHandled}, #{isDelete})
+    </insert>
     <!--更新report(has_handled、handled_time等字段)-->
     <!--void update(Report report);-->
     <update id="update" parameterType="cn.edu.hestyle.bookstadium.entity.Report">

@@ -14,6 +14,12 @@ import java.util.List;
 public interface ReportMapper {
 
     /**
+     * 添加report
+     * @param report            report
+     */
+    void add(Report report);
+
+    /**
      * 更新report(has_handled、handled_time等字段)
      * @param report            report
      */
