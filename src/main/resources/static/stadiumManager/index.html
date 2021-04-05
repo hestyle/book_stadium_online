@@ -9,8 +9,6 @@
         <script src="../js/jquery.getUrlParam.js"></script>
         <script src="../layui/layui.all.js"></script>
         <script src="../js/common.js"></script>
-        <script src="../plugins/dropload/dropload.min.js"></script>
-        <link rel="stylesheet" href="../plugins/dropload/dropload.css">
         <link rel="stylesheet" href="../layui/css/layui.css">
         <link rel="stylesheet" href="../css/style.css">
         <title>在线预约体育场馆管理系统</title>
@@ -79,10 +77,22 @@
                 <img id="userConsultationMessageDivCloseImg" src="/book_stadium_online/image/close.png" style="width: 16px;height: 16px;position: absolute;right: 5px;top: 7px;">
             </div>
             <div id="userConsultationMessageListDiv" style="width: 240px;height: 450px;overflow-y:auto;">
-                <div id="chatVOListDiv"></div>
+                <div id="refreshChatVOListBtn" onclick="refreshChatVOList()" style="width:80px;position: absolute;left:15px;text-align: center;font-size: 13px;background-color: #FFB800;color: white;border-radius:3px;padding: 3px 3px;">刷新</div>
+                <div id="loadNextPageChatVOBtn" onclick="loadNextPageChatVO()" style="width:80px;position: absolute;right: 15px;text-align: center;font-size: 13px;background-color: #1E9FFF;color: white;border-radius:3px;padding: 3px 3px;">加载下一页</div>
+                <div id="chatVOListDiv" style="margin-top: 25px;background-color: white;"></div>
             </div>
         </div>
-
+        <!--聊天弹框-->
+        <script type="text/html" id="chattingDialog">
+            <form class="layui-form" id="chattingDialogForm" style="margin-left:10px;padding-right:10px;width: 480px;height: 340px;">
+                <div id="chatMessageList" style="width: 100%;height: 260px;overflow-y:auto;text-align:center">
+                    <div id="loadBeforePageChatMessageBtn" onclick="loadBeforePageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #1E9FFF;color: white;border-radius:3px;padding: 3px 3px;">加载上一页</div>
+                    <div id="chatMessageDiv"></div>
+                    <div id="loadAfterPageChatMessageBtn" onclick="loadAfterPageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #FFB800;color: white;border-radius:3px;padding: 3px 3px;">刷新</div>
+                </div>
+                <textarea id="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;margin-top: 2px;"></textarea>
+            </form>
+        </script>
         <!--设置弹框-->
         <div class="dialogMenu">
             <div id="modifySelfBaseInfo" class="dialogMenu-item"><a href="#/changeAccountInfo.html">账号信息</span></a></div>
@@ -120,19 +130,8 @@
                 </div>
             </form>
         </script>
-        <!--聊天弹框-->
-        <script type="text/html" id="chattingDialog">
-            <form class="layui-form" id="chattingDialogForm" style="margin-left:10px;padding-right:10px;width: 480px;height: 340px;">
-                <div id="chatMessageList" style="width: 100%;height: 260px;overflow-y:auto;text-align:center">
-                    <div id="loadBeforePageChatMessageBtn" onclick="loadBeforePageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #1E9FFF;color: white;border-radius:3px;padding: 3px 3px;">加载上一页</div>
-                    <div id="chatMessageDiv"></div>
-                    <div id="loadAfterPageChatMessageBtn" onclick="loadAfterPageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #FFB800;color: white;border-radius:3px;padding: 3px 3px;">刷新</div>
-                </div>
-                <textarea id="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;margin-top: 2px;"></textarea>
-            </form>
-        </script>
         <script>
-            var nextPage = 1;
+            var chatNextPage = 1;
             var PAGE_SIZE = 10;
             var chatVOData = [];
             var chattingVO = null;
@@ -376,120 +375,8 @@
                     //location.href = '#/manager/base_info.html';
                 });
 
-                // dropload调用
-                $('#userConsultationMessageListDiv').dropload({
-                    scrollArea: window,
-                    distance: 50,
-                    autoLoad: true,
-                    threshold: 320,
-                    loadUpFn : function(me){
-                        alert("上拉加载！");
-                    },
-                    loadDownFn : function(me){
-                        if (nextPage === -1) {
-                            // -1页，说明没有更多数据了
-                            me.lock('down');
-                            me.noData();
-                            me.resetload();
-                            return;
-                        }
-                        $.ajax({
-                            "url": '/book_stadium_online/chat/stadiumManagerFindByPage.do',
-                            "data" : {"pageIndex":nextPage, "pageSize":PAGE_SIZE},
-                            "type": 'POST',
-                            "dataType" : "json",
-                            "beforeSend": function (request) {
-                                request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                            },
-                            success: function(data){
-                                if (data.code === 200) {
-                                    var chatVOs = data.data;
-                                    if (chatVOs == null || chatVOs.length === 0) {
-                                        // 没有更多数据了
-                                        nextPage = -1;
-                                        me.lock('down');
-                                        me.noData();
-                                        me.resetload();
-                                        return;
-                                    }
-                                    var chatVODivString = '';
-                                    for(var i = 0; i < chatVOs.length; i++) {
-                                        var chatVO = chatVOs[i];
-                                        var username = 'null';
-                                        var avatarPath = '/book_stadium_online/image/defaultAvatar.png';
-                                        var lastMessageContent = '';
-                                        var unreadCount = 0;
-                                        if (chatVO.chatType === 1) {
-                                            username = chatVO.fromAccountUsername;
-                                            if (chatVO.fromAccountAvatarPath != null && chatVO.fromAccountAvatarPath.length !== 0) {
-                                                avatarPath = chatVO.fromAccountAvatarPath;
-                                            }
-                                            if (chatVO.toUnreadCount != null) {
-                                                unreadCount = chatVO.toUnreadCount;
-                                            }
-                                        } else if (chatVO.chatType === 2) {
-                                            username = chatVO.toAccountUsername;
-                                            if (chatVO.toAccountAvatarPath != null && chatVO.toAccountAvatarPath.length !== 0) {
-                                                avatarPath = chatVO.toAccountAvatarPath;
-                                            }
-                                            if (chatVO.fromUnreadCount != null) {
-                                                unreadCount = chatVO.fromUnreadCount;
-                                            }
-                                        }
-                                        if (chatVO.lastChatMessage != null) {
-                                            lastMessageContent = chatVO.lastChatMessage.content;
-                                        }
-                                        if (unreadCount !== 0) {
-                                            chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;" onclick="chatAction(' + chatVOData.length + ')">\n' +
-                                                '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
-                                                '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
-                                                '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
-                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: flex;justify-content: center;align-items: center;">\n' +
-                                                '                        <div style="color: white;">' + unreadCount + '</div>\n' +
-                                                '                    </div>\n' +
-                                                '                </div>';
-                                        } else {
-                                            chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;" onclick="chatAction(' + chatVOData.length + ')">\n' +
-                                                '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
-                                                '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
-                                                '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
-                                                '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: none;">\n' +
-                                                '                        <div style="color: white;">' + unreadCount + '</div>\n' +
-                                                '                    </div>\n' +
-                                                '                </div>';
-                                        }
-                                        chatVOData.push(chatVO);
-                                    }
-                                    // 更新下一页
-                                    if (chatVOs.length < PAGE_SIZE) {
-                                        nextPage = -1;
-                                        // me.lock('down');
-                                    } else {
-                                        nextPage += 1;
-                                    }
-                                    chatVOData = chatVOData.concat(chatVOs);
-                                    // 更新视图
-                                    $("#chatVOListDiv").append(chatVODivString);
-                                    me.resetload();
-                                } else {
-                                    layer.open({
-                                        title: "提示信息",
-                                        content: data.message
-                                    });
-                                }
-                            },
-                            error: function(){
-                                me.lock('down');
-                                me.noData();
-                                me.resetload();
-                                layer.open({
-                                    title: "提示信息",
-                                    content: "服务器连接异常！"
-                                });
-                            }
-                        });
-                    }
-                });
+                // 获取chat列表
+                refreshChatVOList();
             }
 
             /**
@@ -567,6 +454,118 @@
                     },
                     "error" : function () {
                         // 弹出中间提示框
+                        layer.open({
+                            title: "提示信息",
+                            content: "服务器连接异常！"
+                        });
+                    }
+                });
+            }
+
+            /**
+             * 刷新chatVO list
+             */
+            function refreshChatVOList() {
+                // 获取chat列表
+                chatNextPage = 1;
+                chatVOData = [];
+                $('#chatVOListDiv').empty();
+                loadNextPageChatVO();
+            }
+
+            /**
+             * 获取下一页chat
+             */
+            function loadNextPageChatVO() {
+                if (chatNextPage === -1) {
+                    // -1页，说明没有更多数据了
+                    $('#loadNextPageChatVOBtn').hide();
+                    return;
+                }
+                $.ajax({
+                    "url": '/book_stadium_online/chat/stadiumManagerFindByPage.do',
+                    "data" : {"pageIndex":chatNextPage, "pageSize":PAGE_SIZE},
+                    "type": 'POST',
+                    "dataType" : "json",
+                    "beforeSend": function (request) {
+                        request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                    },
+                    success: function(data){
+                        if (data.code === 200) {
+                            var chatVOs = data.data;
+                            if (chatVOs == null || chatVOs.length === 0) {
+                                // 没有更多数据了
+                                chatNextPage = -1;
+                                $('#loadNextPageChatVOBtn').hide();
+                                return;
+                            }
+                            var chatVODivString = '';
+                            for(var i = 0; i < chatVOs.length; i++) {
+                                var chatVO = chatVOs[i];
+                                var username = 'null';
+                                var avatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                                var lastMessageContent = '';
+                                var unreadCount = 0;
+                                if (chatVO.chatType === 1) {
+                                    username = chatVO.fromAccountUsername;
+                                    if (chatVO.fromAccountAvatarPath != null && chatVO.fromAccountAvatarPath.length !== 0) {
+                                        avatarPath = chatVO.fromAccountAvatarPath;
+                                    }
+                                    if (chatVO.toUnreadCount != null) {
+                                        unreadCount = chatVO.toUnreadCount;
+                                    }
+                                } else if (chatVO.chatType === 2) {
+                                    username = chatVO.toAccountUsername;
+                                    if (chatVO.toAccountAvatarPath != null && chatVO.toAccountAvatarPath.length !== 0) {
+                                        avatarPath = chatVO.toAccountAvatarPath;
+                                    }
+                                    if (chatVO.fromUnreadCount != null) {
+                                        unreadCount = chatVO.fromUnreadCount;
+                                    }
+                                }
+                                if (chatVO.lastChatMessage != null) {
+                                    lastMessageContent = chatVO.lastChatMessage.content;
+                                }
+                                if (unreadCount !== 0) {
+                                    chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;background-color: white;" onclick="chatAction(' + chatVOData.length + ')">\n' +
+                                        '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
+                                        '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
+                                        '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
+                                        '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: flex;justify-content: center;align-items: center;">\n' +
+                                        '                        <div style="color: white;">' + unreadCount + '</div>\n' +
+                                        '                    </div>\n' +
+                                        '                </div>';
+                                } else {
+                                    chatVODivString += '<div style="width: 210px;height: 50px;margin-left: 15px;margin-right: 15px;position: relative;border-bottom:1px solid #BFBFBF;background-color: white;" onclick="chatAction(' + chatVOData.length + ')">\n' +
+                                        '                    <img src="' + avatarPath + '" style="width: 40px;height: 40px;position: absolute;top: 5px;left: 0px;">\n' +
+                                        '                    <div style="font-size: 15px;left: 45px;top: 5px;position: absolute;">' + username + '</div>\n' +
+                                        '                    <div style="max-width: 150px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;font-size: 10px;left: 45px;bottom: 5px;position: absolute;">' + lastMessageContent + '</div>\n' +
+                                        '                    <div style="width: 22px;height: 22px;background: red;border-radius:50%;position: absolute;top: 14px;right: 0px;display: none;">\n' +
+                                        '                        <div style="color: white;">' + unreadCount + '</div>\n' +
+                                        '                    </div>\n' +
+                                        '                </div>';
+                                }
+                            }
+                            // 更新下一页
+                            if (chatVOs.length < PAGE_SIZE) {
+                                chatNextPage = -1;
+                                $('#loadNextPageChatVOBtn').hide();
+                            } else {
+                                chatNextPage += 1;
+                                $('#loadNextPageChatVOBtn').show();
+                            }
+                            chatVOData = chatVOData.concat(chatVOs);
+                            // 更新视图
+                            $("#chatVOListDiv").append(chatVODivString);
+                        } else {
+                            layer.open({
+                                title: "提示信息",
+                                content: data.message
+                            });
+                        }
+                        form.render();
+                    },
+                    error: function(){
                         layer.open({
                             title: "提示信息",
                             content: "服务器连接异常！"
@@ -680,6 +679,8 @@
                     },
                     cancel: function (index2, layero) {
                         layer.close(index2);
+                        // 聊天窗口关闭的时候刷新聊天列表
+                        refreshChatVOList();
                     }
                 });
             }
