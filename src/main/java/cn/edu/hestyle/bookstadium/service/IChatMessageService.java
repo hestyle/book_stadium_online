@@ -27,4 +27,14 @@ public interface IChatMessageService {
      * @return              List ChatMessage
      */
     List<ChatMessage> userFindByChatIdAndPage(Integer userId, Integer chatId, Integer pageIndex, Integer pageSize);
+
+    /**
+     * stadiumManager获取chatMessageId之前的消息
+     * @param stadiumManagerId  stadiumManagerId
+     * @param chatId            chatId
+     * @param chatMessageId     chatMessageId
+     * @param pageSize          pageSize
+     * @return                  List    ChatMessage
+     */
+    List<ChatMessage> stadiumManagerFindBeforePage(Integer stadiumManagerId, Integer chatId, Integer chatMessageId, Integer pageSize);
 }

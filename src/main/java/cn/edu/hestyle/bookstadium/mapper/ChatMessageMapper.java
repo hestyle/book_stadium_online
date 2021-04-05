@@ -33,4 +33,13 @@ public interface ChatMessageMapper {
      * @return              List ChatMessage
      */
     List<ChatMessage> findByChatIdAndPage(Integer chatId, Integer beginIndex, Integer pageSize);
+
+    /**
+     * 获取chatMessageId之前的message
+     * @param chatId            chatId
+     * @param chatMessageId     chatMessageId
+     * @param pageSize          页大小
+     * @return                  List ChatMessage
+     */
+    List<ChatMessage> findBeforePage(Integer chatId, Integer chatMessageId, Integer pageSize);
 }

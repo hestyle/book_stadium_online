@@ -3,6 +3,7 @@ package cn.edu.hestyle.bookstadium.controller;
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
 import cn.edu.hestyle.bookstadium.entity.Banner;
 import cn.edu.hestyle.bookstadium.entity.ChatMessage;
+import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.jwt.JwtToken;
 import cn.edu.hestyle.bookstadium.service.IChatMessageService;
@@ -56,6 +57,17 @@ public class ChatMessageController extends BaseController {
                                                                            HttpSession session) {
         Integer userId = (Integer) session.getAttribute("id");
         List<ChatMessage> chatMessageList = chatMessageService.userFindByChatIdAndPage(userId, chatId, pageIndex, pageSize);
+        return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
+    }
+
+    @PostMapping("/stadiumManagerFindBeforePage.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
+    public ResponseResult<List<ChatMessage>> handleStadiumManagerFindBeforePage(@RequestParam(value = "chatId") Integer chatId,
+                                                                               @RequestParam(value = "chatMessageId", defaultValue = "") Integer chatMessageId,
+                                                                               @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                               HttpSession session) {
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        List<ChatMessage> chatMessageList = chatMessageService.stadiumManagerFindBeforePage(stadiumManagerId, chatId, chatMessageId, pageSize);
         return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
     }
 }

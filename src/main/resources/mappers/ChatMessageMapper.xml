@@ -46,4 +46,28 @@
         LIMIT
             #{beginIndex}, #{pageSize}
     </select>
+    <!--获取chatMessageId之前的message-->
+    <!--List<ChatMessage> findBeforePage(Integer chatId, Integer chatMessageId, Integer pageSize);-->
+    <select id="findBeforePage" resultType="cn.edu.hestyle.bookstadium.entity.ChatMessage">
+        SELECT
+            `id` as `id`,
+            `chat_id` as `chatId`,
+            `chat_type` as `chatType`,
+            `from_account_id` as  `fromAccountId`,
+            `to_account_id` as `toAccountId`,
+            `content` as `content`,
+            `sent_time` as `sentTime`,
+            `is_delete` as `isDelete`
+        FROM
+            `t_chat_message`
+        WHERE
+            `chat_id` = #{chatId}
+        <if test="chatMessageId != null">
+            AND `id` &lt; #{chatMessageId}
+        </if>
+        ORDER BY
+            `sent_time` DESC
+        LIMIT
+            0, #{pageSize}
+    </select>
 </mapper>
