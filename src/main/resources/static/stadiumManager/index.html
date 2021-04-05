@@ -128,7 +128,7 @@
                     <div id="chatMessageDiv"></div>
                     <div id="loadAfterPageChatMessageBtn" onclick="loadAfterPageChatMessage()" style="width:80px;margin:0 auto;font-size: 13px;background-color: #FFB800;color: white;border-radius:3px;padding: 3px 3px;">刷新</div>
                 </div>
-                <textarea name="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;"></textarea>
+                <textarea id="messageContent" placeholder="请输入需要发送的文字~" style="width: 100%;height: 80px;resize: none;border:1px solid #000000;margin-top: 2px;"></textarea>
             </form>
         </script>
         <script>
@@ -620,48 +620,63 @@
                         form.render();
                     },
                     yes: function (index1, layero) {
-                        if ($('input[name=newPassword]').val() !== $('input[name=reNewPassword]').val()) {
+                        var messageContent = $('#messageContent').val();
+                        if (messageContent === null || messageContent.length === 0) {
                             // 弹出中间提示框
                             layer.open({
                                 title: "提示信息",
-                                content: "两次输入的新密码不一致！"
+                                content: "发送失败，请输入需要发送的文字内容！"
                             });
                             return;
                         }
-                        // var url ="/book_stadium_online/stadiumManager/changePassword.do";
-                        // var data = $("#dialogModifySelfPasswordForm").serialize();
-                        // $.ajax({
-                        //     "url" : url,
-                        //     "data" : data,
-                        //     "type" : "POST",
-                        //     "dataType" : "json",
-                        //     "beforeSend": function (request) {
-                        //         request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
-                        //     },
-                        //     "success" : function (json) {
-                        //         // 弹出中间提示框
-                        //         layer.open({
-                        //             title: "提示信息",
-                        //             content: json.message,
-                        //             yes: function (index2, layero) {
-                        //                 if (json.code === 200) {
-                        //                     layer.close(index1);
-                        //                 } else if (json.code === 401) {
-                        //                     // code==401说明未登录(BaseController.java定义)
-                        //                     location.href = "/book_stadium_online/stadiumManager/login.html"
-                        //                 }
-                        //                 layer.close(index2);
-                        //             }
-                        //         });
-                        //     },
-                        //     "error" : function () {
-                        //         // 弹出中间提示框
-                        //         layer.open({
-                        //             title: "提示信息",
-                        //             content: "出现异常！"
-                        //         });
-                        //     }
-                        //});
+                        if (messageContent.length > 500) {
+                            // 弹出中间提示框
+                            layer.open({
+                                title: "提示信息",
+                                content: "发送失败，输入发送的文字内容超过了500个字符！"
+                            });
+                            return;
+                        }
+                        var url ="/book_stadium_online/chatMessage/stadiumManagerSend.do";
+                        var data = '{"chatId":"' + chattingVO.id + '", "content":"' + messageContent + '"}';
+                        $.ajax({
+                            "url" : url,
+                            "data" : {"chatMessageData":data},
+                            "type" : "POST",
+                            "dataType" : "json",
+                            "beforeSend": function (request) {
+                                request.setRequestHeader("token", $.cookie("stadiumManagerToken"))
+                            },
+                            "success" : function (json) {
+                                if (json.code !== 200) {
+                                    // 弹出中间提示框
+                                    layer.open({
+                                        title: "提示信息",
+                                        content: json.message,
+                                    });
+                                    return;
+                                }
+                                // 将发送成功的消息添加至chatMessageListData
+                                var chatMessage = json.data;
+                                var resultString = chatMessageToDivString(chatMessage);
+                                $('#chatMessageDiv').append(resultString);
+                                chatMessageListData.push(chatMessage);
+                                form.render();
+                                // 滚动到底部
+                                var chatMessageDiv = document.getElementById("chatMessageDiv");
+                                chatMessageDiv.scrollTop = chatMessageDiv.scrollHeight;
+                                // 清空messageContent
+                                $('#messageContent').val('');
+                                form.render();
+                            },
+                            "error" : function () {
+                                // 弹出中间提示框
+                                layer.open({
+                                    title: "提示信息",
+                                    content: "出现异常！"
+                                });
+                            }
+                        });
                     },
                     cancel: function (index2, layero) {
                         layer.close(index2);
@@ -673,7 +688,7 @@
              * chatMessage 转成 chatMessageDiv
              * @param chatMessage           chatMessage
              */
-            function chatMessageDiv(chatMessage) {
+            function chatMessageToDivString(chatMessage) {
                 var divString = '';
                 if (chatMessage.chatType === 1) {
                     // user -> stadiumManager的消息
@@ -725,7 +740,7 @@
                         if (json.data != null && json.data.length !== 0) {
                             var chatMessageListDataTmp = json.data;
                             for (var i = chatMessageListDataTmp.length - 1; i >= 0; --i) {
-                                var resultString = chatMessageDiv(chatMessageListDataTmp[i]);
+                                var resultString = chatMessageToDivString(chatMessageListDataTmp[i]);
                                 $('#chatMessageDiv').prepend(resultString);
                             }
                             chatMessageListData = chatMessageListDataTmp.concat(chatMessageListData);
@@ -775,7 +790,7 @@
                         if (json.data != null && json.data.length !== 0) {
                             var chatMessageListDataTmp = json.data;
                             for (var i = 0; i < chatMessageListDataTmp.length; ++i) {
-                                var resultString = chatMessageDiv(chatMessageListDataTmp[i]);
+                                var resultString = chatMessageToDivString(chatMessageListDataTmp[i]);
                                 $('#chatMessageDiv').append(resultString);
                             }
                             chatMessageListData = chatMessageListData.concat(chatMessageListDataTmp);
