@@ -19,6 +19,14 @@ public interface IChatMessageService {
     ChatMessage userSend(Integer userId, ChatMessage chatMessage);
 
     /**
+     * stadiumManager发送chatMessage
+     * @param stadiumManagerId  stadiumManagerId
+     * @param chatMessage       chatMessage
+     * @return                  ChatMessage
+     */
+    ChatMessage stadiumManagerSend(Integer stadiumManagerId, ChatMessage chatMessage);
+
+    /**
      * user通过chatId分页查询ChatMessage
      * @param userId        userId
      * @param chatId        chatId

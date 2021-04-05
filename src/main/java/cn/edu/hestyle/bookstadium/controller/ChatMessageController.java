@@ -34,7 +34,7 @@ public class ChatMessageController extends BaseController {
 
     @PostMapping("/userSend.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
-    public ResponseResult<ChatMessage> handleUserFindByChatIdAndPage(@RequestParam(value = "chatMessageData") String chatMessageData, HttpSession session) {
+    public ResponseResult<ChatMessage> handleUserSend(@RequestParam(value = "chatMessageData") String chatMessageData, HttpSession session) {
         Integer userId = (Integer) session.getAttribute("id");
         ObjectMapper objectMapper = new ObjectMapper();
         ChatMessage chatMessage = null;
@@ -46,6 +46,23 @@ public class ChatMessageController extends BaseController {
             throw new RequestException("消息发送失败，数据格式错误！");
         }
         chatMessage = chatMessageService.userSend(userId, chatMessage);
+        return new ResponseResult<ChatMessage>(SUCCESS, "发送成功！", chatMessage);
+    }
+
+    @PostMapping("/stadiumManagerSend.do")
+    @JwtToken(required = true, authorizedRoles = {StadiumManager.STADIUM_MANAGER_ROLE})
+    public ResponseResult<ChatMessage> handleStadiumManagerSend(@RequestParam(value = "chatMessageData") String chatMessageData, HttpSession session) {
+        Integer stadiumManagerId = (Integer) session.getAttribute("id");
+        ObjectMapper objectMapper = new ObjectMapper();
+        ChatMessage chatMessage = null;
+        try {
+            chatMessage = objectMapper.readValue(chatMessageData, ChatMessage.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("ChatMessage 发送失败，数据格式错误！chatMessageData = " + chatMessageData);
+            throw new RequestException("消息发送失败，数据格式错误！");
+        }
+        chatMessage = chatMessageService.stadiumManagerSend(stadiumManagerId, chatMessage);
         return new ResponseResult<ChatMessage>(SUCCESS, "发送成功！", chatMessage);
     }
 
