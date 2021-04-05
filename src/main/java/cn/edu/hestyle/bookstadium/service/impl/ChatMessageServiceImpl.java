@@ -164,76 +164,26 @@ public class ChatMessageServiceImpl implements IChatMessageService {
     }
 
     @Override
-    public List<ChatMessage> userFindByChatIdAndPage(Integer userId, Integer chatId, Integer pageIndex, Integer pageSize) {
-        if (chatId == null) {
-            logger.warn("ChatMessage 查找失败，未传入chatId！");
-            throw new FindFailedException("查找失败，未传入chatId参数！");
-        }
-        Chat chat = null;
-        try {
-            chat = chatMapper.findById(chatId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.warn("Chat 查找失败，数据库发生未知异常！chatId = " + chatId);
-            throw new FindFailedException("查找失败，数据库发生未知异常！");
-        }
-        boolean isFrom = true;
-        // 检查user是否是chat的发起者或者接受者
-        if (chat.getChatType().equals(Chat.CHAT_TYPE_USER_TO_MANAGER)) {
-            if (!chat.getFromAccountId().equals(userId)) {
-                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
-                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
-            }
-            // 当前账号是chat发起者
-        } else if (chat.getChatType().equals(Chat.CHAT_TYPE_MANAGER_TO_USER)) {
-            if (!chat.getToAccountId().equals(userId)) {
-                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
-                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
-            }
-            // 当前账号是chat接受者
-            isFrom = false;
-        } else if (!chat.getFromAccountId().equals(userId)) {
-            if (!chat.getToAccountId().equals(userId)) {
-                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
-                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
-            }
-            // 当前账号是chat接受者
-            isFrom = false;
-        } else {
-            // 当前账号是chat发起者
-            isFrom = true;
-        }
-        boolean chatNeedUpdate = false;
-        if (isFrom && chat.getFromUnreadCount() != 0) {
-            // 发起者请求ChatMessage，清除它的未读消息数
-            chat.setFromUnreadCount(0);
-            chatNeedUpdate = true;
-        } else if (!isFrom && chat.getToUnreadCount() != 0) {
-            // 接收者请求ChatMessage，清除它的未读消息数
-            chat.setToUnreadCount(0);
-            chatNeedUpdate = true;
-        }
-        if (chatNeedUpdate) {
-            try {
-                chatMapper.update(chat);
-            } catch (Exception e) {
-                e.printStackTrace();
-                logger.warn("Chat 更新失败，数据库发生未知异常！chat = " + chat);
-                throw new FindFailedException("查找失败，数据库发生未知异常！");
-            }
-            logger.warn("Chat 更新成功！chat = " + chat);
-        }
-        // 检查页码是否合法
-        if (pageIndex < 1) {
-            throw new FindFailedException("查询失败，页码 " + pageIndex + " 非法，必须大于0！");
-        }
-        // 检查页大小是否合法
-        if (pageSize < 1) {
-            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
-        }
+    public List<ChatMessage> userFindBeforePage(Integer userId, Integer chatId, Integer chatMessageId, Integer pageSize) {
+        userFindPageCheck(userId, chatId, pageSize);
         List<ChatMessage> chatMessageList = null;
         try {
-            chatMessageList = chatMessageMapper.findByChatIdAndPage(chatId, (pageIndex - 1) * pageSize, pageSize);
+            chatMessageList = chatMessageMapper.findBeforePage(chatId, chatMessageId, pageSize);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("ChatMessage 查找失败，数据库发生未知异常！chatId = " + chatId);
+            throw new FindFailedException("查找失败，数据库发生未知异常！");
+        }
+        logger.warn("ChatMessage 查找成功！chatMessageList = " + chatMessageList);
+        return chatMessageList;
+    }
+
+    @Override
+    public List<ChatMessage> userFindAfterPage(Integer userId, Integer chatId, Integer chatMessageId, Integer pageSize) {
+        userFindPageCheck(userId, chatId, pageSize);
+        List<ChatMessage> chatMessageList = null;
+        try {
+            chatMessageList = chatMessageMapper.findAfterPage(chatId, chatMessageId, pageSize);
         } catch (Exception e) {
             e.printStackTrace();
             logger.warn("ChatMessage 查找失败，数据库发生未知异常！chatId = " + chatId);
@@ -328,7 +278,79 @@ public class ChatMessageServiceImpl implements IChatMessageService {
     }
 
     /**
-     * stadiumManager分压查找message时参数检查
+     * user分页查找message时的参数检查
+     * @param userId                userId
+     * @param chatId                chatId
+     * @param pageSize              pageSize
+     */
+    private void userFindPageCheck(Integer userId, Integer chatId, Integer pageSize) {
+        if (chatId == null) {
+            logger.warn("ChatMessage 查找失败，未传入chatId！");
+            throw new FindFailedException("查找失败，未传入chatId参数！");
+        }
+        Chat chat = null;
+        try {
+            chat = chatMapper.findById(chatId);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.warn("Chat 查找失败，数据库发生未知异常！chatId = " + chatId);
+            throw new FindFailedException("查找失败，数据库发生未知异常！");
+        }
+        boolean isFrom;
+        // 检查user是否是chat的发起者或者接受者
+        if (chat.getChatType().equals(Chat.CHAT_TYPE_USER_TO_MANAGER)) {
+            if (!chat.getFromAccountId().equals(userId)) {
+                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
+                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
+            }
+            // 当前账号是chat发起者
+            isFrom = true;
+        } else if (chat.getChatType().equals(Chat.CHAT_TYPE_MANAGER_TO_USER)) {
+            if (!chat.getToAccountId().equals(userId)) {
+                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
+                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
+            }
+            // 当前账号是chat接受者
+            isFrom = false;
+        } else if (!chat.getFromAccountId().equals(userId)) {
+            if (!chat.getToAccountId().equals(userId)) {
+                logger.warn("ChatMessage 查找失败，用户无法查找非自己账号的聊天！userId = " + userId + "，chat = " + chat);
+                throw new FindFailedException("查找失败，无法查看其他用户之间的聊天！");
+            }
+            // 当前账号是chat接受者
+            isFrom = false;
+        } else {
+            // 当前账号是chat发起者
+            isFrom = true;
+        }
+        boolean chatNeedUpdate = false;
+        if (isFrom && chat.getFromUnreadCount() != 0) {
+            // 发起者请求ChatMessage，清除它的未读消息数
+            chat.setFromUnreadCount(0);
+            chatNeedUpdate = true;
+        } else if (!isFrom && chat.getToUnreadCount() != 0) {
+            // 接收者请求ChatMessage，清除它的未读消息数
+            chat.setToUnreadCount(0);
+            chatNeedUpdate = true;
+        }
+        if (chatNeedUpdate) {
+            try {
+                chatMapper.update(chat);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("Chat 更新失败，数据库发生未知异常！chat = " + chat);
+                throw new FindFailedException("查找失败，数据库发生未知异常！");
+            }
+            logger.warn("Chat 更新成功！chat = " + chat);
+        }
+        // 检查页大小是否合法
+        if (pageSize < 1) {
+            throw new FindFailedException("查询失败，页大小 " + pageSize + " 非法，必须大于0！");
+        }
+    }
+
+    /**
+     * stadiumManager分页查找message时参数检查
      * @param stadiumManagerId      stadiumManagerId
      * @param chatId                chatId
      * @param pageSize              pageSize

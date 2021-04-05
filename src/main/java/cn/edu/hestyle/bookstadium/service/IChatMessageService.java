@@ -27,14 +27,24 @@ public interface IChatMessageService {
     ChatMessage stadiumManagerSend(Integer stadiumManagerId, ChatMessage chatMessage);
 
     /**
-     * user通过chatId分页查询ChatMessage
-     * @param userId        userId
-     * @param chatId        chatId
-     * @param pageIndex     pageIndex
-     * @param pageSize      pageSize
-     * @return              List ChatMessage
+     * user获取chatMessageId之前的消息
+     * @param userId            userId
+     * @param chatId            chatId
+     * @param chatMessageId     chatMessageId
+     * @param pageSize          pageSize
+     * @return                  List    ChatMessage
      */
-    List<ChatMessage> userFindByChatIdAndPage(Integer userId, Integer chatId, Integer pageIndex, Integer pageSize);
+    List<ChatMessage> userFindBeforePage(Integer userId, Integer chatId, Integer chatMessageId, Integer pageSize);
+
+    /**
+     * user获取chatMessageId之后的消息
+     * @param userId            userId
+     * @param chatId            chatId
+     * @param chatMessageId     chatMessageId
+     * @param pageSize          pageSize
+     * @return                  List    ChatMessage
+     */
+    List<ChatMessage> userFindAfterPage(Integer userId, Integer chatId, Integer chatMessageId, Integer pageSize);
 
     /**
      * stadiumManager获取chatMessageId之前的消息

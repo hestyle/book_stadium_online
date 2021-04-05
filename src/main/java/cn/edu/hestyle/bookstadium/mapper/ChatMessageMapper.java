@@ -25,14 +25,14 @@ public interface ChatMessageMapper {
      */
     ChatMessage findById(Integer id);
 
-    /**
-     * 通过chatId分页查询ChatMessage
-     * @param chatId        chatId
-     * @param beginIndex    beginIndex
-     * @param pageSize      pageSize
-     * @return              List ChatMessage
-     */
-    List<ChatMessage> findByChatIdAndPage(Integer chatId, Integer beginIndex, Integer pageSize);
+//    /**
+//     * 通过chatId分页查询ChatMessage
+//     * @param chatId        chatId
+//     * @param beginIndex    beginIndex
+//     * @param pageSize      pageSize
+//     * @return              List ChatMessage
+//     */
+//    List<ChatMessage> findByChatIdAndPage(Integer chatId, Integer beginIndex, Integer pageSize);
 
     /**
      * 获取chatMessageId之前的message

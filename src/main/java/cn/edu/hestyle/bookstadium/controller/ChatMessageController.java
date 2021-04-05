@@ -1,7 +1,6 @@
 package cn.edu.hestyle.bookstadium.controller;
 
 import cn.edu.hestyle.bookstadium.controller.exception.RequestException;
-import cn.edu.hestyle.bookstadium.entity.Banner;
 import cn.edu.hestyle.bookstadium.entity.ChatMessage;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
@@ -66,14 +65,25 @@ public class ChatMessageController extends BaseController {
         return new ResponseResult<ChatMessage>(SUCCESS, "发送成功！", chatMessage);
     }
 
-    @PostMapping("/userFindByChatIdAndPage.do")
+    @PostMapping("/userFindBeforePage.do")
     @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
-    public ResponseResult<List<ChatMessage>> handleUserFindByChatIdAndPage(@RequestParam(value = "chatId") Integer chatId,
-                                                                           @RequestParam(value = "pageIndex", defaultValue = "1") Integer pageIndex,
-                                                                           @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-                                                                           HttpSession session) {
+    public ResponseResult<List<ChatMessage>> handleUserFindBeforePage(@RequestParam(value = "chatId") Integer chatId,
+                                                                      @RequestParam(value = "chatMessageId", defaultValue = "") Integer chatMessageId,
+                                                                      @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                      HttpSession session) {
         Integer userId = (Integer) session.getAttribute("id");
-        List<ChatMessage> chatMessageList = chatMessageService.userFindByChatIdAndPage(userId, chatId, pageIndex, pageSize);
+        List<ChatMessage> chatMessageList = chatMessageService.userFindBeforePage(userId, chatId, chatMessageId, pageSize);
+        return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
+    }
+
+    @PostMapping("/userFindAfterPage.do")
+    @JwtToken(required = true, authorizedRoles = {User.USER_ROLE})
+    public ResponseResult<List<ChatMessage>> handleUserFindAfterPage(@RequestParam(value = "chatId") Integer chatId,
+                                                                     @RequestParam(value = "chatMessageId", defaultValue = "") Integer chatMessageId,
+                                                                     @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                                                                     HttpSession session) {
+        Integer userId = (Integer) session.getAttribute("id");
+        List<ChatMessage> chatMessageList = chatMessageService.userFindAfterPage(userId, chatId, chatMessageId, pageSize);
         return new ResponseResult<List<ChatMessage>>(SUCCESS, "查询成功！", chatMessageList);
     }
 
