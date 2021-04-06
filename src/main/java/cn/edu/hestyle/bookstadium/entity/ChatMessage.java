@@ -20,7 +20,7 @@ public class ChatMessage {
     private Integer id;
     /** chatId */
     private Integer chatId;
-    /** chatType */
+    /** messageType */
     private Integer messageType;
     /** fromAccountId */
     private Integer fromAccountId;
