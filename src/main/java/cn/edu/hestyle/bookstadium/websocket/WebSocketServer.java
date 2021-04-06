@@ -4,7 +4,6 @@ import cn.edu.hestyle.bookstadium.entity.ChatMessage;
 import cn.edu.hestyle.bookstadium.entity.StadiumManager;
 import cn.edu.hestyle.bookstadium.entity.User;
 import cn.edu.hestyle.bookstadium.entity.WebSocketMessage;
-import cn.edu.hestyle.bookstadium.jwt.exception.TokenVerificationFailedException;
 import cn.edu.hestyle.bookstadium.service.IStadiumManagerService;
 import cn.edu.hestyle.bookstadium.service.IUserService;
 import com.auth0.jwt.JWT;
@@ -17,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.websocket.*;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -45,10 +45,18 @@ public class WebSocketServer {
     private Integer accountId;
     private String accountRole;
 
+    private static IUserService userService;
+    private static IStadiumManagerService stadiumManagerService;
+
     @Autowired
-    private IUserService userService;
+    public void setUserService(IUserService userService) {
+        WebSocketServer.userService = userService;
+    }
+
     @Autowired
-    private IStadiumManagerService stadiumManagerService;
+    public void setStadiumManagerService(IStadiumManagerService stadiumManagerService) {
+        WebSocketServer.stadiumManagerService = stadiumManagerService;
+    }
 
     /**
      * 连接建立成功调用的方法
@@ -62,18 +70,61 @@ public class WebSocketServer {
             accountRole = JWT.decode(token).getAudience().get(1);
         } catch (Exception e) {
             e.printStackTrace();
-            logger.warn("Token解析失败！token = " + token);
-            throw new TokenVerificationFailedException("Token无效，请重新登录！");
+            logger.warn("WebSocket 连接失败，Token解析失败！token = " + token);
+            closeSession(session);
+            return;
+        }
+        // 检查token是否过期
+        Date expiresDate = JWT.decode(token).getExpiresAt();
+        if (expiresDate.before(new Date())) {
+            logger.warn("WebSocket 连接失败，Token 已过期！token = " + token);
+            closeSession(session);
+            return;
         }
         if (User.USER_ROLE.equals(accountRole)) {
+            // User角色的token验证
+            User user = null;
+            try {
+                user = userService.systemFindById(accountId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("User 查询失败！token = " + token);
+                closeSession(session);
+                return;
+            }
+            if (user == null || !token.equals(user.getToken())) {
+                logger.warn("WebSocket 连接失败，Token验证失败！token = " + token);
+                closeSession(session);
+                return;
+            }
+            logger.warn("Token通过验证！token = " + token + "，user = " + user);
+            // 存储session
             onlineCount.incrementAndGet();
             userSessionHashMap.put(accountId, session);
         } else if (StadiumManager.STADIUM_MANAGER_ROLE.equals(accountRole)) {
+            // StadiumManager角色的token验证
+            StadiumManager stadiumManager = null;
+            try {
+                stadiumManager = stadiumManagerService.systemFindById(accountId);
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.warn("WebSocket 连接失败，Token验证失败！token = " + token);
+                closeSession(session);
+                return;
+            }
+            if (stadiumManager == null || !token.equals(stadiumManager.getToken())) {
+                logger.warn("WebSocket 连接失败，Token验证失败！token = " + token);
+                closeSession(session);
+                return;
+            }
+            logger.warn("Token通过验证！token = " + token + "，stadiumManager = " + stadiumManager);
+            // 存储session
             onlineCount.incrementAndGet();
             stadiumManagerSessionHashMap.put(accountId, session);
         } else {
-            logger.warn("Token解析失败！token = " + token);
-            throw new TokenVerificationFailedException("Token无效，请重新登录！");
+            logger.warn("WebSocket 连接失败，Token非法！token = " + token);
+            closeSession(session);
+            return;
         }
         this.session = session;
         this.accountId = accountId;
@@ -85,47 +136,6 @@ public class WebSocketServer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        // 检查token是否过期
-//        Date expiresDate = JWT.decode(token).getExpiresAt();
-//        if (expiresDate.before(new Date())) {
-//            logger.warn("Token 已过期！token = " + token);
-//            throw new TokenVerificationFailedException("Token 已失效，请重新登录！");
-//        }
-//        // 验证token是否与数据库一致
-//        if (User.USER_ROLE.equals(accountRole)) {
-//            // User角色的token验证
-//            User user = null;
-//            try {
-//                user = userService.systemFindById(accountId);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                logger.warn("Token验证失败！token = " + token);
-//                throw new TokenVerificationFailedException("Token无效，请重新登录！");
-//            }
-//            if (user == null || !token.equals(user.getToken())) {
-//                logger.warn("Token验证失败！token = " + token);
-//                throw new TokenVerificationFailedException("Token无效，请重新登录！");
-//            }
-//            logger.warn("Token通过验证！token = " + token + "，user = " + user);
-//        } else if (StadiumManager.STADIUM_MANAGER_ROLE.equals(accountRole)) {
-//            // StadiumManager角色的token验证
-//            StadiumManager stadiumManager = null;
-//            try {
-//                stadiumManager = stadiumManagerService.systemFindById(accountId);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                logger.warn("Token验证失败！token = " + token);
-//                throw new TokenVerificationFailedException("Token无效，请重新登录！");
-//            }
-//            if (stadiumManager == null || !token.equals(stadiumManager.getToken())) {
-//                logger.warn("Token验证失败！token = " + token);
-//                throw new TokenVerificationFailedException("Token无效，请重新登录！");
-//            }
-//            logger.warn("Token通过验证！token = " + token + "，stadiumManager = " + stadiumManager);
-//        } else {
-//            logger.warn("Token验证失败！token = " + token);
-//            throw new TokenVerificationFailedException("Token无效，请重新登录！");
-//        }
     }
 
     /**
@@ -160,6 +170,18 @@ public class WebSocketServer {
     public void onError(Session session, Throwable error) {
         error.printStackTrace();
         logger.warn("websocket出错！session = " + session);
+    }
+
+    /**
+     * 强制关闭session
+     * @param session
+     */
+    public static void closeSession(Session session) {
+        try {
+            session.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
