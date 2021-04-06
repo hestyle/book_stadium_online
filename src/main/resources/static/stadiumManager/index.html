@@ -459,6 +459,8 @@
                     console.log("ChatMessage 为空！");
                     return;
                 }
+                var audio = new Audio("/book_stadium_online/media/receivedMessage.mp3");
+                audio.play();//播放音频
                 if (chattingVO !== null && chattingVO.id === chatMessage.chatId) {
                     // 收到的chatMessage属于当前打开的聊天窗口
                     chatMessageListData.push(chatMessage);
