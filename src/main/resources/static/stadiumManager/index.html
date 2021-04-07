@@ -58,6 +58,9 @@
             </div>
         </div>
 
+        <!--websocket消息展示-->
+        <div id="websocketMessage" style="width: 300px;height: 200px;position: fixed;bottom: 80px;right: 25px;z-index: 100;background: white;border-radius: 2px;-webkit-box-shadow: #666 0px 0px 10px;-moz-box-shadow: #666 0px 0px 10px;box-shadow: #666 0px 0px 10px;overflow-y:auto;padding-right: 15px;"></div>
+
         <!--左侧菜单-->
         <div class="leftMenu">
             <ul class="layui-nav layui-nav-tree"></ul>
@@ -69,6 +72,9 @@
         <!--用户咨询-->
         <div class="userConsultation">
             <div style="text-align: center;font-size: 16px;">用户咨询</div>
+            <div id="userConsultationUnReadCountDiv" style="width: 20px;height: 20px;background: red;border-radius:50%;position: absolute;top: -5px;right: -5px;display: flex;justify-content: center;align-items: center;">
+                <div id="userConsultationUnReadCountLabel" style="color: white;">0</div>
+            </div>
         </div>
         <!--用户咨询消息列表-->
         <div class="userConsultationMessageDiv">
@@ -142,6 +148,9 @@
             var leftAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
             var rightUsername = 'null';
             var rightAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+
+            var websocket = null;
+            var userConsultationUnReadCount = 0;
 
             layuiModules=['layer', 'form', 'element', 'upload'];
             function mounted() {
@@ -379,6 +388,116 @@
 
                 // 获取chat列表
                 refreshChatVOList();
+                // 初始化websocket
+                initWebsocket();
+            }
+
+            /**
+             * 更新未读消息数
+             */
+            function updateUserConsultationUnReadCount() {
+                if (userConsultationUnReadCount < 1) {
+                    $('#userConsultationUnReadCountDiv').hide();
+                    return;
+                }
+                $('#userConsultationUnReadCountDiv').show();
+                if (userConsultationUnReadCount > 99) {
+                    $('#userConsultationUnReadCountLabel').text('99+');
+                } else {
+                    $('#userConsultationUnReadCountLabel').text('' + userConsultationUnReadCount);
+                }
+
+            }
+
+            /**
+             * 初始化WebSocket
+             */
+            function initWebsocket() {
+                var token = $.cookie("stadiumManagerToken");
+                if (token === null || token.length === 0) {
+                    websocket = null;
+                }
+                // 判断当前浏览器是否支持WebSocket, 主要此处要更换为自己的地址
+                if ('WebSocket' in window) {
+                    websocket = new WebSocket("ws://" + window.location.host + "//book_stadium_online/webSocket/" + token);
+                } else {
+                    alert('Not support websocket')
+                }
+
+                //连接发生错误的回调方法
+                websocket.onerror = function() {
+                    setMessageInnerHTML("error");
+                };
+
+                //连接成功建立的回调方法
+                websocket.onopen = function(event) {
+                    setMessageInnerHTML("open");
+                    sendMessage("我是客户端");
+                };
+
+                //接收到消息的回调方法
+                websocket.onmessage = function(event) {
+                    webSocketMessage = JSON.parse(event.data);
+                    if (webSocketMessage.messageType === 1) {
+                        // 收到的是ChatMessage类型
+                        receivedChatMessage(JSON.parse(webSocketMessage.content));
+                    }
+                    setMessageInnerHTML(event.data);
+                };
+
+                //连接关闭的回调方法
+                websocket.onclose = function() {
+                    setMessageInnerHTML("close");
+                };
+
+                //监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+                window.onbeforeunload = function() {
+                    websocket.close();
+                };
+            }
+
+
+            //将消息显示在网页上
+            function setMessageInnerHTML(innerHTML) {
+                document.getElementById('websocketMessage').innerHTML += innerHTML + '<br/>';
+            }
+
+            //关闭连接
+            function closeWebSocket() {
+                websocket.close();
+            }
+
+            //发送消息
+            function sendMessage(message) {
+                websocket.send(message);
+            }
+
+            /**
+             * 收到了chatMessage
+             */
+            function receivedChatMessage(chatMessage) {
+                if (chatMessage === null) {
+                    console.log("ChatMessage 为空！");
+                    return;
+                }
+                // 播放音频
+                var audio = new Audio("/book_stadium_online/media/receivedMessage.mp3");
+                audio.play();
+                // 更新未读消息数
+                userConsultationUnReadCount += 1;
+                updateUserConsultationUnReadCount();
+                if (chattingVO !== null && chattingVO.id === chatMessage.chatId) {
+                    // 收到的chatMessage属于当前打开的聊天窗口
+                    chatMessageListData.push(chatMessage);
+                    var resultString = chatMessageToDivString(chatMessage);
+                    $('#chatMessageDiv').append(resultString);
+                    form.render();
+                    return;
+                }
+                if ($(".userConsultationMessageDiv").is(':visible')) {
+                    // 用户咨询列表是展示状态
+                    refreshChatVOList();
+                }
             }
 
             /**
@@ -502,6 +621,7 @@
                                 return;
                             }
                             var chatVODivString = '';
+                            var messageUnReadCount = 0;
                             for(var i = 0; i < chatVOs.length; i++) {
                                 var chatVO = chatVOs[i];
                                 var username = 'null';
@@ -547,7 +667,17 @@
                                         '                    </div>\n' +
                                         '                </div>';
                                 }
+                                // 统计消息未读数
+                                messageUnReadCount += unreadCount;
+                                chatVOData.push(chatVO);
                             }
+                            // 更新ReadCount
+                            if (chatNextPage === 1) {
+                                userConsultationUnReadCount = messageUnReadCount;
+                            } else {
+                                userConsultationUnReadCount += messageUnReadCount;
+                            }
+                            updateUserConsultationUnReadCount();
                             // 更新下一页
                             if (chatVOs.length < PAGE_SIZE) {
                                 chatNextPage = -1;
@@ -556,7 +686,6 @@
                                 chatNextPage += 1;
                                 $('#loadNextPageChatVOBtn').show();
                             }
-                            chatVOData = chatVOData.concat(chatVOs);
                             // 更新视图
                             $("#chatVOListDiv").append(chatVODivString);
                         } else {
@@ -588,6 +717,7 @@
                 leftAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
                 rightUsername = 'null';
                 rightAvatarPath = '/book_stadium_online/image/defaultAvatar.png';
+                var unReadCount = 0;
                 if (chattingVO.chatType === 1) {
                     // user -> stadiumManager
                     leftUsername = chattingVO.fromAccountUsername;
@@ -598,6 +728,7 @@
                     if (chattingVO.toAccountAvatarPath != null && chattingVO.toAccountAvatarPath.length !== 0) {
                         rightAvatarPath = chattingVO.toAccountAvatarPath;
                     }
+                    unReadCount = chattingVO.toUnreadCount;
                 } else if (chattingVO.chatType === 2) {
                     // stadiumManager -> user
                     rightUsername = chattingVO.fromAccountUsername;
@@ -608,6 +739,7 @@
                     if (chattingVO.toAccountAvatarPath != null && chattingVO.toAccountAvatarPath.length !== 0) {
                         leftAvatarPath = chattingVO.toAccountAvatarPath;
                     }
+                    unReadCount = chattingVO.fromUnreadCount;
                 }
                 // 弹出聊天窗口
                 layer.open({
@@ -619,6 +751,9 @@
                     success: function(index, layero) {
                         loadAfterPageChatMessage();
                         form.render();
+                        // 更新ReadCount
+                        userConsultationUnReadCount -= unReadCount;
+                        updateUserConsultationUnReadCount();
                     },
                     yes: function (index1, layero) {
                         var messageContent = $('#messageContent').val();

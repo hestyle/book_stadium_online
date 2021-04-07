@@ -11,6 +11,7 @@ import com.auth0.jwt.JWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,6 +26,7 @@ import java.util.Date;
  * @projectName book_stadium
  * @date 2021/3/9 11:41 上午
  */
+@Component
 public class TokenInterceptor implements HandlerInterceptor {
 
     private static final Logger logger = LoggerFactory.getLogger(TokenInterceptor.class);

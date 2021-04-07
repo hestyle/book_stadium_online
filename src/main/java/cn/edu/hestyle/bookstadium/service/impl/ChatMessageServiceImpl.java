@@ -7,6 +7,7 @@ import cn.edu.hestyle.bookstadium.mapper.ChatMessageMapper;
 import cn.edu.hestyle.bookstadium.service.IChatMessageService;
 import cn.edu.hestyle.bookstadium.service.exception.AddFailedException;
 import cn.edu.hestyle.bookstadium.service.exception.FindFailedException;
+import cn.edu.hestyle.bookstadium.websocket.WebSocketServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -105,6 +106,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
             logger.warn("Chat 更新失败，数据库发生未知异常！chat = " + chat);
             throw new AddFailedException("发送失败，数据库发生未知异常！");
         }
+        // 尝试通过websocket推送消息
+        WebSocketServer.sendChatMessage(chatMessage);
         return chatMessage;
     }
 
@@ -133,8 +136,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
             // 当前账号是chat发起者
             chatMessage.setToAccountId(chat.getToAccountId());
             chatMessage.setFromAccountId(chat.getFromAccountId());
-            // chat发起者未读消息增加一条
-            chat.setFromUnreadCount(chat.getFromUnreadCount() + 1);
+            // chat接收者未读消息增加一条
+            chat.setToUnreadCount(chat.getToUnreadCount() + 1);
         } else {
             logger.warn("ChatMessage 发送失败，StadiumManager只能查看USER_TO_MANAGER/MANAGER_TO_USER类型的chat！chat = " + chat);
             throw new FindFailedException("操作失败，无权限操作其他用户之间的聊天！");
@@ -160,6 +163,8 @@ public class ChatMessageServiceImpl implements IChatMessageService {
             logger.warn("Chat 更新失败，数据库发生未知异常！chat = " + chat);
             throw new AddFailedException("发送失败，数据库发生未知异常！");
         }
+        // 尝试通过websocket推送消息
+        WebSocketServer.sendChatMessage(chatMessage);
         return chatMessage;
     }
 
